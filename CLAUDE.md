@@ -19,7 +19,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 .venv/bin/python3 db.py
 ```
 
-The dev server is configured in `.claude/launch.json` for preview_start on port 5001. The venv is at `.venv/` using system Python 3.
+The dev server is configured in `.claude/launch.json` for preview_start on port 5001. The venv is at `.venv/` using system Python 3. In production (Render), the app reads `PORT` from the environment variable.
+
+## Deployment
+
+Hosted on Render.com, auto-deploys from `main` branch on GitHub (`romanlarosa4411-glitch/striper-tides`). Build command: `pip install -r requirements.txt`. Start command: `python app.py`. Push to `main` triggers a redeploy.
 
 ## Architecture
 
@@ -53,6 +57,16 @@ The dev server is configured in `.claude/launch.json` for preview_start on port 
 - **Subordinate stations**: Hereford, Corsons, Townsends don't have direct NOAA hourly data. `fetch_tides_hourly()` fetches from Cape May (8536110) and applies time/height offsets via cosine interpolation.
 - **Surf models**: Three sources — GFS and ECMWF via Open-Meteo, plus proprietary "Striper Tides" wind-driven estimation as fallback when buoys are down.
 - **Scoring thresholds**: `BIG_SWING_PERCENTILE = 50` (top half of tidal ranges). Water temp prime: 50-68°F. Spring peak: May. Fall peak: Oct-Nov.
+
+## Mobile Responsive
+
+The app has a full mobile layout (`@media max-width: 600px`). Key mobile behaviors:
+- Tab labels shorten (Tide Calendar → Tides, etc.) via `.tab-full`/`.tab-short` CSS classes
+- Swell chart shows 1-day windows instead of 3-day (detected via `_isMobile()` → `window.innerWidth <= 600`)
+- Swell table samples every 3h on mobile (8 cols) vs 6h on desktop (12 cols)
+- Day pills group by 1 day on mobile, 3 on desktop (`_getWindowDays()`)
+- Spot tides default to one spot with "Show all spots" toggle
+- Stats bar replaced with single "Next Best Day" card
 
 ## Geography
 

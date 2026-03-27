@@ -1,0 +1,8 @@
+.venv/
+__pycache__/
+*.pyc
+striper_tides.db
+striper_tides.db-shm
+striper_tides.db-wal
+.claude/
+.DS_Store

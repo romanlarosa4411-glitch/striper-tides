@@ -1,0 +1,2034 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Striper Tides</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+    :root{
+      --bg:#060f1c;--surf:#0b1929;--surf2:#0f2238;--surf3:#163050;
+      --border:#1a3254;--border2:#214070;
+      --rg:#f59e0b;--rg-glow:rgba(245,158,11,.2);--rg-dim:rgba(245,158,11,.1);
+      --good:#14b8a6;--good-glow:rgba(20,184,166,.2);--good-dim:rgba(20,184,166,.1);
+      --sol-major:rgba(34,197,94,.18);--sol-minor:rgba(250,204,21,.12);
+      --text:#deeeff;--muted:#527898;--accent:#3b82f6;--accent2:#60a5fa;
+      --red:#ef4444;--green:#22c55e;
+    }
+
+    html{scroll-behavior:smooth}
+    body{background:var(--bg);color:var(--text);font-family:'Inter',-apple-system,sans-serif;min-height:100vh;overflow-x:hidden}
+
+    /* ══ HERO ══════════════════════════════════════════════════════════════ */
+    .hero{position:relative;background:linear-gradient(180deg,#030c18 0%,#071628 60%,var(--bg) 100%);padding:24px 24px 0;overflow:hidden}
+    .hero-inner{max-width:1060px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;position:relative;z-index:2}
+    .logo-row{display:flex;align-items:center;gap:10px}
+    .logo-icon{font-size:1.7rem;filter:drop-shadow(0 0 14px rgba(245,158,11,.65));animation:bobble 3.5s ease-in-out infinite}
+    @keyframes bobble{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+    .logo-text{font-size:1.35rem;font-weight:900;letter-spacing:-.5px;background:linear-gradient(135deg,#deeeff 0%,#60a5fa 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+    .logo-sub{font-size:.62rem;font-weight:500;color:var(--muted);letter-spacing:.14em;text-transform:uppercase;-webkit-text-fill-color:var(--muted);margin-top:1px}
+    .hero-actions{display:flex;align-items:center;gap:8px}
+    .hero-btn{background:var(--surf2);border:1px solid var(--border);color:var(--text);padding:7px 14px;border-radius:8px;cursor:pointer;font-size:.8rem;font-weight:600;font-family:inherit;transition:all .15s}
+    .hero-btn:hover{background:var(--surf3);border-color:var(--border2)}
+    .wave-wrap{position:relative;height:52px;margin-top:22px;overflow:hidden}
+    .wave{position:absolute;bottom:0;width:200%;height:100%}
+    .wave1{animation:wv1 7s linear infinite;opacity:.35}
+    .wave2{animation:wv2 5s linear infinite;opacity:.2}
+    .wave3{animation:wv3 9s linear infinite;opacity:.12}
+    @keyframes wv1{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+    @keyframes wv2{from{transform:translateX(-25%)}to{transform:translateX(-75%)}}
+    @keyframes wv3{from{transform:translateX(-10%)}to{transform:translateX(-60%)}}
+
+    /* ══ TABS ══════════════════════════════════════════════════════════════ */
+    .tab-bar{background:var(--surf);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100}
+    .tab-bar-inner{max-width:1060px;margin:0 auto;display:flex;align-items:center;padding:0 16px}
+    .tab{background:none;border:none;border-bottom:2px solid transparent;color:var(--muted);padding:13px 18px;cursor:pointer;font-size:.84rem;font-weight:600;font-family:inherit;transition:all .15s;white-space:nowrap}
+    .tab:hover{color:var(--text)}
+    .tab.active{color:var(--accent2);border-bottom-color:var(--accent)}
+    .tab-short{display:none}
+    .tab-spacer{flex:1}
+    .days-group{display:flex;background:var(--bg);border-radius:7px;border:1px solid var(--border);overflow:hidden;margin:8px 0}
+    .days-btn{background:none;border:none;color:var(--muted);padding:5px 12px;cursor:pointer;font-size:.77rem;font-weight:600;font-family:inherit;transition:all .15s}
+    .days-btn.active{background:var(--accent);color:#fff}
+    .days-btn:hover:not(.active){color:var(--text);background:var(--surf2)}
+
+    /* ══ LAYOUT ════════════════════════════════════════════════════════════ */
+    .wrap{max-width:1060px;margin:0 auto;padding:26px 16px 64px}
+    .pane{display:none}.pane.active{display:block}
+    .hidden{display:none!important}
+
+    /* ══ LOADING ══════════════════════════════════════════════════════════ */
+    .loading{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:80px 24px;color:var(--muted);font-size:.88rem}
+    .spinner{width:36px;height:36px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite}
+    @keyframes spin{to{transform:rotate(360deg)}}
+
+    /* ══ HOT BANNER ═══════════════════════════════════════════════════════ */
+    #hotBanner{background:linear-gradient(90deg,rgba(245,158,11,.14),rgba(239,68,68,.1));border:1px solid rgba(245,158,11,.45);border-radius:10px;padding:11px 18px;margin-bottom:18px;display:flex;align-items:center;gap:10px;font-size:.84rem;font-weight:600;animation:pulseBorder 2s ease-in-out infinite}
+    @keyframes pulseBorder{0%,100%{border-color:rgba(245,158,11,.4)}50%{border-color:rgba(245,158,11,.85)}}
+
+    /* ══ STATS CHIPS ══════════════════════════════════════════════════════ */
+    .stats-bar{display:flex;gap:10px;margin-bottom:22px;flex-wrap:wrap}
+    .chip{background:var(--surf);border:1px solid var(--border);border-radius:10px;padding:10px 16px;font-size:.8rem;color:var(--muted);display:flex;align-items:center;gap:6px}
+    .chip strong{color:var(--text);font-size:1.1rem;font-weight:800}
+    .chip.rg{border-color:rgba(245,158,11,.35);background:var(--rg-dim)}
+    .chip.good{border-color:rgba(20,184,166,.35);background:var(--good-dim)}
+
+    /* ══ CALENDAR ═════════════════════════════════════════════════════════ */
+    .cal-nav{display:flex;align-items:center;justify-content:center;gap:14px;margin-bottom:14px}
+    .cal-nav-btn{background:var(--surf);border:1px solid var(--border);color:var(--text);width:34px;height:34px;border-radius:8px;cursor:pointer;font-size:1.1rem;display:flex;align-items:center;justify-content:center;font-family:inherit;transition:background .15s}
+    .cal-nav-btn:hover{background:var(--surf2)}
+    .cal-nav h2{font-size:1.05rem;font-weight:700;min-width:160px;text-align:center;letter-spacing:-.2px}
+    .cal-head{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:4px}
+    .cal-head span{text-align:center;font-size:.67rem;font-weight:700;color:var(--muted);padding:5px 0;text-transform:uppercase;letter-spacing:.1em}
+    .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+    .day{background:var(--surf);border:1px solid var(--border);border-radius:10px;min-height:76px;padding:7px;display:flex;flex-direction:column;transition:all .13s;position:relative}
+    .day.other{opacity:.2}
+    .day.today{border-color:var(--accent)}
+    .day.clickable{cursor:pointer}
+    .day.clickable:hover{background:var(--surf2);border-color:var(--border2);transform:translateY(-1px);box-shadow:0 4px 18px rgba(0,0,0,.35)}
+    .day.sel{background:var(--surf2);border-color:var(--accent);box-shadow:0 0 0 2px rgba(59,130,246,.2)}
+    .day-num{font-size:.78rem;font-weight:600;color:var(--muted);line-height:1}
+    .day.today .day-num{background:var(--accent);color:#fff;border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;font-size:.72rem}
+    .day.clickable .day-num{color:var(--text)}
+    .dots{display:flex;flex-wrap:wrap;gap:3px;margin-top:auto;padding-top:4px}
+    .dot{width:7px;height:7px;border-radius:50%}
+    .dot.rg{background:var(--rg);box-shadow:0 0 5px var(--rg-glow)}
+    .dot.gd{background:var(--good);box-shadow:0 0 5px var(--good-glow)}
+    .dot.jn{background:#818cf8;box-shadow:0 0 5px rgba(129,140,248,.5)}
+    .legend{display:flex;align-items:center;gap:14px;margin-top:11px;font-size:.72rem;color:var(--muted);flex-wrap:wrap}
+    .legend-item{display:flex;align-items:center;gap:5px}
+    .ldot{width:9px;height:9px;border-radius:50%;display:inline-block;flex-shrink:0}
+    .ldot.rg{background:var(--rg)}
+    .ldot.gd{background:var(--good)}
+    .ldot.jn{background:#818cf8}
+    .lsq{width:10px;height:10px;border-radius:2px;display:inline-block;flex-shrink:0}
+    .lsq.major{background:rgba(34,197,94,.6)}
+    .lsq.minor{background:rgba(250,204,21,.5)}
+
+    /* ══ DAY DETAIL ═══════════════════════════════════════════════════════ */
+    .detail{margin-top:20px;background:var(--surf);border:1px solid var(--border);border-radius:14px;overflow:hidden;animation:fadeUp .2s ease}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+    .detail-head{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;border-bottom:1px solid var(--border);background:linear-gradient(135deg,var(--surf),var(--surf2))}
+    .detail-title{font-size:1.05rem;font-weight:700;letter-spacing:-.2px}
+    .detail-meta{display:flex;align-items:center;gap:12px;font-size:.8rem;color:var(--muted)}
+    .water-temp-badge{background:var(--surf3);border:1px solid var(--border2);border-radius:20px;padding:3px 10px;font-size:.75rem;font-weight:700;color:var(--accent2)}
+    .moon-badge{display:flex;align-items:center;gap:4px}
+    .sun-bar-wrap{padding:11px 20px;border-bottom:1px solid var(--border)}
+    .sun-bar{height:7px;border-radius:4px;overflow:hidden}
+    .sun-labels{display:flex;justify-content:space-between;margin-top:4px;font-size:.67rem;color:var(--muted)}
+
+    /* ── solunar legend strip ─────────────────────────────────────────── */
+    .sol-legend{display:flex;align-items:center;gap:14px;padding:8px 20px;border-bottom:1px solid var(--border);font-size:.72rem;color:var(--muted)}
+    .sol-dot{width:10px;height:10px;border-radius:2px;display:inline-block;margin-right:4px}
+    .sol-dot.major{background:rgba(34,197,94,.6)}
+    .sol-dot.minor{background:rgba(250,204,21,.5)}
+
+    /* ── chart section ────────────────────────────────────────────────── */
+    .chart-section{padding:16px 18px 0;position:relative}
+    .chart-spinner{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:.8rem;color:var(--muted);background:var(--surf);z-index:2}
+    #tideChart{width:100%!important}
+
+    /* ── wind row ─────────────────────────────────────────────────────── */
+    .wind-row{display:flex;overflow-x:auto;padding:8px 18px 12px;gap:0;border-top:1px solid var(--border);scrollbar-width:none}
+    .wind-row::-webkit-scrollbar{display:none}
+    .wind-cell{display:flex;flex-direction:column;align-items:center;gap:1px;min-width:56px;flex:1}
+    .wind-time{font-size:.62rem;color:var(--muted);font-weight:500}
+    .wind-dir{font-size:.78rem;font-weight:800;letter-spacing:.03em}
+    .wind-speed{font-size:.7rem;font-weight:700;color:var(--text)}
+    .wind-gust{font-size:.58rem;color:var(--muted)}
+
+    /* ── fishing events sidebar ───────────────────────────────────────── */
+    .detail-body{display:grid;grid-template-columns:1fr 250px}
+    @media(max-width:720px){.detail-body{grid-template-columns:1fr}}
+    .ev-panel{padding:14px 16px;border-left:1px solid var(--border);display:flex;flex-direction:column;gap:8px}
+    @media(max-width:640px){.ev-panel{border-left:none;border-top:1px solid var(--border)}}
+    .ev-label{font-size:.66rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--muted)}
+    .ev-card{background:var(--bg);border:1px solid var(--border);border-left-width:3px;border-radius:8px;padding:9px 11px}
+    .ev-card.rg{border-left-color:var(--rg)}
+    .ev-card.gd{border-left-color:var(--good)}
+    .ev-q{font-size:.66rem;font-weight:800;letter-spacing:.04em;margin-bottom:2px}
+    .ev-card.rg .ev-q{color:var(--rg)}
+    .ev-card.gd .ev-q{color:var(--good)}
+    .ev-loc{font-size:.78rem;font-weight:600;margin-bottom:2px}
+    .ev-time{font-size:.92rem;font-weight:700}
+    .ev-meta{font-size:.7rem;color:var(--muted);margin-top:2px}
+    .no-events{font-size:.8rem;color:var(--muted);padding:20px 0;text-align:center}
+
+    /* solunar window pills */
+    .sol-windows{padding:10px 18px 14px;display:flex;flex-wrap:wrap;gap:7px;border-top:1px solid var(--border)}
+    .sol-pill{display:flex;align-items:center;gap:5px;border-radius:20px;padding:4px 12px;font-size:.74rem;font-weight:600;border:1px solid transparent}
+    .sol-pill.major{background:rgba(34,197,94,.12);border-color:rgba(34,197,94,.3);color:#4ade80}
+    .sol-pill.minor{background:rgba(250,204,21,.1);border-color:rgba(250,204,21,.25);color:#facc15}
+
+    /* ══ JOURNAL ══════════════════════════════════════════════════════════ */
+    .journal-grid{display:grid;grid-template-columns:1fr 360px;gap:24px;align-items:start}
+    @media(max-width:820px){.journal-grid{grid-template-columns:1fr}}
+
+    /* season stats banner */
+    .season-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px;margin-bottom:22px}
+    .sstat{background:var(--surf);border:1px solid var(--border);border-radius:10px;padding:12px 14px;text-align:center}
+    .sstat-num{font-size:1.5rem;font-weight:900;letter-spacing:-.5px;color:var(--text);line-height:1.1}
+    .sstat-label{font-size:.68rem;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-top:3px}
+
+    /* leaderboard */
+    .leaderboard{background:var(--surf);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:18px}
+    .lb-head{padding:10px 14px;border-bottom:1px solid var(--border);font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);display:flex;gap:8px;align-items:center}
+    .lb-row{display:flex;align-items:center;gap:10px;padding:9px 14px;border-bottom:1px solid var(--border);font-size:.82rem}
+    .lb-row:last-child{border-bottom:none}
+    .lb-rank{font-size:.72rem;font-weight:800;color:var(--muted);min-width:18px}
+    .lb-rank.gold{color:#f59e0b}
+    .lb-rank.silver{color:#94a3b8}
+    .lb-rank.bronze{color:#b45309}
+    .lb-name{font-weight:700;flex:1}
+    .lb-fish{font-weight:800;color:var(--accent2)}
+    .lb-bite{font-size:.7rem;color:var(--muted)}
+
+    /* spot filters */
+    .spot-filters{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px}
+    .spot-pill{background:var(--surf);border:1px solid var(--border);border-radius:20px;padding:5px 12px;font-size:.75rem;font-weight:600;cursor:pointer;color:var(--muted);font-family:inherit;transition:all .13s}
+    .spot-pill.active{background:var(--accent);border-color:var(--accent);color:#fff}
+    .spot-pill:hover:not(.active){border-color:var(--border2);color:var(--text)}
+    .feed-label{font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:12px}
+
+    /* session cards */
+    .session-card{border-radius:13px;overflow:hidden;margin-bottom:12px;border:1px solid var(--border);animation:fadeUp .2s ease;transition:border-color .15s}
+    .session-card:hover{border-color:var(--border2)}
+    .sc-header{padding:12px 16px;display:flex;align-items:center;justify-content:space-between}
+    .sc-header.hot5{background:linear-gradient(90deg,rgba(239,68,68,.25),rgba(245,158,11,.15))}
+    .sc-header.hot4{background:linear-gradient(90deg,rgba(249,115,22,.2),rgba(245,158,11,.1))}
+    .sc-header.hot3{background:linear-gradient(90deg,rgba(20,184,166,.15),rgba(59,130,246,.1))}
+    .sc-header.hot2{background:linear-gradient(90deg,rgba(59,130,246,.12),rgba(99,102,241,.08))}
+    .sc-header.hot1{background:linear-gradient(90deg,rgba(100,116,139,.12),rgba(71,85,105,.08))}
+    .sc-angler{font-weight:800;font-size:.92rem}
+    .sc-spot{font-size:.75rem;color:var(--muted);margin-top:1px}
+    .sc-quality-label{font-size:.72rem;font-weight:700;letter-spacing:.03em;text-align:right}
+    .sc-quality-label.hot5{color:#ef4444}
+    .sc-quality-label.hot4{color:#f97316}
+    .sc-quality-label.hot3{color:var(--good)}
+    .sc-quality-label.hot2{color:var(--accent2)}
+    .sc-quality-label.hot1{color:var(--muted)}
+    .sc-body{background:var(--surf);padding:12px 16px}
+    .sc-metrics{display:flex;align-items:center;gap:12px;margin-bottom:10px}
+    .sc-fish-count{font-size:2rem;font-weight:900;letter-spacing:-.5px;line-height:1}
+    .sc-fish-label{font-size:.68rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-top:2px}
+    .sc-right{flex:1}
+    .flames{font-size:1rem;letter-spacing:1px;margin-bottom:4px}
+    .sc-time{font-size:.75rem;color:var(--muted)}
+    .sc-conditions{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+    .sc-cond{background:var(--bg);border:1px solid var(--border);border-radius:20px;padding:3px 9px;font-size:.72rem;font-weight:500;color:var(--muted)}
+    .sc-notes{margin-top:9px;font-size:.78rem;color:#7aa8cc;font-style:italic;border-left:2px solid var(--border2);padding-left:10px;line-height:1.55}
+    .feed-empty{background:var(--surf);border:1px dashed var(--border);border-radius:12px;padding:40px 24px;text-align:center;color:var(--muted);font-size:.88rem}
+
+    /* name banner */
+    .name-banner{background:linear-gradient(135deg,var(--surf2),var(--surf3));border:1px solid var(--border2);border-radius:12px;padding:20px;text-align:center;margin-bottom:22px}
+    .name-banner p{font-size:.84rem;color:var(--muted);margin-bottom:12px}
+    .name-row{display:flex;gap:8px;max-width:300px;margin:0 auto}
+    .angler-bar{display:flex;align-items:center;justify-content:space-between;background:var(--surf);border:1px solid var(--border);border-radius:9px;padding:9px 15px;margin-bottom:18px;font-size:.84rem}
+    .change-name{font-size:.73rem;color:var(--muted);cursor:pointer;text-decoration:underline}
+    .change-name:hover{color:var(--text)}
+
+    /* log form */
+    .log-card{background:var(--surf);border:1px solid var(--border);border-radius:14px;overflow:hidden;position:sticky;top:58px}
+    .log-head{padding:13px 17px;border-bottom:1px solid var(--border);background:linear-gradient(135deg,var(--surf),var(--surf2));font-weight:700;font-size:.88rem;display:flex;align-items:center;gap:7px}
+    .log-body{padding:15px 17px}
+    .fg{margin-bottom:12px}
+    .fl{display:block;font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:4px}
+    .fi,.fsel,.fta{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:inherit;font-size:.84rem;padding:7px 10px;outline:none;transition:border-color .15s}
+    .fi:focus,.fsel:focus,.fta:focus{border-color:var(--accent)}
+    .fsel option{background:#0b1929}
+    .grow{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+    .fta{resize:vertical;min-height:60px;line-height:1.5}
+    .slider-row{display:flex;align-items:center;gap:9px}
+    .fslider{flex:1;-webkit-appearance:none;height:4px;border-radius:2px;background:var(--border);outline:none}
+    .fslider::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:var(--accent);cursor:pointer;box-shadow:0 0 0 3px rgba(59,130,246,.2)}
+    .slval{font-weight:800;font-size:1rem;min-width:24px;text-align:center}
+    .bite-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:4px}
+    .bite-opt{background:var(--bg);border:1px solid var(--border);border-radius:7px;padding:6px 3px;cursor:pointer;font-size:.66rem;font-weight:600;color:var(--muted);text-align:center;font-family:inherit;transition:all .12s;line-height:1.35}
+    .bite-opt.sel{border-color:var(--accent);color:var(--text);background:var(--surf2)}
+    .bite-opt[data-v="5"].sel{border-color:var(--rg);color:var(--rg);background:var(--rg-dim)}
+    .bite-opt[data-v="4"].sel{border-color:#fb923c;color:#fb923c}
+    .bite-opt[data-v="1"].sel{border-color:var(--muted);color:var(--muted)}
+    .sub-btn{width:100%;background:linear-gradient(135deg,var(--accent),#6366f1);border:none;border-radius:9px;color:#fff;font-size:.87rem;font-weight:700;font-family:inherit;padding:11px;cursor:pointer;transition:all .15s;margin-top:4px;letter-spacing:.01em}
+    .sub-btn:hover{opacity:.9;transform:translateY(-1px)}
+    .sub-btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+    .fb-ok{background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.3);border-radius:8px;padding:9px 13px;font-size:.8rem;color:var(--green);font-weight:600;margin-top:9px;display:flex;align-items:center;gap:5px}
+    .fb-err{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);border-radius:8px;padding:9px 13px;font-size:.8rem;color:var(--red);margin-top:9px}
+
+    /* ══ DAY OUTLOOK CARD ═════════════════════════════════════════════════ */
+    .outlook-wrap{padding:10px 18px 4px}
+    .outlook-card{border-radius:10px;overflow:hidden;border:1px solid var(--border)}
+    .outlook-head{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:linear-gradient(135deg,var(--surf2),var(--surf3))}
+    .outlook-rating{display:flex;align-items:center;gap:8px}
+    .outlook-badge{font-size:.75rem;font-weight:800;padding:3px 10px;border-radius:20px;letter-spacing:.03em}
+    .outlook-season{font-size:.7rem;font-weight:700;color:var(--muted)}
+    .outlook-body{padding:11px 14px;display:flex;flex-direction:column;gap:7px;background:var(--surf)}
+    .outlook-row{display:flex;align-items:flex-start;gap:8px;font-size:.76rem;line-height:1.4}
+    .outlook-icon{font-size:.9rem;flex-shrink:0;margin-top:1px}
+    .outlook-text{color:var(--muted)}
+    .outlook-text strong{color:var(--text)}
+
+    /* ══ SPOT TIDES TABLE ═════════════════════════════════════════════════ */
+    .spot-tides-wrap{padding:12px 18px 16px;border-top:1px solid var(--border)}
+    .spot-tides-label{font-size:.66rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:9px}
+    .spot-tides-grid{display:flex;flex-direction:column;gap:5px}
+    .spot-tide-row{display:flex;align-items:center;gap:0;background:var(--bg);border:1px solid var(--border);border-radius:8px;overflow:hidden}
+    .spot-tide-name{font-size:.73rem;font-weight:600;color:var(--muted);padding:6px 10px;min-width:148px;flex-shrink:0;border-right:1px solid var(--border)}
+    .spot-tide-events{display:flex;flex:1;flex-wrap:wrap;gap:4px;padding:5px 8px}
+    .spot-tide-ev{font-size:.71rem;font-weight:600;padding:2px 7px;border-radius:12px;border:1px solid transparent}
+    .spot-tide-ev.target-H{background:rgba(59,130,246,.15);border-color:rgba(59,130,246,.35);color:var(--accent2)}
+    .spot-tide-ev.target-L{background:rgba(20,184,166,.12);border-color:rgba(20,184,166,.3);color:#2dd4bf}
+    .spot-tide-ev.other{background:var(--surf);border-color:var(--border);color:var(--muted)}
+
+    /* calendar day score pips */
+    .day-score-bar{height:3px;border-radius:2px;margin-top:auto;width:100%;background:var(--border);overflow:hidden}
+    .day-score-fill{height:100%;border-radius:2px;transition:width .3s}
+
+    /* ══ WATER CLARITY TAB ═══════════════════════════════════════════ */
+    .clarity-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px}
+    .clarity-title{font-size:1.3rem;font-weight:900;letter-spacing:-.3px}
+    .clarity-updated{font-size:.72rem;color:var(--muted)}
+
+    .clarity-current{display:flex;align-items:center;gap:18px;background:var(--surf);border:1px solid var(--border);border-radius:14px;padding:20px 24px;margin-bottom:20px}
+    .clarity-badge{font-size:1.4rem;font-weight:900;letter-spacing:-.3px}
+    .clarity-score-ring{width:72px;height:72px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;border:4px solid}
+    .clarity-score-num{font-size:1.6rem;font-weight:900}
+
+    .clarity-grid{display:grid;grid-template-columns:1fr 320px;gap:20px;align-items:start}
+    @media(max-width:820px){.clarity-grid{grid-template-columns:1fr}}
+
+    /* 72h timeline */
+    .clarity-timeline{background:var(--surf);border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:20px}
+    .ct-head{padding:12px 16px;border-bottom:1px solid var(--border);font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--muted)}
+    .ct-bar-wrap{padding:16px;position:relative}
+    .ct-bar{display:flex;height:32px;border-radius:6px;overflow:hidden}
+    .ct-seg{flex:1;min-width:0;transition:background .3s}
+    .ct-labels{display:flex;justify-content:space-between;margin-top:6px;font-size:.65rem;color:var(--muted)}
+    .ct-clears{padding:0 16px 12px;font-size:.78rem;font-weight:600}
+
+    /* drivers */
+    .clarity-drivers{background:var(--surf);border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:20px}
+    .cd-head{padding:12px 16px;border-bottom:1px solid var(--border);font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--muted)}
+    .cd-row{display:flex;align-items:flex-start;gap:10px;padding:10px 16px;border-bottom:1px solid var(--border);font-size:.8rem;line-height:1.45}
+    .cd-row:last-child{border-bottom:none}
+    .cd-icon{font-size:1rem;flex-shrink:0;margin-top:1px}
+    .cd-text{color:var(--muted)}.cd-text strong{color:var(--text)}
+
+    /* ══ SWELL REPORT TAB ═══════════════════════════════════════════ */
+    .swell-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px}
+    .swell-title{font-size:1.3rem;font-weight:900;letter-spacing:-.3px}
+    .swell-spot-label{font-size:.78rem;color:var(--muted);margin-top:2px}
+    .swell-updated{font-size:.72rem;color:var(--muted)}
+
+    .swell-current{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:12px;margin-bottom:20px}
+    @media(max-width:700px){.swell-current{grid-template-columns:1fr 1fr}}
+    .swell-stat{background:var(--surf);border:1px solid var(--border);border-radius:12px;padding:16px;text-align:center}
+    .swell-stat-val{font-size:1.8rem;font-weight:900;letter-spacing:-.5px;line-height:1.1}
+    .swell-stat-label{font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-top:6px}
+    .swell-stat-sub{font-size:.75rem;color:var(--muted);margin-top:2px}
+    .swell-quality-tag{display:inline-block;padding:5px 14px;border-radius:20px;font-size:.82rem;font-weight:800;letter-spacing:-.2px;border:1px solid}
+
+    /* Day pills nav */
+    .swell-day-pills{display:flex;gap:6px;justify-content:center;margin-bottom:14px;flex-wrap:wrap}
+    .swell-day-pill{background:var(--surf);border:1px solid var(--border);border-radius:8px;padding:6px 14px;font-size:.72rem;font-weight:700;color:var(--muted);cursor:pointer;transition:all .15s}
+    .swell-day-pill:hover{border-color:var(--acc);color:var(--acc)}
+    .swell-day-pill.active{background:var(--acc);color:#fff;border-color:var(--acc)}
+    .swell-day-pill .pill-date{font-size:.58rem;font-weight:400;opacity:.7}
+
+    .swell-chart-wrap{background:var(--surf);border:1px solid var(--border);border-radius:14px 14px 0 0;padding:16px 16px 8px;margin-bottom:0;border-bottom:none;position:relative}
+
+    /* Hover banner */
+    .swell-hover-banner{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:10px 16px;margin:0 0 0;display:none;gap:16px;align-items:center;justify-content:center;flex-wrap:wrap;font-size:.78rem}
+    .swell-hover-banner.visible{display:flex}
+    .swell-hover-banner .shb-item{text-align:center;min-width:70px}
+    .swell-hover-banner .shb-val{font-weight:800;font-size:.88rem}
+    .swell-hover-banner .shb-label{font-size:.58rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;font-weight:600}
+    .swell-hover-banner .shb-sep{width:1px;height:28px;background:var(--border)}
+    .swell-hover-banner .shb-quality{padding:3px 10px;border-radius:12px;font-weight:800;font-size:.72rem;border:1px solid}
+
+    /* Surf forecast table */
+    .sf-table{background:var(--surf);border:1px solid var(--border);border-top:none;border-radius:0 0 14px 14px;overflow-x:auto;margin-bottom:20px;padding:4px 0}
+    .sf-grid{display:grid;min-width:500px;gap:0}
+    .sf-row-label{font-size:.66rem;font-weight:700;color:var(--muted);padding:8px 10px;text-align:right;border-right:1px solid var(--border);white-space:nowrap;position:sticky;left:0;background:var(--surf);z-index:1}
+    .sf-cell{text-align:center;padding:8px 4px;border-bottom:1px solid rgba(26,50,84,.2);font-size:.76rem;font-weight:600;min-width:0}
+    .sf-cell.day-sep{border-left:3px solid var(--acc)}
+    .sf-wave{font-weight:800;font-size:.82rem}
+    .sf-dir{color:#14b8a6;font-weight:800;font-size:.76rem}
+    .sf-per{color:#f59e0b;font-size:.72rem}
+    .sf-wind-tag{font-size:.6rem;font-weight:800;padding:3px 7px;border-radius:6px;display:inline-block;white-space:nowrap}
+
+    /* live report form + feed */
+    .cr-card{background:var(--surf);border:1px solid var(--border);border-radius:14px;overflow:hidden;position:sticky;top:58px}
+    .cr-head{padding:12px 16px;border-bottom:1px solid var(--border);background:linear-gradient(135deg,var(--surf),var(--surf2));font-weight:700;font-size:.85rem;display:flex;align-items:center;gap:7px}
+    .cr-body{padding:14px 16px}
+    .clarity-opts{display:grid;grid-template-columns:repeat(5,1fr);gap:4px;margin-bottom:10px}
+    .cl-opt{background:var(--bg);border:2px solid var(--border);border-radius:8px;padding:8px 3px;cursor:pointer;font-size:.62rem;font-weight:700;color:var(--muted);text-align:center;font-family:inherit;transition:all .12s;line-height:1.3}
+    .cl-opt.sel{color:#fff}
+    .cl-opt:hover:not(.sel){border-color:var(--border2)}
+
+    .cr-feed{margin-top:16px}
+    .cr-feed-label{font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:10px}
+    .cr-entry{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);font-size:.78rem}
+    .cr-entry:last-child{border-bottom:none}
+    .cr-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+    .cr-who{font-weight:700;flex:1}
+    .cr-where{color:var(--muted);font-size:.72rem}
+    .cr-when{color:var(--muted);font-size:.68rem}
+
+    /* Next Best Day card */
+    .next-best{background:linear-gradient(135deg,var(--surf) 0%,var(--surf2) 100%);border:1px solid var(--border);border-left:3px solid var(--rg);border-radius:10px;padding:12px 16px;margin-bottom:18px;cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:12px}
+    .next-best:hover{border-color:var(--rg);background:var(--surf2)}
+    .next-best-date{font-size:1rem;font-weight:900;white-space:nowrap}
+    .next-best-detail{font-size:.78rem;color:var(--muted);flex:1}
+    .next-best-detail strong{color:var(--text)}
+    .next-best-arrow{color:var(--muted);font-size:1.2rem}
+
+    /* Spot tides toggle */
+    .spot-tides-toggle{background:none;border:1px solid var(--border);border-radius:7px;color:var(--muted);padding:5px 12px;font-size:.68rem;font-weight:600;cursor:pointer;font-family:inherit;margin-bottom:8px;transition:all .15s}
+    .spot-tides-toggle:hover{color:var(--text);border-color:var(--border2)}
+
+    /* ══ MOBILE ═══════════════════════════════════════════════════════════ */
+    @media(max-width:600px){
+      /* Tabs — short labels on mobile */
+      .tab{padding:12px 8px;font-size:.72rem}
+      .tab-full{display:none}
+      .tab-short{display:inline}
+      .days-group{display:none}
+
+      /* Hero compact */
+      .hero{padding:16px 14px 0}
+      .logo-text{font-size:1.1rem}
+      .hero-btn{font-size:.7rem;padding:5px 10px}
+      .wave-wrap{height:36px;margin-top:14px}
+
+      /* General compact */
+      .wrap{padding:16px 10px 40px}
+
+      /* Calendar compact */
+      .cal-day{min-height:52px;padding:3px 2px;font-size:.7rem}
+      .cal-dots{gap:1px}
+      .cal-dot{width:5px;height:5px}
+
+      /* Day detail compact */
+      .detail-header{padding:14px 14px 10px}
+      .detail-date{font-size:1.1rem}
+      .spot-tide-name{min-width:100px;font-size:.65rem;padding:5px 7px}
+      .spot-tide-ev{font-size:.63rem;padding:2px 5px}
+      .spot-tides-wrap{padding:10px 12px 14px}
+
+      /* Swell compact */
+      .swell-header{gap:8px}
+      .swell-title{font-size:1.1rem}
+      .swell-stat{padding:12px 8px}
+      .swell-stat-val{font-size:1.4rem}
+      .swell-day-pill{padding:5px 10px;font-size:.66rem}
+
+      /* Hover banner stacks on mobile */
+      .swell-hover-banner{padding:8px 10px;gap:8px;font-size:.7rem}
+      .swell-hover-banner .shb-val{font-size:.78rem}
+      .swell-hover-banner .shb-sep{height:20px}
+
+      /* Swell table — tighter */
+      .sf-table{padding:2px 0}
+      .sf-row-label{font-size:.6rem;padding:6px 6px}
+      .sf-cell{padding:6px 2px;font-size:.68rem}
+      .sf-wave{font-size:.72rem}
+
+      /* Outlook compact */
+      .outlook-card{padding:10px 12px}
+      .outlook-text{font-size:.78rem}
+
+      /* Journal compact */
+      .sstat{padding:8px 10px}
+      .sstat-num{font-size:1.2rem}
+    }
+  </style>
+</head>
+<body>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-inner">
+    <div class="logo-row">
+      <span class="logo-icon">🎣</span>
+      <div>
+        <div class="logo-text">Striper Tides</div>
+        <div class="logo-sub">Cape May · Wildwood · NJ Shore</div>
+      </div>
+    </div>
+    <div class="hero-actions">
+      <button class="hero-btn" id="exportBtn">↓ Export .ics</button>
+    </div>
+  </div>
+  <div class="wave-wrap">
+    <svg class="wave wave1" viewBox="0 0 1440 52" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M0,26C240,52 480,0 720,26C960,52 1200,0 1440,26L1440,52L0,52Z" fill="#3b82f6"/>
+    </svg>
+    <svg class="wave wave2" viewBox="0 0 1440 52" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M0,13C360,52 720,0 1080,26C1260,39 1380,13 1440,13L1440,52L0,52Z" fill="#14b8a6"/>
+    </svg>
+    <svg class="wave wave3" viewBox="0 0 1440 52" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M0,39C180,0 360,52 540,26C720,0 900,52 1080,26C1260,0 1380,39 1440,26L1440,52L0,52Z" fill="#6366f1"/>
+    </svg>
+  </div>
+</div>
+
+<!-- TABS -->
+<div class="tab-bar">
+  <div class="tab-bar-inner">
+    <button class="tab active" data-tab="calendar"><span class="tab-full">📅 Tide Calendar</span><span class="tab-short">📅 Tides</span></button>
+    <button class="tab" data-tab="swell"><span class="tab-full">🌊 Swell Report</span><span class="tab-short">🌊 Swell</span></button>
+    <button class="tab" data-tab="clarity"><span class="tab-full">💧 Water Clarity</span><span class="tab-short">💧 Clarity</span></button>
+    <button class="tab" data-tab="journal"><span class="tab-full">📖 Fish Journal</span><span class="tab-short">📖 Journal</span></button>
+    <div class="tab-spacer"></div>
+    <div class="days-group">
+      <button class="days-btn" data-days="30">30d</button>
+      <button class="days-btn active" data-days="90">90d</button>
+      <button class="days-btn" data-days="180">180d</button>
+    </div>
+  </div>
+</div>
+
+<div class="wrap">
+  <div id="hotBanner" class="hidden"></div>
+
+  <!-- ══ CALENDAR PANE ══════════════════════════════════════════════════ -->
+  <div id="pane-calendar" class="pane active">
+    <div id="calLoad" class="loading">
+      <div class="spinner"></div><p>Fetching tide predictions from NOAA…</p>
+    </div>
+    <div id="calContent" class="hidden">
+      <div id="nextBestCard"></div>
+      <div class="cal-nav">
+        <button class="cal-nav-btn" id="prevMo">&#8249;</button>
+        <h2 id="moLabel"></h2>
+        <button class="cal-nav-btn" id="nextMo">&#8250;</button>
+      </div>
+      <div class="cal-head">
+        <span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span>
+      </div>
+      <div id="calGrid" class="cal-grid"></div>
+      <div class="legend">
+        <span class="legend-item"><span class="ldot gd"></span>Good tide</span>
+        <span class="legend-item"><span class="ldot rg"></span>Really Good</span>
+        <span class="legend-item"><span class="ldot jn"></span>Journal entry</span>
+        <span class="legend-item"><span class="lsq major"></span>Solunar major</span>
+        <span class="legend-item"><span class="lsq minor"></span>Minor</span>
+      </div>
+
+      <!-- DAY DETAIL -->
+      <div id="detail" class="detail hidden">
+        <div class="detail-head">
+          <div>
+            <div class="detail-title" id="detTitle"></div>
+          </div>
+          <div class="detail-meta">
+            <div class="water-temp-badge hidden" id="waterTempBadge"></div>
+            <div class="moon-badge" id="moonBadge"></div>
+          </div>
+        </div>
+        <div class="sun-bar-wrap">
+          <div class="sun-bar" id="sunBar"></div>
+          <div class="sun-labels" id="sunLabels"></div>
+        </div>
+        <div class="sol-legend">
+          <span><span class="sol-dot major"></span>Major solunar window (2h)</span>
+          <span><span class="sol-dot minor"></span>Minor window (1h)</span>
+        </div>
+        <!-- chart + events side by side -->
+        <div class="detail-body">
+          <div>
+            <div class="chart-section">
+              <div id="chartSpinner" class="chart-spinner">Loading forecast…</div>
+              <canvas id="tideChart"></canvas>
+            </div>
+            <!-- wind row -->
+            <div class="wind-row" id="windRow"></div>
+            <!-- outlook + solunar fill the space under the chart -->
+            <div id="outlookSlot"></div>
+            <div class="sol-windows" id="solWindows"></div>
+          </div>
+          <div class="ev-panel" id="evPanel">
+            <div class="ev-label">Prime Windows</div>
+          </div>
+        </div>
+        <!-- full-width spot tides below grid -->
+        <div class="spot-tides-wrap hidden" id="spotTidesWrap">
+          <div class="spot-tides-label">📍 Spot Tides</div>
+          <div class="spot-tides-grid" id="spotTidesGrid"></div>
+          <div id="spotTidesExtra" class="hidden">
+            <div class="spot-tides-grid" id="spotTidesGridExtra"></div>
+          </div>
+          <button class="spot-tides-toggle" id="spotTidesToggle" onclick="toggleAllSpots()">Show all spots ▾</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ SWELL REPORT PANE ═════════════════════════════════════════════ -->
+  <div id="pane-swell" class="pane">
+    <div id="swellLoad" class="loading">
+      <div class="spinner"></div><p>Fetching swell data…</p>
+    </div>
+    <div id="swellContent" class="hidden">
+      <div class="swell-header">
+        <div>
+          <div class="swell-title">🌊 Swell Report</div>
+          <div class="swell-spot-label" id="swellSpotLabel"></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+          <select class="fsel" id="surfSpotSel" style="min-width:140px;font-size:.8rem;padding:6px 10px">
+            <option value="LBI">Long Beach Island</option>
+            <option value="Ocean City">Ocean City</option>
+            <option value="Avalon">Avalon</option>
+            <option value="Cape May" selected>Cape May</option>
+          </select>
+          <select class="fsel" id="surfModelSel" style="min-width:130px;font-size:.8rem;padding:6px 10px">
+            <option value="gfs" selected>GFS Model</option>
+            <option value="euro">Euro (ECMWF)</option>
+            <option value="striper">Striper Tides</option>
+          </select>
+          <div class="swell-updated" id="swellUpdated"></div>
+        </div>
+      </div>
+
+      <!-- Current conditions card -->
+      <div class="swell-current" id="swellCurrent"></div>
+
+      <!-- Day pills navigation -->
+      <div class="swell-day-pills" id="swellDayPills"></div>
+
+      <!-- Swell chart -->
+      <div class="swell-chart-wrap">
+        <canvas id="swellChart" height="220"></canvas>
+      </div>
+
+      <!-- Hover detail banner -->
+      <div class="swell-hover-banner" id="swellBanner">
+        <div class="shb-item"><div class="shb-val" id="shbWave">—</div><div class="shb-label">Wave</div></div>
+        <div class="shb-sep"></div>
+        <div class="shb-item"><div class="shb-val" id="shbSwell">—</div><div class="shb-label">Primary Swell</div></div>
+        <div class="shb-sep"></div>
+        <div class="shb-item"><div class="shb-val" id="shbWindWave">—</div><div class="shb-label">Wind Waves</div></div>
+        <div class="shb-sep"></div>
+        <div class="shb-item"><div class="shb-val" id="shbWind">—</div><div class="shb-label">Wind</div></div>
+        <div class="shb-sep"></div>
+        <div class="shb-item"><div class="shb-quality" id="shbQuality">—</div><div class="shb-label" style="margin-top:4px">Quality</div></div>
+      </div>
+
+      <!-- Surf forecast table -->
+      <div class="sf-table" id="sfTable"></div>
+    </div>
+  </div>
+
+  <!-- ══ JOURNAL PANE ═══════════════════════════════════════════════════ -->
+  <div id="pane-journal" class="pane">
+
+    <div id="nameBanner" class="name-banner hidden">
+      <p>Who are you? Your crew will see your name when you log a session.</p>
+      <div class="name-row">
+        <input class="fi" id="nameIn" type="text" placeholder="Your name…" maxlength="30"/>
+        <button class="sub-btn" style="width:auto;padding:7px 14px" id="nameSetBtn">Let's go</button>
+      </div>
+    </div>
+    <div id="anglerBar" class="angler-bar hidden">
+      <span id="greetTxt"></span>
+      <span class="change-name" id="changeName">change name</span>
+    </div>
+
+    <!-- Season stats -->
+    <div class="season-stats" id="seasonStats"></div>
+
+    <div class="journal-grid">
+      <!-- Feed -->
+      <div>
+        <!-- Leaderboard -->
+        <div class="leaderboard" id="leaderboard"></div>
+
+        <div style="margin-top:18px">
+          <div class="spot-filters" id="spotFilters">
+            <button class="spot-pill active" data-spot="">All Spots</button>
+            {% for spot in spots %}
+            <button class="spot-pill" data-spot="{{ spot }}">{{ spot }}</button>
+            {% endfor %}
+          </div>
+          <div class="feed-label">Recent Sessions</div>
+          <div id="feed"></div>
+        </div>
+      </div>
+
+      <!-- Log form -->
+      <div class="log-card">
+        <div class="log-head">🎣 Log a Session</div>
+        <div class="log-body">
+          <div class="fg">
+            <label class="fl">Spot</label>
+            <select class="fsel" id="fSpot">
+              <option value="">— pick a spot —</option>
+              {% for spot in spots %}
+              <option value="{{ spot }}">{{ spot }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="fg">
+            <label class="fl">Date</label>
+            <input class="fi" type="date" id="fDate"/>
+          </div>
+          <div class="grow">
+            <div class="fg">
+              <label class="fl">Time out</label>
+              <input class="fi" type="time" id="fStart"/>
+            </div>
+            <div class="fg">
+              <label class="fl">Time in</label>
+              <input class="fi" type="time" id="fEnd"/>
+            </div>
+          </div>
+          <div class="fg">
+            <label class="fl">Fish — <span id="fishVal">0</span></label>
+            <div class="slider-row">
+              <span style="font-size:.72rem;color:var(--muted)">0</span>
+              <input class="fslider" type="range" id="fFish" min="0" max="20" value="0"/>
+              <span style="font-size:.72rem;color:var(--muted)">20</span>
+            </div>
+          </div>
+          <div class="fg">
+            <label class="fl">Bite quality</label>
+            <div class="bite-grid">
+              <button class="bite-opt" data-v="1">😐<br>Slow</button>
+              <button class="bite-opt" data-v="2">🐟<br>Decent</button>
+              <button class="bite-opt" data-v="3">🎣<br>Good</button>
+              <button class="bite-opt" data-v="4">🔥<br>Hot</button>
+              <button class="bite-opt" data-v="5">🚀<br>Red Hot</button>
+            </div>
+          </div>
+          <div class="fg">
+            <label class="fl">Water temp °F <span style="font-weight:400;text-transform:none;letter-spacing:0">&nbsp;optional</span></label>
+            <input class="fi" type="number" id="fTemp" placeholder="e.g. 58" min="30" max="90" step="0.5"/>
+          </div>
+          <div class="fg">
+            <label class="fl">Notes <span style="font-weight:400;text-transform:none;letter-spacing:0">&nbsp;optional</span></label>
+            <textarea class="fta" id="fNotes" placeholder="What worked, what didn't…"></textarea>
+          </div>
+          <button class="sub-btn" id="submitBtn">Log Session</button>
+          <div id="formFB"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ WATER CLARITY PANE ═══════════════════════════════════════════ -->
+  <div id="pane-clarity" class="pane">
+    <div id="clarityLoad" class="loading">
+      <div class="spinner"></div><p>Building clarity forecast…</p>
+    </div>
+    <div id="clarityContent" class="hidden">
+      <div class="clarity-header">
+        <div>
+          <div class="clarity-title">💧 Water Clarity Forecast</div>
+          <div style="font-size:.78rem;color:var(--muted);margin-top:2px">Cape May County · NJ Shore</div>
+        </div>
+        <div class="clarity-updated" id="clarityUpdated"></div>
+      </div>
+
+      <!-- Current clarity -->
+      <div class="clarity-current" id="clarityCurrent"></div>
+
+      <!-- 72h timeline -->
+      <div class="clarity-timeline">
+        <div class="ct-head">72-Hour Forecast</div>
+        <div class="ct-bar-wrap">
+          <div class="ct-bar" id="ctBar"></div>
+          <div class="ct-labels">
+            <span>Now</span><span>12h</span><span>24h</span><span>36h</span><span>48h</span><span>60h</span><span>72h</span>
+          </div>
+        </div>
+        <div class="ct-clears" id="ctClears"></div>
+      </div>
+
+      <div class="clarity-grid">
+        <div>
+          <!-- Drivers -->
+          <div class="clarity-drivers">
+            <div class="cd-head">Conditions Driving Clarity</div>
+            <div id="cdRows"></div>
+          </div>
+        </div>
+
+        <!-- Live report form + recent reports -->
+        <div class="cr-card">
+          <div class="cr-head">📍 Report Live Clarity</div>
+          <div class="cr-body">
+            <div class="fg">
+              <label class="fl">Spot</label>
+              <select class="fsel" id="crSpot">
+                <option value="">— where are you? —</option>
+                {% for spot in spots %}
+                <option value="{{ spot }}">{{ spot }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div style="display:flex;gap:10px">
+              <div class="fg" style="flex:1">
+                <label class="fl">Date</label>
+                <input type="date" class="fin" id="crDate"/>
+              </div>
+              <div class="fg" style="flex:1">
+                <label class="fl">Time</label>
+                <input type="time" class="fin" id="crTime"/>
+              </div>
+            </div>
+            <div class="fg">
+              <label class="fl">What are you seeing?</label>
+              <div class="clarity-opts" id="clarityOpts"></div>
+            </div>
+            <div class="fg">
+              <label class="fl">Notes <span style="font-weight:400;text-transform:none;letter-spacing:0">&nbsp;optional</span></label>
+              <textarea class="fta" id="crNotes" placeholder="Visibility, color, what's working…" style="min-height:50px"></textarea>
+            </div>
+            <button class="sub-btn" id="crSubmit">Submit Report</button>
+            <div id="crFB"></div>
+
+            <div class="cr-feed" id="crFeed"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div><!-- /wrap -->
+
+<script>
+// ── Constants ────────────────────────────────────────────────────────────────
+const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+const MOON_EMOJI = {'New Moon':'🌑','Waxing Crescent':'🌒','First Quarter':'🌓','Waxing Gibbous':'🌔','Full Moon':'🌕','Waning Gibbous':'🌖','Last Quarter':'🌗','Waning Crescent':'🌘'};
+const TOD = {dawn:'🌅 Dawn',dusk:'🌇 Dusk',night:'🌙 Night',day:'☀️ Day'};
+const BITE_LABEL = ['','😐 Slow','🐟 Decent','🎣 Good','🔥 Hot','🚀 Red Hot'];
+const BITE_CLASS = ['','hot1','hot2','hot3','hot4','hot5'];
+const FLAMES = ['','·','🔥','🔥🔥','🔥🔥🔥','🔥🔥🔥🔥🔥'];
+
+// ── State ────────────────────────────────────────────────────────────────────
+let allEvents=[], byDate={}, journalDates=new Set(), currentDays=90;
+let viewMonth=new Date(), selectedDate=null, tideChart=null, loadedDates=new Set();
+let anglerName=localStorage.getItem('anglerName')||'', biteQuality=0, feedSpot='';
+let swellChart=null, swellLoaded=false;
+viewMonth.setDate(1);
+
+// ── Helpers ──────────────────────────────────────────────────────────────────
+const toHour = s => { const [h,m]=s.split(':').map(Number); return h+m/60; };
+const todayStr = () => new Date().toISOString().slice(0,10);
+const esc = s => String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+const fmtDate = ds => { const [y,m,d]=ds.split('-').map(Number); const dow=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][new Date(y,m-1,d).getDay()]; return `${dow}, ${MONTHS[m-1]} ${d}`; };
+const windArrow = deg => { const dirs=['↓','↙','←','↖','↑','↗','→','↘']; return dirs[Math.round(((deg+180)%360)/45)%8]; };
+const windCard = deg => { const c=['N','NE','E','SE','S','SW','W','NW']; return c[Math.round(deg/45)%8]; };
+const windColor = mph => mph >= 20 ? '#ef4444' : mph >= 12 ? '#f97316' : '#5a84aa';
+
+// Safe fetch wrapper — checks r.ok before parsing JSON
+async function api(url){
+  const r=await fetch(url);
+  if(!r.ok) throw new Error(`${r.status} ${r.statusText}`);
+  return r.json();
+}
+
+// ── Tabs ─────────────────────────────────────────────────────────────────────
+document.querySelectorAll('.tab').forEach(t => t.addEventListener('click', () => {
+  document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+  document.querySelectorAll('.pane').forEach(x=>x.classList.remove('active'));
+  t.classList.add('active');
+  document.getElementById('pane-'+t.dataset.tab).classList.add('active');
+  if(t.dataset.tab==='journal') initJournal();
+  if(t.dataset.tab==='swell') initSwell();
+  if(t.dataset.tab==='clarity') initClarity();
+}));
+
+// ── Calendar data ─────────────────────────────────────────────────────────────
+async function fetchEvents(days){
+  document.getElementById('calLoad').classList.remove('hidden');
+  document.getElementById('calContent').classList.add('hidden');
+  document.getElementById('detail').classList.add('hidden');
+  selectedDate=null;
+  try{
+    const data = await api(`/api/events?days=${days}`);
+    allEvents=data.events; byDate={}; loadedDates=new Set();
+    for(const e of allEvents){ if(!byDate[e.date])byDate[e.date]=[]; byDate[e.date].push(e); }
+    // Mark all dates in the loaded window as clickable
+    const rangeStart=new Date(); rangeStart.setHours(0,0,0,0);
+    for(let i=0;i<days;i++){
+      const d=new Date(rangeStart); d.setDate(d.getDate()+i);
+      loadedDates.add(d.toISOString().slice(0,10));
+    }
+    // Find next best day (first upcoming really_good or good event)
+    const today = todayStr();
+    const upcoming = allEvents.filter(e => e.date >= today && (e.quality === 'really_good' || e.quality === 'good'));
+    const nextBestEl = document.getElementById('nextBestCard');
+    if(upcoming.length) {
+      const best = upcoming[0];
+      const bd = new Date(best.date + 'T12:00:00');
+      const dayLabel = bd.toLocaleDateString('en-US',{weekday:'long',month:'short',day:'numeric'});
+      const stars = best.quality === 'really_good' ? '★★★' : '★★';
+      const reason = `${best.location} · ${best.time_12h || best.time} · ${best.daily_range}ft swing`;
+      nextBestEl.innerHTML = `
+        <div class="next-best" onclick="selectDay('${best.date}')">
+          <div><div class="next-best-date">${stars} ${dayLabel}</div>
+          <div class="next-best-detail"><strong>Next prime window</strong> — ${reason}</div></div>
+          <div class="next-best-arrow">›</div>
+        </div>`;
+    } else {
+      nextBestEl.innerHTML = '';
+    }
+    document.getElementById('calLoad').classList.add('hidden');
+    document.getElementById('calContent').classList.remove('hidden');
+    renderCal();
+    // Auto-select today on first load
+    const t=todayStr();
+    if(loadedDates.has(t) && !selectedDate) selectDay(t);
+  }catch(e){
+    document.getElementById('calLoad').innerHTML=`<div style="color:#ef4444;padding:40px;text-align:center">⚠ ${e.message}</div>`;
+  }
+}
+
+// ── Calendar render ───────────────────────────────────────────────────────────
+function renderCal(){
+  const y=viewMonth.getFullYear(), m=viewMonth.getMonth();
+  document.getElementById('moLabel').textContent=`${MONTHS[m]} ${y}`;
+  const first=new Date(y,m,1).getDay(), daysIn=new Date(y,m+1,0).getDate(), prevEnd=new Date(y,m,0).getDate();
+  const today=todayStr(), total=Math.ceil((first+daysIn)/7)*7;
+  const grid=document.getElementById('calGrid'); grid.innerHTML='';
+  for(let i=0;i<total;i++){
+    let num, ds, other;
+    if(i<first){num=prevEnd-first+i+1;ds=new Date(y,m-1,num).toISOString().slice(0,10);other=true;}
+    else if(i<first+daysIn){num=i-first+1;ds=`${y}-${String(m+1).padStart(2,'0')}-${String(num).padStart(2,'0')}`;other=false;}
+    else{num=i-first-daysIn+1;ds=new Date(y,m+1,num).toISOString().slice(0,10);other=true;}
+    const evs=byDate[ds]||[], hasJ=journalDates.has(ds), click=evs.length||hasJ||(!other&&loadedDates.has(ds));
+    const div=document.createElement('div');
+    div.className='day'+(other?' other':'')+(click?' clickable':'')+(ds===today?' today':'')+(ds===selectedDate?' sel':'');
+    const n=document.createElement('div'); n.className='day-num'; n.textContent=num; div.appendChild(n);
+    if(evs.length||hasJ){
+      const dots=document.createElement('div'); dots.className='dots';
+      const hasRG=evs.some(e=>e.quality==='really_good');
+      const hasGD=evs.some(e=>e.quality==='good');
+      if(hasRG){const d=document.createElement('div');d.className='dot rg';dots.appendChild(d);}
+      if(hasGD){const d=document.createElement('div');d.className='dot gd';dots.appendChild(d);}
+      if(hasJ){const d=document.createElement('div');d.className='dot jn';dots.appendChild(d);}
+      div.appendChild(dots);
+    }
+    // Score bar — visual heat indicator for days with events
+    if(evs.length){
+      const maxScore=Math.max(...evs.map(e=>e.score||0));
+      const pct=Math.min(100,maxScore);
+      const barColor=maxScore>=65?'var(--rg)':maxScore>=35?'var(--good)':'var(--border2)';
+      const bar=document.createElement('div'); bar.className='day-score-bar';
+      bar.innerHTML=`<div class="day-score-fill" style="width:${pct}%;background:${barColor}"></div>`;
+      div.appendChild(bar);
+    }
+    if(click) div.addEventListener('click',()=>selectDay(ds));
+    grid.appendChild(div);
+  }
+}
+
+// ── Day select ────────────────────────────────────────────────────────────────
+async function selectDay(ds){
+  selectedDate=ds; renderCal();
+  const evs=byDate[ds]||[];
+  const det=document.getElementById('detail'); det.classList.remove('hidden');
+  const [y,mo,d]=ds.split('-').map(Number);
+  const dow=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'][new Date(y,mo-1,d).getDay()];
+  document.getElementById('detTitle').textContent=`${dow}, ${MONTHS[mo-1]} ${d}, ${y}`;
+
+  // Immediately populate what we have from event data (before async fetch)
+  if(evs.length){
+    const fe=evs[0];
+    document.getElementById('moonBadge').innerHTML=`<span style="font-size:1.1rem">${MOON_EMOJI[fe.moon]||'🌙'}</span><span>${fe.moon} · ${fe.moon_pct}%</span>`;
+    renderSunBar(fe.solar);
+    renderEvents(evs);
+  } else {
+    document.getElementById('moonBadge').innerHTML='';
+    document.getElementById('sunBar').style.background='var(--border)';
+    document.getElementById('sunLabels').innerHTML='';
+    document.getElementById('evPanel').innerHTML='<div class="ev-label">Prime Windows</div><div class="no-events" style="padding:8px 0 4px">Fetching forecast…</div>';
+  }
+
+  await loadForecast(ds, evs.length ? evs[0].solar : null, evs);
+  det.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+
+function renderSunBar(s){
+  const dawn=toHour(s.dawn),rise=toHour(s.sunrise),set=toHour(s.sunset),dusk=toHour(s.dusk);
+  const p=h=>(h/24*100).toFixed(2)+'%';
+  document.getElementById('sunBar').style.background=`linear-gradient(to right,#020a1e 0%,#020a1e ${p(dawn)},#b84a14 ${p(dawn)},#e87a28 ${p(rise)},#4a90d4 ${p(rise)},#4a90d4 ${p(set)},#e87a28 ${p(set)},#b84a14 ${p(dusk)},#020a1e ${p(dusk)},#020a1e 100%)`;
+  document.getElementById('sunLabels').innerHTML=`<span>Dawn ${s.dawn_12}</span><span>Sunrise ${s.sunrise_12}</span><span>Sunset ${s.sunset_12}</span><span>Dusk ${s.dusk_12}</span>`;
+}
+
+function renderEvents(evs){
+  const panel=document.getElementById('evPanel');
+  panel.innerHTML='<div class="ev-label">Prime Windows</div>';
+  for(const e of evs){
+    const rg=e.quality==='really_good';
+    const score=e.score||'';
+    panel.insertAdjacentHTML('beforeend',`
+      <div class="ev-card ${rg?'rg':'gd'}">
+        <div style="display:flex;align-items:center;justify-content:space-between">
+          <div class="ev-q">${rg?'★★★ REALLY GOOD':'★★ GOOD'}</div>
+          ${score?`<div style="font-size:.65rem;font-weight:700;color:var(--muted);opacity:.7">${score}/100</div>`:''}
+        </div>
+        <div class="ev-loc">${esc(e.location)}</div>
+        <div class="ev-time">${e.tide_type} · ${e.time_12h}</div>
+        <div class="ev-meta">${e.height} ft · Range ${e.daily_range} ft</div>
+        <div class="ev-meta">${TOD[e.time_of_day]||e.time_of_day}</div>
+      </div>`);
+  }
+}
+
+// ── Forecast (chart + wind + solunar + spot tides + outlook) ──────────────────
+async function loadForecast(ds, solar, evs){
+  const spinner=document.getElementById('chartSpinner'); spinner.classList.remove('hidden');
+  if(tideChart){tideChart.destroy();tideChart=null;}
+  document.getElementById('windRow').innerHTML='';
+  document.getElementById('solWindows').innerHTML='';
+  document.getElementById('outlookSlot').innerHTML='';
+  document.getElementById('spotTidesWrap').classList.add('hidden');
+  document.getElementById('waterTempBadge').classList.add('hidden');
+
+  try{
+    const data = await api(`/api/forecast/${ds}`);
+    if(data.error) throw new Error(data.error);
+
+    // ── Solar / Moon (use forecast data if events didn't supply them) ─────
+    // IMPORTANT: solar2 must be set BEFORE chart creation so sun bands render
+    const solar2 = solar || data.solar || null;
+    if(!solar && data.solar) renderSunBar(data.solar);
+    if(!solar && data.moon){
+      const m=data.moon;
+      document.getElementById('moonBadge').innerHTML=`<span style="font-size:1.1rem">${MOON_EMOJI[m.phase]||'🌙'}</span><span>${m.phase} · ${m.pct}%</span>`;
+    }
+
+    // ── Water temp badge ──────────────────────────────────────────────────
+    if(data.conditions?.water_temp_f){
+      const b=document.getElementById('waterTempBadge');
+      b.textContent=`💧 ${data.conditions.water_temp_f}°F`;
+      b.classList.remove('hidden');
+    }
+
+    // ── Day Outlook card ──────────────────────────────────────────────────
+    if(data.outlook){
+      renderOutlook(data.outlook, evs);
+    }
+
+    // ── Solunar pills ─────────────────────────────────────────────────────
+    const solWrap=document.getElementById('solWindows');
+    for(const w of data.solunar||[]){
+      solWrap.insertAdjacentHTML('beforeend',
+        `<div class="sol-pill ${w.type}">${w.icon} ${w.label} — ${w.time_12}</div>`);
+    }
+
+    // ── Wind row ──────────────────────────────────────────────────────────
+    const windWrap=document.getElementById('windRow');
+    const windHours = data.conditions?.hourly || [];
+    const SHOW=[0,3,6,9,12,15,18,21];
+    let hasAnyWind=false;
+    for(const h of windHours){
+      if(!SHOW.includes(h.hour)) continue;
+      const ap=h.hour<12?'AM':'PM', hr=h.hour%12||12;
+      const hasWind=h.wind_mph!=null&&h.wind_deg!=null;
+      if(hasWind) hasAnyWind=true;
+      const dir=hasWind?windCard(h.wind_deg):'–';
+      const spd=hasWind?`${Math.round(h.wind_mph)}`:'–';
+      const col=hasWind?windColor(h.wind_mph):'var(--muted)';
+      windWrap.insertAdjacentHTML('beforeend',`
+        <div class="wind-cell">
+          <div class="wind-time">${hr}${ap}</div>
+          <div class="wind-dir" style="color:${col}">${dir}</div>
+          <div class="wind-speed" style="color:${col}">${spd} mph</div>
+          ${h.gust_mph?`<div class="wind-gust">gust ${Math.round(h.gust_mph)}</div>`:''}
+        </div>`);
+    }
+    if(!hasAnyWind) windWrap.innerHTML='<div style="width:100%;text-align:center;font-size:.75rem;color:var(--muted);padding:8px 0">Wind data unavailable for this date</div>';
+
+    // ── All-spot tide times table ─────────────────────────────────────────
+    if(data.all_spots && Object.keys(data.all_spots).length){
+      renderSpotTides(data.all_spots);
+    }
+
+    // ── Tide chart ────────────────────────────────────────────────────────
+    const parse = arr => arr.map(p=>({x:toHour(p.t.split(' ')[1]),y:parseFloat(p.v)}));
+    const nowHour = ds===todayStr() ? new Date().getHours()+new Date().getMinutes()/60 : null;
+    const solunar = data.solunar||[];
+
+    const bandsPlugin = {
+      id:'bands',
+      beforeDraw(chart){
+        const {ctx,chartArea:{left,right,top,bottom},scales:{x}}=chart;
+        const px=h=>Math.max(left,Math.min(right,x.getPixelForValue(h)));
+        ctx.save(); ctx.beginPath(); ctx.rect(left,top,right-left,bottom-top); ctx.clip();
+
+        // Sun bands
+        if(solar2){
+          const dawn=toHour(solar2.dawn),rise=toHour(solar2.sunrise),set=toHour(solar2.sunset),dusk=toHour(solar2.dusk);
+          ctx.fillStyle='rgba(2,8,28,.55)'; ctx.fillRect(left,top,px(dawn)-left,bottom-top);
+          ctx.fillStyle='rgba(200,90,20,.1)'; ctx.fillRect(px(dawn),top,px(rise)-px(dawn),bottom-top);
+          ctx.fillStyle='rgba(200,90,20,.1)'; ctx.fillRect(px(set),top,px(dusk)-px(set),bottom-top);
+          ctx.fillStyle='rgba(2,8,28,.55)'; ctx.fillRect(px(dusk),top,right-px(dusk),bottom-top);
+        }
+
+        // Solunar bands
+        for(const w of solunar){
+          const half=w.duration/2;
+          ctx.fillStyle=w.type==='major'?'rgba(34,197,94,.14)':'rgba(250,204,21,.1)';
+          ctx.fillRect(px(w.hour-half),top,px(w.hour+half)-px(w.hour-half),bottom-top);
+          ctx.strokeStyle=w.type==='major'?'rgba(34,197,94,.5)':'rgba(250,204,21,.4)';
+          ctx.lineWidth=1; ctx.setLineDash([2,3]);
+          ctx.beginPath(); ctx.moveTo(px(w.hour),top); ctx.lineTo(px(w.hour),bottom); ctx.stroke();
+          ctx.setLineDash([]);
+        }
+
+        // Fishing event markers
+        for(const e of evs){
+          const ex=px(toHour(e.time));
+          ctx.strokeStyle=e.quality==='really_good'?'#f59e0b':'#14b8a6';
+          ctx.lineWidth=1.5; ctx.setLineDash([4,3]);
+          ctx.beginPath(); ctx.moveTo(ex,top); ctx.lineTo(ex,bottom); ctx.stroke();
+          ctx.setLineDash([]);
+        }
+
+        // NOW cursor
+        if(nowHour!=null){
+          const nx=px(nowHour);
+          ctx.strokeStyle='rgba(255,255,255,.7)'; ctx.lineWidth=1.5; ctx.setLineDash([]);
+          ctx.beginPath(); ctx.moveTo(nx,top); ctx.lineTo(nx,bottom); ctx.stroke();
+          ctx.fillStyle='rgba(255,255,255,.9)'; ctx.font='bold 10px Inter,sans-serif';
+          ctx.fillText('NOW',nx+4,top+13);
+        }
+        ctx.restore();
+      }
+    };
+
+    // Build datasets — primary pair bold+filled, others thin+subtle
+    const SPOT_CHART = [
+      {key:'Hereford Inlet',     color:'#3b82f6', primary:true},
+      {key:'Cape May Ferry Terminal', color:'#14b8a6', primary:true},
+      {key:'Corsons Inlet',      color:'#f59e0b', primary:false},
+      {key:'Townsends Inlet',    color:'#818cf8', primary:false},
+      {key:'Cape May Inlet',     color:'#ec4899', primary:false},
+    ];
+    const curves = data.hourly_curves || {};
+    const datasets = SPOT_CHART.map(s=>{
+      const raw = curves[s.key] || (s.key==='Hereford Inlet'?data.hereford:s.key==='Cape May Ferry Terminal'?data.cape_may:[]);
+      if(!raw.length) return null;
+      const shortName = s.key==='Cape May Inlet'?'CM Inlet':s.key==='Cape May Ferry Terminal'?'CM Ferry':s.key.replace(' Inlet','');
+      return {
+        label: shortName,
+        data: parse(raw),
+        borderColor: s.primary ? s.color : s.color+'99',
+        backgroundColor: s.primary ? s.color+'12' : 'transparent',
+        fill: s.primary,
+        tension: .4,
+        pointRadius: s.primary ? 2 : 0,
+        borderWidth: s.primary ? 2.5 : 1.3,
+        borderDash: s.primary ? [] : [4,3],
+      };
+    }).filter(Boolean);
+
+    tideChart=new Chart(document.getElementById('tideChart'),{
+      type:'line',
+      data:{datasets},
+      options:{
+        responsive:true,maintainAspectRatio:true,animation:{duration:200},
+        plugins:{
+          legend:{labels:{color:'#527898',font:{size:10},boxWidth:10,padding:10},maxHeight:28},
+          tooltip:{backgroundColor:'#0b1929',borderColor:'#1a3254',borderWidth:1,titleColor:'#deeeff',bodyColor:'#527898',
+            callbacks:{
+              title:items=>{const h=Math.floor(items[0].parsed.x),min=Math.round((items[0].parsed.x%1)*60),ap=h<12?'AM':'PM';return `${h%12||12}:${String(min).padStart(2,'0')} ${ap}`;},
+              label:item=>` ${item.dataset.label}: ${item.parsed.y.toFixed(1)} ft`
+            }}
+        },
+        scales:{
+          x:{type:'linear',min:0,max:24,ticks:{color:'#527898',stepSize:3,callback:v=>`${v%12||12}${v<12?'AM':'PM'}`},grid:{color:'rgba(26,50,84,.4)'}},
+          y:{ticks:{color:'#527898',callback:v=>`${v}ft`},grid:{color:'rgba(26,50,84,.4)'}}
+        }
+      },
+      plugins:[bandsPlugin]
+    });
+    spinner.classList.add('hidden');
+  }catch(e){
+    spinner.textContent=`⚠ ${e.message}`;
+  }
+}
+
+// ── Day Outlook card renderer ──────────────────────────────────────────────────
+function renderOutlook(outlook, evs){
+  // Update event panel message when no starred events
+  if(!evs.length){
+    document.getElementById('evPanel').innerHTML=`<div class="ev-label">Prime Windows</div>
+      <div class="no-events" style="padding:6px 0 8px;font-size:.75rem">No starred windows today</div>`;
+  }
+
+  const rows=[];
+  rows.push(`<div class="outlook-row"><span class="outlook-icon">🗓️</span><div class="outlook-text"><strong>${outlook.season_name}</strong> — ${esc(outlook.season_text)}</div></div>`);
+  if(outlook.moon_text) rows.push(`<div class="outlook-row"><span class="outlook-icon">${MOON_EMOJI[outlook.moon_phase]||'🌙'}</span><div class="outlook-text">${esc(outlook.moon_text)}</div></div>`);
+  if(outlook.temp_text) rows.push(`<div class="outlook-row"><span class="outlook-icon">🌡️</span><div class="outlook-text">${esc(outlook.temp_text)}</div></div>`);
+  if(outlook.wind_text){
+    const windIcon={'great':'💨','good':'🌬️','neutral':'〰️','bad':'⚠️','rough':'🚫','unknown':''}[outlook.wind_rating]||'🌬️';
+    rows.push(`<div class="outlook-row"><span class="outlook-icon">${windIcon}</span><div class="outlook-text">${esc(outlook.wind_text)}</div></div>`);
+  }
+
+  document.getElementById('outlookSlot').innerHTML=`
+    <div class="outlook-wrap">
+      <div class="outlook-card">
+        <div class="outlook-head">
+          <div class="outlook-rating">
+            <span style="font-size:1.15rem">${outlook.overall_icon}</span>
+            <span class="outlook-badge" style="background:${outlook.overall_color}22;color:${outlook.overall_color};border:1px solid ${outlook.overall_color}55">${esc(outlook.overall_label)}</span>
+          </div>
+          <span class="outlook-season">${esc(outlook.season_name)}</span>
+        </div>
+        <div class="outlook-body">${rows.join('')}</div>
+      </div>
+    </div>`;
+}
+
+// ── Spot Tides table renderer ─────────────────────────────────────────────────
+let _allSpotsExpanded = false;
+function renderSpotTides(allSpots){
+  const wrap=document.getElementById('spotTidesWrap');
+  const grid=document.getElementById('spotTidesGrid');
+  const gridExtra=document.getElementById('spotTidesGridExtra');
+  grid.innerHTML='';
+  gridExtra.innerHTML='';
+  const spotOrder=['Corsons Inlet','Townsends Inlet','Hereford Inlet','Cape May Inlet','Cape May Ferry Terminal'];
+  // Default spot = Cape May Inlet (or first available)
+  const defaultSpot = 'Cape May Inlet';
+
+  function spotRowHtml(name, spot){
+    const evHtml=spot.events.map(ev=>{
+      const cls=ev.is_target?`target-${spot.tide_type==='High'?'H':'L'}`:'other';
+      return `<span class="spot-tide-ev ${cls}">${ev.is_target?'⭐ ':''}${ev.type} ${ev.time_12} · ${ev.height}ft</span>`;
+    }).join('');
+    return `<div class="spot-tide-row">
+      <div class="spot-tide-name">${esc(name)}</div>
+      <div class="spot-tide-events">${evHtml||'<span style="font-size:.7rem;color:var(--muted);padding:4px">no data</span>'}</div>
+    </div>`;
+  }
+
+  for(const name of spotOrder){
+    const spot=allSpots[name]; if(!spot) continue;
+    if(name === defaultSpot){
+      grid.insertAdjacentHTML('beforeend', spotRowHtml(name, spot));
+    } else {
+      gridExtra.insertAdjacentHTML('beforeend', spotRowHtml(name, spot));
+    }
+  }
+  // Reset toggle state
+  document.getElementById('spotTidesExtra').classList.add('hidden');
+  document.getElementById('spotTidesToggle').textContent = 'Show all spots ▾';
+  _allSpotsExpanded = false;
+  wrap.classList.remove('hidden');
+}
+
+function toggleAllSpots(){
+  _allSpotsExpanded = !_allSpotsExpanded;
+  document.getElementById('spotTidesExtra').classList.toggle('hidden', !_allSpotsExpanded);
+  document.getElementById('spotTidesToggle').textContent = _allSpotsExpanded ? 'Hide spots ▴' : 'Show all spots ▾';
+}
+
+// ── Controls ──────────────────────────────────────────────────────────────────
+document.querySelectorAll('.days-btn').forEach(b=>b.addEventListener('click',()=>{
+  document.querySelectorAll('.days-btn').forEach(x=>x.classList.remove('active'));
+  b.classList.add('active'); currentDays=parseInt(b.dataset.days); fetchEvents(currentDays);
+}));
+document.getElementById('prevMo').addEventListener('click',()=>{viewMonth.setMonth(viewMonth.getMonth()-1);renderCal();});
+document.getElementById('nextMo').addEventListener('click',()=>{viewMonth.setMonth(viewMonth.getMonth()+1);renderCal();});
+document.getElementById('exportBtn').addEventListener('click',()=>{window.location.href=`/api/export?days=${currentDays}`;});
+
+// ══ JOURNAL ═══════════════════════════════════════════════════════════════════
+function initJournal(){
+  initAngler();
+  loadStats();
+  loadLeaderboard();
+  loadFeed();
+  document.getElementById('fDate').value=todayStr();
+}
+
+// Angler name
+function initAngler(){
+  if(anglerName) showGreeting();
+  else document.getElementById('nameBanner').classList.remove('hidden');
+}
+function showGreeting(){
+  document.getElementById('nameBanner').classList.add('hidden');
+  document.getElementById('anglerBar').classList.remove('hidden');
+  document.getElementById('greetTxt').textContent=`Hey ${anglerName} 👋`;
+}
+document.getElementById('nameSetBtn').addEventListener('click',()=>{
+  const v=document.getElementById('nameIn').value.trim(); if(!v)return;
+  anglerName=v; localStorage.setItem('anglerName',v); showGreeting();
+});
+document.getElementById('nameIn').addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('nameSetBtn').click();});
+document.getElementById('changeName').addEventListener('click',()=>{
+  anglerName=''; localStorage.removeItem('anglerName');
+  document.getElementById('anglerBar').classList.add('hidden');
+  document.getElementById('nameBanner').classList.remove('hidden');
+  document.getElementById('nameIn').value='';
+});
+
+// Season stats
+async function loadStats(){
+  const data=await api('/api/journal/stats');
+  document.getElementById('seasonStats').innerHTML=`
+    <div class="sstat"><div class="sstat-num">${data.sessions||0}</div><div class="sstat-label">Sessions</div></div>
+    <div class="sstat"><div class="sstat-num">${data.total_fish||0}</div><div class="sstat-label">Fish Caught</div></div>
+    <div class="sstat"><div class="sstat-num">${data.avg_bite||'—'}</div><div class="sstat-label">Avg Bite</div></div>
+    <div class="sstat"><div class="sstat-num">${data.best_haul||0}</div><div class="sstat-label">Best Haul</div></div>
+    <div class="sstat"><div class="sstat-num">${data.anglers||0}</div><div class="sstat-label">Anglers</div></div>
+    <div class="sstat"><div class="sstat-num">${data.spots_fished||0}</div><div class="sstat-label">Spots Fished</div></div>`;
+}
+
+// Leaderboard
+async function loadLeaderboard(){
+  const data=await api('/api/journal/leaderboard');
+  if(!data.length){document.getElementById('leaderboard').innerHTML='';return;}
+  const rankClass=['','gold','silver','bronze'];
+  let html=`<div class="lb-head">🏆 Season Leaderboard</div>`;
+  for(let i=0;i<data.length;i++){
+    const r=data[i];
+    html+=`<div class="lb-row">
+      <span class="lb-rank ${rankClass[i+1]||''}">${['🥇','🥈','🥉'][i]||`#${i+1}`}</span>
+      <span class="lb-name">${esc(r.angler_name)}</span>
+      <span class="lb-fish">${r.total_fish} 🐟</span>
+      <span class="lb-bite">${r.sessions} trips · ${r.avg_bite} avg</span>
+    </div>`;
+  }
+  document.getElementById('leaderboard').innerHTML=html;
+}
+
+// Feed
+async function loadFeed(spot){
+  const url=spot?`/api/journal?limit=50&spot=${encodeURIComponent(spot)}`:'/api/journal?limit=50';
+  const entries=await api(url);
+  journalDates=new Set(entries.map(e=>e.session_date));
+
+  const feed=document.getElementById('feed'); feed.innerHTML='';
+  if(!entries.length){feed.innerHTML='<div class="feed-empty">No sessions yet — be the first to drop a report! 🎣</div>';return;}
+
+  for(const e of entries){
+    const bq=e.bite_quality||1, cls=BITE_CLASS[bq];
+    const isHot=bq>=4;
+    feed.insertAdjacentHTML('beforeend',`
+      <div class="session-card">
+        <div class="sc-header ${cls}">
+          <div>
+            <div class="sc-angler">${esc(e.angler_name)}</div>
+            <div class="sc-spot">📍 ${esc(e.spot)}</div>
+          </div>
+          <div>
+            <div class="sc-quality-label ${cls}">${BITE_LABEL[bq]}</div>
+            <div class="sc-time" style="text-align:right;font-size:.72rem;color:var(--muted);margin-top:2px">${fmtDate(e.session_date)}</div>
+          </div>
+        </div>
+        <div class="sc-body">
+          <div class="sc-metrics">
+            <div>
+              <div class="sc-fish-count" style="color:${isHot?'var(--rg)':'var(--accent2)'}">${e.fish_count}</div>
+              <div class="sc-fish-label">fish</div>
+            </div>
+            <div class="sc-right">
+              <div class="flames">${FLAMES[bq]}</div>
+              <div class="sc-time">${e.time_start} – ${e.time_end}</div>
+            </div>
+            ${e.water_temp_f?`<div style="text-align:center"><div style="font-size:1.1rem;font-weight:800;color:var(--accent2)">${e.water_temp_f}°</div><div style="font-size:.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em">Water</div></div>`:''}
+          </div>
+          <div class="sc-conditions">
+            ${e.tide_type?`<span class="sc-cond">🌊 ${e.tide_type} tide</span>`:''}
+            ${e.moon_phase?`<span class="sc-cond">${MOON_EMOJI[e.moon_phase]||'🌙'} ${e.moon_phase}</span>`:''}
+            ${e.time_of_day?`<span class="sc-cond">${TOD[e.time_of_day]||e.time_of_day}</span>`:''}
+            ${e.tidal_range_ft?`<span class="sc-cond">↕ ${e.tidal_range_ft} ft range</span>`:''}
+          </div>
+          ${e.notes?`<div class="sc-notes">${esc(e.notes)}</div>`:''}
+        </div>
+      </div>`);
+
+    if(isHot && e.session_date===todayStr()) showHotBanner(e);
+  }
+}
+
+function showHotBanner(e){
+  const b=document.getElementById('hotBanner');
+  b.classList.remove('hidden');
+  b.innerHTML=`🔥 <strong>${esc(e.angler_name)}</strong> is on at <strong>${esc(e.spot)}</strong> — ${BITE_LABEL[e.bite_quality]}! Go now!`;
+}
+
+// Spot filters
+document.querySelectorAll('.spot-pill').forEach(p=>p.addEventListener('click',()=>{
+  document.querySelectorAll('.spot-pill').forEach(x=>x.classList.remove('active'));
+  p.classList.add('active'); feedSpot=p.dataset.spot; loadFeed(feedSpot);
+}));
+
+// Bite buttons
+document.querySelectorAll('.bite-opt').forEach(b=>b.addEventListener('click',()=>{
+  document.querySelectorAll('.bite-opt').forEach(x=>x.classList.remove('sel'));
+  b.classList.add('sel'); biteQuality=parseInt(b.dataset.v);
+}));
+
+// Fish slider
+document.getElementById('fFish').addEventListener('input',function(){document.getElementById('fishVal').textContent=this.value;});
+
+// Submit
+document.getElementById('submitBtn').addEventListener('click', async()=>{
+  const fb=document.getElementById('formFB'), btn=document.getElementById('submitBtn');
+  fb.innerHTML='';
+  if(!anglerName){fb.innerHTML='<div class="fb-err">Set your name first.</div>';return;}
+  const spot=document.getElementById('fSpot').value;
+  const fdate=document.getElementById('fDate').value;
+  const start=document.getElementById('fStart').value;
+  const end=document.getElementById('fEnd').value;
+  const fish=parseInt(document.getElementById('fFish').value);
+  const temp=document.getElementById('fTemp').value;
+  const notes=document.getElementById('fNotes').value.trim();
+  if(!spot||!fdate||!start||!end||!biteQuality){fb.innerHTML='<div class="fb-err">Fill in spot, date, times, and bite quality.</div>';return;}
+  btn.disabled=true; btn.textContent='Saving…';
+  try{
+    const res=await fetch('/api/journal',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({angler_name:anglerName,spot,session_date:fdate,time_start:start,time_end:end,
+        fish_count:fish,bite_quality:biteQuality,water_temp_f:temp?parseFloat(temp):null,notes})});
+    if(!res.ok){const e=await res.json();throw new Error(e.error||'Server error');}
+    fb.innerHTML='<div class="fb-ok">✓ Logged! Your crew can see it now.</div>';
+    document.getElementById('fFish').value=0;document.getElementById('fishVal').textContent='0';
+    document.querySelectorAll('.bite-opt').forEach(b=>b.classList.remove('sel'));
+    document.getElementById('fTemp').value='';document.getElementById('fNotes').value='';
+    biteQuality=0;
+    loadFeed(feedSpot);loadLeaderboard();loadStats();
+    setTimeout(()=>fb.innerHTML='',5000);
+  }catch(e){fb.innerHTML=`<div class="fb-err">${e.message}</div>`;}
+  finally{btn.disabled=false;btn.textContent='Log Session';}
+});
+
+// ══ WATER CLARITY ════════════════════════════════════════════════════════════
+const CL_LEVELS = [
+  {label:'Crystal',   color:'#06b6d4', icon:'💎'},
+  {label:'Clean',     color:'#22c55e', icon:'✅'},
+  {label:'Stained',   color:'#eab308', icon:'🟡'},
+  {label:'Muddy',     color:'#f97316', icon:'🟠'},
+  {label:'Blown Out', color:'#ef4444', icon:'🔴'},
+];
+let clarityLoaded=false, selectedClarity='';
+
+// Build clarity option buttons
+(function(){
+  const wrap=document.getElementById('clarityOpts');
+  if(!wrap) return;
+  for(const cl of CL_LEVELS){
+    wrap.insertAdjacentHTML('beforeend',
+      `<button class="cl-opt" data-cl="${cl.label}" style="border-color:${cl.color}40">${cl.icon}<br>${cl.label}</button>`);
+  }
+  wrap.querySelectorAll('.cl-opt').forEach(b=>b.addEventListener('click',()=>{
+    wrap.querySelectorAll('.cl-opt').forEach(x=>{x.classList.remove('sel');x.style.background='';x.style.borderColor=x.dataset.cl?CL_LEVELS.find(c=>c.label===x.dataset.cl)?.color+'40':'';});
+    b.classList.add('sel');
+    const cl=CL_LEVELS.find(c=>c.label===b.dataset.cl);
+    if(cl){b.style.background=cl.color+'33';b.style.borderColor=cl.color;}
+    selectedClarity=b.dataset.cl;
+  }));
+})();
+
+// ── Swell Report ─────────────────────────────────────────────────────────────
+
+// ── Swell state ──
+let _swellAllData = [];   // all history+forecast points
+let _swellWindow  = 0;    // which 3-day window (0 = starting from today)
+const _SWELL_WINDOW_HRS = 72; // 3 days per window
+const _CARD_DIRS = ['N','NE','E','SE','S','SW','W','NW'];
+
+function _qualityColor(tag) {
+  const map = {'Glass':'#22c55e','Light Offshore':'#22c55e','Clean & Offshore':'#22c55e',
+    'Side-offshore':'#84cc16','Cross-shore':'#eab308','Side-onshore':'#f97316',
+    'Onshore Chop':'#f97316','Blown Out':'#ef4444'};
+  return map[tag] || '#527898';
+}
+
+function _waveColor(ft) {
+  if(ft >= 6) return '#ef4444';
+  if(ft >= 4) return '#f97316';
+  if(ft >= 2.5) return '#eab308';
+  if(ft >= 1.5) return '#22c55e';
+  return '#527898';
+}
+
+function _buildDayPills(allData) {
+  // Only show days from today forward (skip history days)
+  const now = new Date();
+  const todayKey = now.toISOString().slice(0,10);
+  const days = [];
+  const seen = new Set();
+  for(const p of allData) {
+    const dt = new Date(Date.now() + p.offset * 3600000);
+    const key = dt.toISOString().slice(0,10);
+    if(key < todayKey) continue;
+    if(!seen.has(key)) {
+      seen.add(key);
+      days.push({key, dt, label: dt.toLocaleDateString('en-US',{weekday:'short'}),
+                 date: dt.toLocaleDateString('en-US',{month:'short',day:'numeric'})});
+    }
+  }
+  const container = document.getElementById('swellDayPills');
+  const daysPerWin = _getWindowDays();
+  container.innerHTML = days.map((d,i) => {
+    const win = Math.floor(i / daysPerWin);
+    const isActive = (i >= _swellWindow * daysPerWin && i < (_swellWindow + 1) * daysPerWin);
+    return `<button class="swell-day-pill${isActive?' active':''}" data-win="${win}" data-idx="${i}" onclick="_setSwellWindow(${win})">
+      ${d.label}<br><span class="pill-date">${d.date}</span>
+    </button>`;
+  }).join('');
+}
+
+function _setSwellWindow(win) {
+  _swellWindow = win;
+  _renderSwellChart();
+  _renderSwellTable();
+  // Update pill active state
+  const daysPerWin = _getWindowDays();
+  document.querySelectorAll('.swell-day-pill').forEach(p => {
+    const idx = parseInt(p.dataset.idx);
+    const isActive = (idx >= win * daysPerWin && idx < (win + 1) * daysPerWin);
+    p.classList.toggle('active', isActive);
+  });
+}
+
+function _isMobile() { return window.innerWidth <= 600; }
+
+function _getWindowDays() {
+  // Mobile = 1 day per window, desktop = 3 days
+  return _isMobile() ? 1 : 3;
+}
+
+function _getWindowData() {
+  const daysPerWin = _getWindowDays();
+  const now = new Date();
+  const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const winStartDay = _swellWindow * daysPerWin;
+  const windowStartMs = todayStart.getTime() + winStartDay * 86400000;
+  const windowEndMs = windowStartMs + daysPerWin * 86400000;
+  const startOff = (windowStartMs - now.getTime()) / 3600000;
+  const endOff = (windowEndMs - now.getTime()) / 3600000;
+  return _swellAllData.filter(p => p.offset >= startOff && p.offset < endOff);
+}
+
+function _renderSwellChart() {
+  const winData = _getWindowData();
+  if(!winData.length) return;
+
+  if(swellChart) { swellChart.destroy(); swellChart = null; }
+
+  // Prepare wave height points with quality colors
+  const wavePts = winData.map(p => ({x: p.offset, y: p.wave_ht_ft, q: p.wind_quality}));
+  const periodPts = winData.map(p => ({x: p.offset, y: p.period_s || 0}));
+  const xMin = Math.min(...wavePts.map(p=>p.x));
+  const xMax = Math.max(...wavePts.map(p=>p.x));
+
+  // Build segment colors based on quality
+  const segmentColors = winData.map(p => {
+    const q = p.wind_quality;
+    return q ? (q.color || '#527898') : '#527898';
+  });
+
+  const canvas = document.getElementById('swellChart');
+  const chartCtx = canvas.getContext('2d');
+
+  swellChart = new Chart(canvas, {
+    type: 'line',
+    data: {
+      datasets: [
+        {
+          label: 'Wave Height',
+          data: wavePts,
+          borderColor: '#3b82f6',
+          borderWidth: 2.5,
+          fill: true,
+          backgroundColor: (context) => {
+            const chart = context.chart;
+            const {ctx, chartArea} = chart;
+            if(!chartArea) return 'rgba(59,130,246,.15)';
+            // Create quality-colored gradient segments
+            const grad = ctx.createLinearGradient(chartArea.left, 0, chartArea.right, 0);
+            for(let i = 0; i < winData.length; i++) {
+              const frac = i / (winData.length - 1);
+              const q = winData[i].wind_quality;
+              const c = q ? q.color : '#527898';
+              grad.addColorStop(frac, c + '40');
+            }
+            return grad;
+          },
+          segment: {
+            borderColor: ctx => {
+              const i = ctx.p0DataIndex;
+              return segmentColors[i] || '#3b82f6';
+            }
+          },
+          tension: .35,
+          pointRadius: 0,
+          pointHitRadius: 8,
+          order: 1,
+        },
+        {
+          label: 'Period',
+          data: periodPts,
+          borderColor: '#f59e0b88',
+          borderWidth: 1.5,
+          borderDash: [5, 3],
+          fill: false,
+          tension: .35,
+          pointRadius: 0,
+          yAxisID: 'yPeriod',
+          order: 2,
+        }
+      ],
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: true,
+      animation: {duration: 300},
+      interaction: {mode: 'index', intersect: false},
+      plugins: {
+        legend: {display: false},
+        tooltip: {enabled: false},  // We use the hover banner instead
+      },
+      onHover: (evt, elements, chart) => {
+        if(!elements.length) {
+          document.getElementById('swellBanner').classList.remove('visible');
+          return;
+        }
+        const idx = elements[0].index;
+        const pt = winData[idx];
+        if(!pt) return;
+        _updateHoverBanner(pt);
+      },
+      scales: {
+        x: {
+          type: 'linear', min: xMin, max: xMax,
+          ticks: {
+            color: '#527898', stepSize: 6,
+            font: {size: 10},
+            callback: v => {
+              const d = new Date(Date.now() + v * 3600000);
+              const hr = d.toLocaleTimeString('en-US', {hour: 'numeric'});
+              if(d.getHours() === 0) return d.toLocaleDateString('en-US', {weekday: 'short', month: 'short', day: 'numeric'});
+              if(d.getHours() === 6) return '6AM';
+              if(d.getHours() === 12) return 'Noon';
+              if(d.getHours() === 18) return '6PM';
+              return '';
+            },
+            maxRotation: 0,
+          },
+          grid: {
+            color: ctx => {
+              const v = ctx.tick.value;
+              const d = new Date(Date.now() + v * 3600000);
+              return d.getHours() === 0 ? 'rgba(255,255,255,.25)' : 'rgba(26,50,84,.15)';
+            },
+            lineWidth: ctx => {
+              const v = ctx.tick.value;
+              const d = new Date(Date.now() + v * 3600000);
+              return d.getHours() === 0 ? 2 : 0.5;
+            }
+          }
+        },
+        y: {
+          position: 'left',
+          ticks: {color: '#527898', font: {size: 10}, callback: v => `${v}ft`},
+          grid: {color: 'rgba(26,50,84,.2)'},
+          min: 0,
+          title: {display: true, text: 'Wave Height (ft)', color: '#527898', font: {size: 9}}
+        },
+        yPeriod: {
+          position: 'right',
+          ticks: {color: '#f59e0b88', font: {size: 9}, callback: v => `${v}s`},
+          grid: {drawOnChartArea: false},
+          min: 0,
+          title: {display: true, text: 'Period (s)', color: '#f59e0b88', font: {size: 9}}
+        }
+      },
+      layout: {padding: {bottom: 50}}  // Room for direction arrows
+    },
+    plugins: [
+      // NOW line plugin
+      {
+        id: 'swellNowLine',
+        beforeDraw(chart) {
+          const {ctx, chartArea:{left, right, top, bottom}, scales:{x}} = chart;
+          const nx = x.getPixelForValue(0);
+          if(nx <= left || nx >= right) return;
+          ctx.save();
+          ctx.strokeStyle = 'rgba(255,255,255,.5)'; ctx.lineWidth = 1.5; ctx.setLineDash([4,3]);
+          ctx.beginPath(); ctx.moveTo(nx, top); ctx.lineTo(nx, bottom); ctx.stroke();
+          ctx.setLineDash([]);
+          ctx.fillStyle = 'rgba(255,255,255,.85)'; ctx.font = 'bold 10px Inter,sans-serif';
+          ctx.fillText('NOW', nx + 4, top + 12);
+          ctx.restore();
+        }
+      },
+      // Swell direction arrows plugin
+      {
+        id: 'swellDirArrows',
+        afterDraw(chart) {
+          const {ctx, chartArea:{left, right, bottom}, scales:{x}} = chart;
+          ctx.save();
+          const arrowY = bottom + 20;
+          const labelY = bottom + 36;
+          // Draw every 3 hours
+          const step3h = winData.filter((_, i) => i % 3 === 0);
+          for(const pt of step3h) {
+            const px = x.getPixelForValue(pt.offset);
+            if(px < left - 5 || px > right + 5) continue;
+            const deg = pt.swell_deg;
+            if(deg == null) continue;
+            const dir = _CARD_DIRS[Math.round(deg / 45) % 8];
+            // Draw arrow
+            const rad = (deg + 180) * Math.PI / 180; // arrow points direction swell is going
+            const aLen = 8;
+            ctx.strokeStyle = '#14b8a6';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(px - Math.sin(rad) * aLen, arrowY - Math.cos(rad) * aLen);
+            ctx.lineTo(px + Math.sin(rad) * aLen, arrowY + Math.cos(rad) * aLen);
+            ctx.stroke();
+            // Arrowhead
+            const headLen = 4;
+            const tipX = px + Math.sin(rad) * aLen;
+            const tipY = arrowY + Math.cos(rad) * aLen;
+            ctx.beginPath();
+            ctx.moveTo(tipX, tipY);
+            ctx.lineTo(tipX - Math.sin(rad - 0.5) * headLen, tipY - Math.cos(rad - 0.5) * headLen);
+            ctx.moveTo(tipX, tipY);
+            ctx.lineTo(tipX - Math.sin(rad + 0.5) * headLen, tipY - Math.cos(rad + 0.5) * headLen);
+            ctx.stroke();
+            // Cardinal label
+            ctx.fillStyle = '#14b8a6';
+            ctx.font = 'bold 8px Inter,sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText(dir, px, labelY);
+          }
+          ctx.restore();
+        }
+      }
+    ]
+  });
+
+  // Touch support for mobile — tap shows banner
+  canvas.onclick = (evt) => {
+    const points = swellChart.getElementsAtEventForMode(evt, 'index', {intersect: false}, false);
+    if(points.length) {
+      const idx = points[0].index;
+      const pt = winData[idx];
+      if(pt) _updateHoverBanner(pt);
+    }
+  };
+}
+
+function _updateHoverBanner(pt) {
+  const banner = document.getElementById('swellBanner');
+  banner.classList.add('visible');
+
+  const dt = new Date(Date.now() + pt.offset * 3600000);
+  const timeStr = dt.toLocaleString('en-US', {weekday:'short', hour:'numeric', minute:'2-digit'});
+
+  document.getElementById('shbWave').textContent = `${pt.wave_ht_ft} ft`;
+  document.getElementById('shbSwell').innerHTML = pt.swell_ht_ft != null
+    ? `${pt.swell_ht_ft}ft @ ${pt.swell_period_s||pt.period_s||'—'}s<br><span style="font-size:.65rem;color:#14b8a6">${pt.swell_card||'—'} (${pt.swell_deg||'—'}°)</span>`
+    : '—';
+  document.getElementById('shbWindWave').textContent = pt.wind_wave_ht_ft != null ? `${pt.wind_wave_ht_ft} ft` : '—';
+  document.getElementById('shbWind').textContent = pt.wind_card && pt.wind_mph != null
+    ? `${pt.wind_card} ${Math.round(pt.wind_mph)} mph` : '—';
+
+  const qEl = document.getElementById('shbQuality');
+  const wq = pt.wind_quality || {};
+  qEl.textContent = wq.tag || wq.short || '—';
+  qEl.style.color = wq.color || '#527898';
+  qEl.style.borderColor = (wq.color || '#527898') + '55';
+  qEl.style.background = (wq.color || '#527898') + '18';
+
+  // Update banner title with time
+  banner.title = timeStr;
+}
+
+function _renderSwellTable() {
+  const winData = _getWindowData();
+  // Mobile: every 3h (1 day = 8 cols), Desktop: every 6h (3 days = 12 cols)
+  const step = _isMobile() ? 3 : 6;
+  const sampled = winData.filter((_, i) => i % step === 0);
+  if(!sampled.length) { document.getElementById('sfTable').innerHTML = ''; return; }
+
+  const cols = sampled.length;
+  let tbl = `<div class="sf-grid" style="grid-template-columns:56px repeat(${cols},1fr)">`;
+
+  // Helper to get day info
+  const dayInfo = s => {
+    const dt = new Date(Date.now() + s.offset * 3600000);
+    return {dt, day: dt.toLocaleDateString('en-US',{weekday:'short'}),
+            date: dt.toLocaleDateString('en-US',{month:'numeric',day:'numeric'}),
+            hr: dt.toLocaleTimeString('en-US',{hour:'numeric'}).replace(' ','')};
+  };
+
+  // Header row (times)
+  tbl += `<div class="sf-row-label" style="border-bottom:2px solid var(--border)"></div>`;
+  let prevDay = '';
+  for(const s of sampled) {
+    const {day, date, hr} = dayInfo(s);
+    const isSep = day !== prevDay; prevDay = day;
+    tbl += `<div class="sf-cell${isSep?' day-sep':''}" style="border-bottom:2px solid var(--border);padding:8px 2px">
+      ${isSep ? `<div style="font-weight:900;color:var(--text);font-size:.78rem">${day}</div><div style="font-size:.56rem;color:var(--muted)">${date}</div>` : ''}
+      <div style="font-size:.66rem;color:var(--muted);margin-top:2px">${hr}</div>
+    </div>`;
+  }
+
+  // Wave height row
+  prevDay = '';
+  tbl += `<div class="sf-row-label">Height</div>`;
+  for(const s of sampled) {
+    const {day} = dayInfo(s);
+    const isSep = day !== prevDay; prevDay = day;
+    const c = _waveColor(s.wave_ht_ft);
+    tbl += `<div class="sf-cell sf-wave${isSep?' day-sep':''}" style="color:${c}">${s.wave_ht_ft}<span style="font-size:.6rem">ft</span></div>`;
+  }
+
+  // Period row
+  prevDay = '';
+  tbl += `<div class="sf-row-label">Period</div>`;
+  for(const s of sampled) {
+    const {day} = dayInfo(s);
+    const isSep = day !== prevDay; prevDay = day;
+    tbl += `<div class="sf-cell sf-per${isSep?' day-sep':''}">${s.period_s != null ? s.period_s + 's' : '—'}</div>`;
+  }
+
+  // Swell direction row
+  prevDay = '';
+  tbl += `<div class="sf-row-label">Swell</div>`;
+  for(const s of sampled) {
+    const {day} = dayInfo(s);
+    const isSep = day !== prevDay; prevDay = day;
+    const dir = s.swell_deg != null ? _CARD_DIRS[Math.round(s.swell_deg / 45) % 8] : (s.swell_card || '—');
+    tbl += `<div class="sf-cell sf-dir${isSep?' day-sep':''}">${dir}</div>`;
+  }
+
+  // Quality row
+  prevDay = '';
+  tbl += `<div class="sf-row-label">Quality</div>`;
+  for(const s of sampled) {
+    const {day} = dayInfo(s);
+    const isSep = day !== prevDay; prevDay = day;
+    const wq = s.wind_quality || {};
+    tbl += `<div class="sf-cell${isSep?' day-sep':''}">
+      <span class="sf-wind-tag" style="color:${wq.color||'#527898'};background:${(wq.color||'#527898')}15">${wq.short||'—'}</span>
+    </div>`;
+  }
+
+  tbl += '</div>';
+  document.getElementById('sfTable').innerHTML = tbl;
+}
+
+async function initSwell(forceSpot, forceModel){
+  const spot = forceSpot || document.getElementById('surfSpotSel').value;
+  const model = forceModel || document.getElementById('surfModelSel').value;
+  document.getElementById('swellLoad').classList.remove('hidden');
+  document.getElementById('swellContent').classList.add('hidden');
+
+  try{
+    const data = await api(`/api/surf?spot=${encodeURIComponent(spot)}&model=${model}`);
+    if(data.error) throw new Error(data.error);
+
+    document.getElementById('swellSpotLabel').textContent = data.spot.label;
+    const upd = new Date(data.updated);
+    document.getElementById('swellUpdated').textContent = `Updated ${upd.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'})}`;
+
+    // ── Current conditions card ─────────────────────────────────────
+    const cur = data.current;
+    const q = cur.quality;
+    const isEst = cur.estimated;
+    const modelNames = {gfs:'GFS Wave', euro:'ECMWF WAM', striper:'Striper Tides'};
+    const modelLabel = modelNames[data.model] || data.model;
+    const waveTxt = cur.wave_ht_ft != null ? `${cur.wave_ht_ft} ft` : '—';
+    const perTxt = cur.period_s != null ? `${cur.period_s}s` : '—';
+    const swellTxt = cur.swell_card || (isEst ? 'Wind est.' : '—');
+    const swellSub = cur.swell_ht_ft != null
+      ? `${cur.swell_ht_ft} ft swell @ ${cur.swell_deg||''}°`
+      : (cur.swell_deg != null ? cur.swell_deg + '°' : isEst ? 'from wind model' : '');
+    const windTxt = cur.wind_mph != null ? `${cur.wind_card} ${Math.round(cur.wind_mph)} mph` : '—';
+
+    document.getElementById('swellCurrent').innerHTML = `
+      <div class="swell-stat">
+        <div class="swell-stat-val">${waveTxt}</div>
+        <div class="swell-stat-label">Wave Height</div>
+        <div class="swell-stat-sub">${perTxt} period</div>
+      </div>
+      <div class="swell-stat">
+        <div class="swell-stat-val">${swellTxt}</div>
+        <div class="swell-stat-label">Swell Direction</div>
+        <div class="swell-stat-sub">${swellSub}</div>
+      </div>
+      <div class="swell-stat">
+        <div class="swell-stat-val">${windTxt}</div>
+        <div class="swell-stat-label">Wind</div>
+        <div class="swell-stat-sub">Offshore = ${data.spot.offshore_label}</div>
+      </div>
+      <div class="swell-stat">
+        <div class="swell-quality-tag" style="color:${q.color};border-color:${q.color}55;background:${q.color}18">${q.tag}</div>
+        <div class="swell-stat-label" style="margin-top:10px">Surf Quality</div>
+        <div style="font-size:.62rem;color:var(--muted);margin-top:4px">${modelLabel}</div>
+      </div>`;
+
+    // ── Store all data and render ───────────────────────────────────
+    _swellAllData = [...(data.history||[]), ...(data.forecast||[])];
+    _swellWindow = 0;
+
+    // Find the window that contains "now" (offset 0)
+    const now = new Date();
+    const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    // Window 0 = today, which contains offset 0
+
+    _buildDayPills(_swellAllData);
+    _renderSwellChart();
+    _renderSwellTable();
+
+    // Hide banner initially
+    document.getElementById('swellBanner').classList.remove('visible');
+
+    swellLoaded = true;
+    document.getElementById('swellLoad').classList.add('hidden');
+    document.getElementById('swellContent').classList.remove('hidden');
+  } catch(e){
+    document.getElementById('swellLoad').innerHTML = `<div style="color:#ef4444;padding:40px;text-align:center">⚠ ${e.message}</div>`;
+  }
+}
+
+// Spot / model selector changes
+document.getElementById('surfSpotSel')?.addEventListener('change', () => {
+  swellLoaded = false;
+  initSwell();
+});
+document.getElementById('surfModelSel')?.addEventListener('change', () => {
+  swellLoaded = false;
+  initSwell();
+});
+
+// ── Water Clarity ────────────────────────────────────────────────────────────
+
+async function initClarity(){
+  if(clarityLoaded) return;
+  // Default date/time to now
+  const _now=new Date();
+  document.getElementById('crDate').value=_now.toISOString().slice(0,10);
+  document.getElementById('crTime').value=_now.toTimeString().slice(0,5);
+  document.getElementById('clarityLoad').classList.remove('hidden');
+  document.getElementById('clarityContent').classList.add('hidden');
+  try{
+    const data=await api('/api/clarity');
+    if(data.error) throw new Error(data.error);
+
+    // Updated timestamp
+    const upd=new Date(data.updated);
+    document.getElementById('clarityUpdated').textContent=`Updated ${upd.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'})}`;
+
+    // Current clarity card
+    const cur=data.current;
+    const clInfo=CL_LEVELS.find(c=>c.label===cur.label)||CL_LEVELS[2];
+    document.getElementById('clarityCurrent').innerHTML=`
+      <div class="clarity-score-ring" style="border-color:${cur.color}">
+        <div class="clarity-score-num" style="color:${cur.color}">${Math.round(cur.score)}</div>
+      </div>
+      <div style="flex:1">
+        <div class="clarity-badge" style="color:${cur.color}">${clInfo.icon} ${cur.label}</div>
+      </div>`;
+
+    // 72h timeline bar
+    const bar=document.getElementById('ctBar');
+    bar.innerHTML='';
+    for(const h of data.hourly){
+      const seg=document.createElement('div');
+      seg.className='ct-seg';
+      seg.style.background=h.color;
+      seg.title=`+${h.offset}h: ${h.label} (${h.score})`;
+      bar.appendChild(seg);
+    }
+
+    // Clears by
+    const clears=document.getElementById('ctClears');
+    if(data.clears_by){
+      const dt=new Date(data.clears_by);
+      const dayNames=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+      clears.innerHTML=`<span style="color:var(--green)">↗ Clearing →</span> <strong>${cur.label}</strong> now → <strong>Clean</strong> by ${dayNames[dt.getDay()]} ${dt.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'})}`;
+    } else if(cur.score <= 30){
+      clears.innerHTML=`<span style="color:var(--green)">✓ Conditions are clean</span>`;
+    } else {
+      clears.innerHTML=`<span style="color:var(--muted)">Not clearing within 72h — check back</span>`;
+    }
+
+    // Drivers
+    const dr=data.drivers;
+    document.getElementById('cdRows').innerHTML=`
+      <div class="cd-row"><span class="cd-icon">🌊</span><div class="cd-text"><strong>Waves:</strong> ${esc(dr.wave)}</div></div>
+      <div class="cd-row"><span class="cd-icon">💨</span><div class="cd-text"><strong>Wind:</strong> ${esc(dr.wind)}</div></div>
+      <div class="cd-row"><span class="cd-icon">🌧️</span><div class="cd-text"><strong>Rain:</strong> ${esc(dr.rain)}</div></div>
+      <div class="cd-row"><span class="cd-icon">🌊</span><div class="cd-text"><strong>Tides:</strong> ${esc(dr.tide)}</div></div>`;
+
+    document.getElementById('clarityLoad').classList.add('hidden');
+    document.getElementById('clarityContent').classList.remove('hidden');
+    clarityLoaded=true;
+
+    loadClarityReports();
+  }catch(e){
+    document.getElementById('clarityLoad').innerHTML=`<div style="color:#ef4444;padding:40px;text-align:center">⚠ ${e.message}</div>`;
+  }
+}
+
+async function loadClarityReports(){
+  try{
+    const reports=await api('/api/clarity/reports');
+    const feed=document.getElementById('crFeed');
+    if(!reports.length){
+      feed.innerHTML='<div class="cr-feed-label">Live Reports</div><div style="font-size:.78rem;color:var(--muted);padding:8px 0">No reports yet — be the first!</div>';
+      return;
+    }
+    let html='<div class="cr-feed-label">Live Reports</div>';
+    for(const r of reports){
+      const cl=CL_LEVELS.find(c=>c.label===r.clarity)||CL_LEVELS[2];
+      html+=`<div class="cr-entry">
+        <div class="cr-dot" style="background:${cl.color}"></div>
+        <div class="cr-who">${esc(r.angler_name)}</div>
+        <div class="cr-where">${esc(r.spot)}</div>
+        <div style="font-weight:700;color:${cl.color};font-size:.75rem">${r.clarity}</div>
+        <div class="cr-when">${r.report_time}</div>
+      </div>`;
+      if(r.notes) html+=`<div style="font-size:.72rem;color:#7aa8cc;font-style:italic;padding:0 0 6px 20px;border-bottom:1px solid var(--border)">${esc(r.notes)}</div>`;
+    }
+    feed.innerHTML=html;
+  }catch(e){}
+}
+
+// Submit clarity report
+document.getElementById('crSubmit')?.addEventListener('click',async()=>{
+  const fb=document.getElementById('crFB'),btn=document.getElementById('crSubmit');
+  fb.innerHTML='';
+  if(!anglerName){fb.innerHTML='<div class="fb-err">Set your name in the Journal tab first.</div>';return;}
+  const spot=document.getElementById('crSpot').value;
+  const crDate=document.getElementById('crDate').value;
+  const crTime=document.getElementById('crTime').value;
+  if(!spot||!selectedClarity){fb.innerHTML='<div class="fb-err">Pick a spot and clarity level.</div>';return;}
+  if(!crDate||!crTime){fb.innerHTML='<div class="fb-err">Date and time are required.</div>';return;}
+  btn.disabled=true;btn.textContent='Submitting…';
+  try{
+    const res=await fetch('/api/clarity/reports',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({angler_name:anglerName,spot,clarity:selectedClarity,report_date:crDate,report_time:crTime,notes:document.getElementById('crNotes').value.trim()})});
+    if(!res.ok){const e=await res.json();throw new Error(e.error||'Server error');}
+    fb.innerHTML='<div class="fb-ok">✓ Report submitted! Thanks for the intel.</div>';
+    document.getElementById('crNotes').value='';
+    document.querySelectorAll('.cl-opt').forEach(x=>{x.classList.remove('sel');x.style.background='';});
+    selectedClarity='';
+    loadClarityReports();
+    setTimeout(()=>fb.innerHTML='',5000);
+  }catch(e){fb.innerHTML=`<div class="fb-err">${e.message}</div>`;}
+  finally{btn.disabled=false;btn.textContent='Submit Report';}
+});
+
+// ── Boot ──────────────────────────────────────────────────────────────────────
+fetchEvents(currentDays);
+loadFeed();
+</script>
+</body>
+</html>

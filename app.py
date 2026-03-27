@@ -88,7 +88,18 @@ def api_forecast(date_str):
             noon_wind  = next((h for h in hourly if h["hour"] == 12), None)
             wind_mph   = noon_wind["wind_mph"] if noon_wind else None
             wind_deg   = noon_wind["wind_deg"] if noon_wind else None
-            outlook    = st.get_day_fishing_outlook(d, conditions.get("water_temp_f"), wind_mph, wind_deg)
+            # If no water temp for this date (future), use today's reading
+            water_temp = conditions.get("water_temp_f")
+            if water_temp is None and d > date.today():
+                try:
+                    today_cond = st.fetch_marine_conditions(date.today())
+                    water_temp = today_cond.get("water_temp_f")
+                    if water_temp is not None:
+                        conditions["water_temp_f"] = water_temp
+                        conditions["water_temp_latest"] = True
+                except Exception:
+                    pass
+            outlook    = st.get_day_fishing_outlook(d, water_temp, wind_mph, wind_deg)
             _cache[key] = {
                 "hereford":      hereford,
                 "cape_may":      cape_may,

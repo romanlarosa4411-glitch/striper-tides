@@ -430,15 +430,47 @@
       .swell-hover-banner .shb-val{font-size:.78rem}
       .swell-hover-banner .shb-sep{height:20px}
 
+      /* Swell selects — override inline min-width */
+      #surfSpotSel,#surfModelSel{min-width:0!important;width:auto!important;font-size:.72rem!important;padding:5px 8px!important}
+      .swell-header{flex-direction:column;align-items:flex-start}
+
+      /* Hover banner items — shrink */
+      .swell-hover-banner .shb-item{min-width:50px}
+
       /* Swell table — tighter */
       .sf-table{padding:2px 0}
+      .sf-grid{min-width:0!important}
       .sf-row-label{font-size:.6rem;padding:6px 6px}
       .sf-cell{padding:6px 2px;font-size:.68rem}
       .sf-wave{font-size:.72rem}
+      .sf-wind-tag{font-size:.5rem;padding:2px 4px}
 
-      /* Outlook compact */
+      /* Calendar nav — tighter */
+      .cal-nav h2{min-width:120px;font-size:.9rem}
+
+      /* Spot tide names — narrower */
+      .spot-tide-name{min-width:72px;font-size:.6rem;padding:4px 6px}
+      .spot-tide-events{padding:4px 5px;gap:3px}
+
+      /* Prevent any horizontal overflow */
+      body{overflow-x:hidden}
+      .wrap{overflow-x:hidden}
+
+      /* Outlook compact — prevent text clipping */
+      .outlook-wrap{padding:10px 10px 4px}
       .outlook-card{padding:10px 12px}
-      .outlook-text{font-size:.78rem}
+      .outlook-text{font-size:.74rem;overflow-wrap:break-word;word-break:break-word}
+      .outlook-body{padding:9px 10px}
+
+      /* Chart + wind row — tighter padding */
+      .chart-section{padding:12px 8px 0}
+      .wind-row{padding:8px 8px 10px}
+      .wind-cell{min-width:44px}
+
+      /* Detail panel content — prevent overflow */
+      .detail-header{padding:12px 10px 8px}
+      .solar-line{font-size:.62rem;overflow-wrap:break-word;word-break:break-word}
+      .sol-legend{font-size:.62rem}
 
       /* Journal compact */
       .sstat{padding:8px 10px}

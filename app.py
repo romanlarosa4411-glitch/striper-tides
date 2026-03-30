@@ -44,6 +44,15 @@ def api_events():
     return jsonify(_cache[key])
 
 
+@app.route("/api/weather7day")
+def api_weather7day():
+    """7-day daily weather forecast for calendar overlay."""
+    key = _key("weather7day")
+    if key not in _cache:
+        _cache[key] = st.fetch_7day_weather()
+    return jsonify(_cache[key])
+
+
 @app.route("/api/chart")
 def api_chart():
     date_str = request.args.get("date")

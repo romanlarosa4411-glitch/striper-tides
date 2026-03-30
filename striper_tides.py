@@ -352,9 +352,10 @@ def get_solunar(d: date) -> list[dict]:
 # Wind: KWWD ASOS observations for past hours + NWS PHI forecast for future
 # Water temp: NOAA CO-OPS observed data from Cape May station (8536110)
 
-_NWS_HEADERS  = {"User-Agent": "StriperTidesApp/1.0 (contact: stripertides@local)"}
-_NWS_FORECAST = "https://api.weather.gov/gridpoints/PHI/63,33/forecast/hourly"
-_NWS_OBS_URL  = "https://api.weather.gov/stations/KWWD/observations"  # Cape May County Airport ASOS
+_NWS_HEADERS       = {"User-Agent": "StriperTidesApp/1.0 (contact: stripertides@local)"}
+_NWS_FORECAST      = "https://api.weather.gov/gridpoints/PHI/63,33/forecast/hourly"
+_NWS_FORECAST_DAILY = "https://api.weather.gov/gridpoints/PHI/63,33/forecast"
+_NWS_OBS_URL       = "https://api.weather.gov/stations/KWWD/observations"  # Cape May County Airport ASOS
 
 _WIND_DIR_DEG = {
     "N": 0, "NNE": 22, "NE": 45, "ENE": 67,
@@ -400,6 +401,7 @@ def fetch_marine_conditions(d: date) -> dict:
         hour_speeds: dict = defaultdict(list)
         hour_dirs:   dict = defaultdict(list)
         hour_gusts:  dict = defaultdict(list)
+        pressure_readings: list[tuple[datetime, float]] = []  # (dt, mb) for trend calc
 
         for feat in features:
             props = feat.get("properties", {})
@@ -414,6 +416,7 @@ def fetch_marine_conditions(d: date) -> dict:
             ws = props.get("windSpeed",     {}) or {}
             wd = props.get("windDirection", {}) or {}
             wg = props.get("windGust",      {}) or {}
+            bp = props.get("barometricPressure", {}) or {}
 
             if ws.get("value") is not None:
                 hour_speeds[h].append(ws["value"] * _KMH_TO_MPH)
@@ -421,6 +424,8 @@ def fetch_marine_conditions(d: date) -> dict:
                 hour_dirs[h].append(wd["value"])
             if wg.get("value") is not None:
                 hour_gusts[h].append(wg["value"] * _KMH_TO_MPH)
+            if bp.get("value") is not None:
+                pressure_readings.append((dt_local, bp["value"] / 100.0))  # Pa → mb
 
         for h in range(24):
             if hour_speeds[h]:
@@ -489,24 +494,150 @@ def fetch_marine_conditions(d: date) -> dict:
     except Exception:
         pass
 
-    return {"hourly": hourly, "water_temp_f": water_temp_f}
+    # ── Pressure trend: 6-hour window ────────────────────────────────────
+    # Positive drop_mb means pressure is falling (good for fishing)
+    pressure_trend_mb = None
+    if pressure_readings:
+        pressure_readings.sort(key=lambda x: x[0])
+        latest_dt, latest_mb = pressure_readings[-1]
+        # Find reading closest to 6 hours before the latest
+        target_dt = latest_dt - timedelta(hours=6)
+        earlier = [(dt, mb) for dt, mb in pressure_readings if dt <= target_dt]
+        if earlier:
+            _, earlier_mb = earlier[-1]
+            pressure_trend_mb = round(earlier_mb - latest_mb, 1)  # positive = falling
+
+    return {
+        "hourly": hourly,
+        "water_temp_f": water_temp_f,
+        "pressure_trend_mb": pressure_trend_mb,
+    }
+
+
+def fetch_7day_weather() -> dict:
+    """
+    Fetch NWS 7-day daily forecast for calendar display.
+    Returns dict keyed by date string → {high_f, low_f, wind_dir, wind_speed, short_forecast, icon}.
+    """
+    try:
+        resp = requests.get(_NWS_FORECAST_DAILY, headers=_NWS_HEADERS, timeout=15)
+        resp.raise_for_status()
+        periods = resp.json()["properties"]["periods"]
+        by_day: dict[str, dict] = {}
+        for p in periods:
+            dt_start = datetime.fromisoformat(p["startTime"])
+            day_str  = dt_start.date().isoformat()
+            is_day   = p.get("isDaytime", True)
+            short    = p.get("shortForecast", "")
+
+            # Map NWS shortForecast to a simple icon
+            sl = short.lower()
+            if "snow" in sl:
+                icon = "🌨️"
+            elif "thunder" in sl or "storm" in sl:
+                icon = "⛈️"
+            elif "rain" in sl or "shower" in sl:
+                icon = "🌧️"
+            elif "cloud" in sl or "overcast" in sl:
+                icon = "☁️"
+            elif "partly" in sl:
+                icon = "⛅"
+            elif "fog" in sl:
+                icon = "🌫️"
+            elif "wind" in sl:
+                icon = "💨"
+            else:
+                icon = "☀️"
+
+            if day_str not in by_day:
+                by_day[day_str] = {}
+
+            if is_day:
+                by_day[day_str]["high_f"] = p.get("temperature")
+                by_day[day_str]["wind_dir"] = p.get("windDirection", "")
+                ws = p.get("windSpeed", "")
+                speeds = [int(x) for x in ws.replace(" mph", "").split(" to ") if x.isdigit()]
+                by_day[day_str]["wind_speed"] = max(speeds) if speeds else None
+                by_day[day_str]["short_forecast"] = short
+                by_day[day_str]["icon"] = icon
+            else:
+                by_day[day_str]["low_f"] = p.get("temperature")
+                # If no daytime period yet (tonight), still set icon
+                if "icon" not in by_day[day_str]:
+                    by_day[day_str]["icon"] = icon
+                    by_day[day_str]["short_forecast"] = short
+
+        return by_day
+    except Exception:
+        return {}
+
+
+def fetch_water_temp_trend(lookback_days: int = 3) -> dict:
+    """
+    Fetch water temp from NOAA CO-OPS for the past N days and calculate trend.
+    Returns {"current_f": float, "prev_f": float, "change_f": float} or empty dict.
+    """
+    try:
+        end_d   = date.today()
+        start_d = end_d - timedelta(days=lookback_days)
+        resp = requests.get(
+            NOAA_URL,
+            params={
+                "station":    CAPE_MAY_STATION,
+                "product":    "water_temperature",
+                "time_zone":  "lst_ldt",
+                "units":      "english",
+                "format":     "json",
+                "begin_date": start_d.strftime("%Y%m%d"),
+                "end_date":   end_d.strftime("%Y%m%d"),
+            },
+            timeout=15,
+        )
+        data = resp.json()
+        if "data" not in data or not data["data"]:
+            return {}
+        # Group readings by date, average each day
+        from collections import defaultdict as _dd
+        by_day: dict[str, list[float]] = _dd(list)
+        for rec in data["data"]:
+            if rec.get("v") in (None, ""):
+                continue
+            day_key = rec["t"][:10]
+            by_day[day_key].append(float(rec["v"]))
+        if len(by_day) < 2:
+            return {}
+        sorted_days = sorted(by_day.keys())
+        current_avg = sum(by_day[sorted_days[-1]]) / len(by_day[sorted_days[-1]])
+        oldest_avg  = sum(by_day[sorted_days[0]])  / len(by_day[sorted_days[0]])
+        change = round(current_avg - oldest_avg, 1)
+        return {
+            "current_f": round(current_avg, 1),
+            "prev_f":    round(oldest_avg, 1),
+            "change_f":  change,
+        }
+    except Exception:
+        return {}
 
 
 # ── Core data logic ───────────────────────────────────────────────────────────
 
-def _score_event(range_pct: float, tod: str, moon_phase: str, month: int) -> int:
+def _score_event(range_pct: float, tod: str, moon_phase: str, month: int,
+                  wind_mph: float = None, wind_deg: float = None,
+                  pressure_trend_mb: float = None,
+                  temp_change_f: float = None) -> int:
     """
-    Score a tide event 0–100 across four research-backed factors.
+    Score a tide event 0–135 (normalized to 0–100) across seven factors.
 
-    Tidal range rank  (0–35): bigger daily swings push more bait through inlets and
-                               create stronger rips at the ferry terminal.
-    Time of day       (0–30): low-light windows (dawn/dusk) are peak ambush time;
-                               stripers retreat deeper during bright midday.
-    Moon phase        (0–15): new & full moons produce spring tides (bigger ranges)
-                               and correlate with more aggressive feeding behavior.
-    Season            (0–20): South Jersey spring run peaks April–May (post-spawn
-                               fish); fall run peaks Oct–Nov (migration south).
-                               Fish are lethargic in midsummer heat and midwinter cold.
+    Base factors (unchanged):
+      Tidal range rank  (0–35): bigger daily swings push more bait through inlets.
+      Time of day       (0–30): low-light windows (dawn/dusk) are peak ambush time.
+      Moon phase        (0–15): new & full moons = spring tides + aggressive feeding.
+      Season            (0–20): May + Oct-Nov peak, Jan/Jul dead.
+
+    Boost-only factors (new — only add points, never subtract):
+      Wind              (0–15): NE/E calm = 15, NW/N calm = 12, calm any = 8, else 0.
+      Pressure trend    (0–10): Falling fast >3mb/6h = 10, slow 1-3mb = 6, else 0.
+      Temp trend        (0–10): Rising 3°F+/3d in transition months = 10, 1-2°F = 6, else 0.
     """
     range_pts = round(range_pct * 35)
 
@@ -519,13 +650,6 @@ def _score_event(range_pct: float, tod: str, moon_phase: str, month: int) -> int
         "Waxing Crescent": 5, "Waning Crescent": 5,
     }.get(moon_phase, 5)
 
-    # South Jersey research-backed season weights:
-    #   May = true spring peak (bunker arrive, migratory fish in force)
-    #   April = building spring run (holdovers leaving, migrants arriving)
-    #   October-November = peak fall run (biggest fish of year; Nov best for south NJ)
-    #   September = early fall (fish fattening up, action picking up)
-    #   March = very cold water, first scouts only
-    #   August = possible blitzes on bunker return, still mostly offshore
     season_pts = {
         5: 20, 4: 18,   # spring: May peak, April building
         10: 20, 11: 20, # fall peak (both critical months South Jersey)
@@ -535,7 +659,37 @@ def _score_event(range_pct: float, tod: str, moon_phase: str, month: int) -> int
         1: 0,  7: 0,    # January and July: fish are gone
     }.get(month, 0)
 
-    return range_pts + tod_pts + moon_pts + season_pts
+    # ── Wind boost (0-15) — boost only, no penalty ────────────────────────
+    wind_pts = 0
+    if wind_mph is not None and wind_deg is not None:
+        card = ["N","NE","E","SE","S","SW","W","NW"][round(wind_deg / 45) % 8]
+        if card in ("NE", "E") and wind_mph <= 20:
+            wind_pts = 15
+        elif card in ("NW", "N") and wind_mph <= 18:
+            wind_pts = 12
+        elif wind_mph < 8:
+            wind_pts = 8
+
+    # ── Pressure trend boost (0-10) — falling = fish feeding ──────────────
+    pressure_pts = 0
+    if pressure_trend_mb is not None and pressure_trend_mb > 0:
+        if pressure_trend_mb > 3:
+            pressure_pts = 10
+        elif pressure_trend_mb >= 1:
+            pressure_pts = 6
+
+    # ── Temp trend boost (0-10) — rising temp in transition months ────────
+    temp_pts = 0
+    _TRANSITION_MONTHS = {3, 4, 5, 9, 10, 11, 12}
+    if temp_change_f is not None and temp_change_f > 0 and month in _TRANSITION_MONTHS:
+        if temp_change_f >= 3:
+            temp_pts = 10
+        elif temp_change_f >= 1:
+            temp_pts = 6
+
+    raw = range_pts + tod_pts + moon_pts + season_pts + wind_pts + pressure_pts + temp_pts
+    # Normalize from 0-135 scale to 0-100
+    return min(round(raw * 100 / 135), 100)
 
 
 
@@ -741,6 +895,39 @@ def get_events(days: int = 90) -> dict:
     n             = len(sorted_ranges)
     threshold     = sorted_ranges[int(n * BIG_SWING_PERCENTILE / 100)] if n else 4.0
 
+    # ── Fetch boost data (wind, pressure, temp trend) for near-term scoring ──
+    # Wind + pressure: available for ~7 days (NWS forecast) / today (observations)
+    # Temp trend: 3-day lookback, same value applies to all near-term events
+    boost_wind: dict[str, dict] = {}   # day_str → {hour → {mph, deg}}
+    boost_pressure_mb: float = None
+    boost_temp_change: float = None
+
+    # Fetch conditions for today + next 7 days (wind per hour)
+    forecast_end = min(today + timedelta(days=7), end_date)
+    for day_off in range((forecast_end - today).days + 1):
+        d_fc = today + timedelta(days=day_off)
+        try:
+            cond = fetch_marine_conditions(d_fc)
+            hourly_fc = cond.get("hourly", [])
+            wind_data = {}
+            for h in hourly_fc:
+                if h["wind_mph"] is not None and h["wind_deg"] is not None:
+                    wind_data[h["hour"]] = {"mph": h["wind_mph"], "deg": h["wind_deg"]}
+            if wind_data:
+                boost_wind[d_fc.isoformat()] = wind_data
+            # Pressure trend only from today's observations
+            if day_off == 0 and cond.get("pressure_trend_mb") is not None:
+                boost_pressure_mb = cond["pressure_trend_mb"]
+        except Exception:
+            pass
+
+    # Water temp trend (3-day lookback, applies to all events)
+    try:
+        temp_trend = fetch_water_temp_trend(3)
+        boost_temp_change = temp_trend.get("change_f")
+    except Exception:
+        pass
+
     # ── Score and collect events ─────────────────────────────────────────────
     events: list[dict] = []
 
@@ -767,7 +954,25 @@ def get_events(days: int = 90) -> dict:
 
             # Percentile rank of today's tidal range within the loaded window
             rng_pct = bisect.bisect_left(sorted_ranges, swing) / len(sorted_ranges)
-            score   = _score_event(rng_pct, tod, moon_label, d.month)
+
+            # Get boost data for this event's day/hour (if available)
+            ev_wind_mph, ev_wind_deg = None, None
+            day_wind = boost_wind.get(day_str)
+            if day_wind:
+                # Use wind at the event's hour
+                hw = day_wind.get(dt.hour)
+                if hw:
+                    ev_wind_mph, ev_wind_deg = hw["mph"], hw["deg"]
+
+            # Pressure trend only applies to today
+            ev_pressure = boost_pressure_mb if day_str == today.isoformat() else None
+
+            score = _score_event(
+                rng_pct, tod, moon_label, d.month,
+                wind_mph=ev_wind_mph, wind_deg=ev_wind_deg,
+                pressure_trend_mb=ev_pressure,
+                temp_change_f=boost_temp_change,
+            )
 
             if score < 35:
                 continue  # not compelling enough to surface on the calendar

@@ -93,6 +93,8 @@
     .day-num{font-size:.78rem;font-weight:600;color:var(--muted);line-height:1}
     .day.today .day-num{background:var(--accent);color:#fff;border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;font-size:.72rem}
     .day.clickable .day-num{color:var(--text)}
+    .day-weather{font-size:.58rem;color:var(--muted);line-height:1.2;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .day-weather .dw-icon{font-size:.7rem}
     .dots{display:flex;flex-wrap:wrap;gap:3px;margin-top:auto;padding-top:4px}
     .dot{width:7px;height:7px;border-radius:50%}
     .dot.rg{background:var(--rg);box-shadow:0 0 5px var(--rg-glow)}
@@ -416,6 +418,8 @@
       .cal-day{min-height:52px;padding:3px 2px;font-size:.7rem}
       .cal-dots{gap:1px}
       .cal-dot{width:5px;height:5px}
+      .day-weather{font-size:.5rem}
+      .day-weather .dw-icon{font-size:.6rem}
 
       /* Day detail compact */
       .detail-header{padding:14px 14px 10px}
@@ -517,7 +521,9 @@
 <div class="tab-bar">
   <div class="tab-bar-inner">
     <button class="tab active" data-tab="calendar"><span class="tab-full">📅 Tide Calendar</span><span class="tab-short">📅 Tides</span></button>
+    <!-- ARCHIVED: swell tab hidden for now
     <button class="tab" data-tab="swell"><span class="tab-full">🌊 Swell Report</span><span class="tab-short">🌊 Swell</span></button>
+    -->
     <button class="tab" data-tab="clarity"><span class="tab-full">💧 Water Clarity</span><span class="tab-short">💧 Clarity</span></button>
     <button class="tab" data-tab="journal"><span class="tab-full">📖 Fish Journal</span><span class="tab-short">📖 Journal</span></button>
     <div class="tab-spacer"></div>
@@ -606,8 +612,8 @@
     </div>
   </div>
 
-  <!-- ══ SWELL REPORT PANE ═════════════════════════════════════════════ -->
-  <div id="pane-swell" class="pane">
+  <!-- ══ SWELL REPORT PANE (ARCHIVED) ═════════════════════════════════ -->
+  <div id="pane-swell" class="pane" style="display:none">
     <div id="swellLoad" class="loading">
       <div class="spinner"></div><p>Fetching swell data…</p>
     </div>
@@ -849,7 +855,7 @@ const FLAMES = ['','·','🔥','🔥🔥','🔥🔥🔥','🔥🔥🔥🔥🔥']
 
 // ── State ────────────────────────────────────────────────────────────────────
 let allEvents=[], byDate={}, journalDates=new Set(), currentDays=90;
-let viewMonth=new Date(), selectedDate=null, tideChart=null, loadedDates=new Set();
+let viewMonth=new Date(), selectedDate=null, tideChart=null, loadedDates=new Set(), weatherByDate={};
 let anglerName=localStorage.getItem('anglerName')||'', biteQuality=0, feedSpot='';
 let swellChart=null, swellLoaded=false;
 viewMonth.setDate(1);
@@ -916,6 +922,9 @@ async function fetchEvents(days){
     } else {
       nextBestEl.innerHTML = '';
     }
+    // Fetch 7-day weather for calendar overlay
+    try{ weatherByDate = await api('/api/weather7day'); }catch(e){ weatherByDate={}; }
+
     document.getElementById('calLoad').classList.add('hidden');
     document.getElementById('calContent').classList.remove('hidden');
     renderCal();
@@ -965,6 +974,16 @@ function renderCal(){
     const div=document.createElement('div');
     div.className='day'+(other?' other':'')+(click?' clickable':'')+(ds===today?' today':'')+(ds===selectedDate?' sel':'');
     const n=document.createElement('div'); n.className='day-num'; n.textContent=num; div.appendChild(n);
+    // Weather overlay (icon + high temp + wind dir) for days with forecast data
+    const wx=weatherByDate[ds];
+    if(wx && !other){
+      const wd=document.createElement('div'); wd.className='day-weather';
+      const parts=[wx.icon||''];
+      if(wx.high_f!=null) parts.push(`${wx.high_f}°`);
+      if(wx.wind_dir) parts.push(wx.wind_dir);
+      wd.innerHTML=`<span class="dw-icon">${parts[0]}</span> ${parts.slice(1).join(' ')}`;
+      div.appendChild(wd);
+    }
     if(evs.length||hasJ){
       const dots=document.createElement('div'); dots.className='dots';
       const hasRG=evs.some(e=>e.quality==='really_good');

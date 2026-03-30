@@ -32,7 +32,7 @@ Hosted on Render.com, auto-deploys from `main` branch on GitHub (`romanlarosa441
 - **`striper_tides.py`** — Core engine. All data fetching (NOAA tides, NWS weather, NDBC buoys, Open-Meteo marine models), astronomical calculations (solar via Astral, lunar via ephem), scoring algorithms, and forecast logic. This is the brains — ~1500 lines.
 - **`app.py`** — Flask routes and API layer. Thin wrapper that calls into `striper_tides.py`, manages an in-memory daily cache (`_cache` dict keyed by date), and serves JSON endpoints. Also handles journal/clarity CRUD against SQLite.
 - **`db.py`** — SQLite setup. Two tables: `journal_entries` (fishing logs with auto-filled NOAA conditions) and `clarity_reports` (crowd-sourced water clarity). WAL mode, Row factory.
-- **`templates/index.html`** — Full SPA with embedded CSS + vanilla JS. Four tabs: Tide Calendar, Swell Report, Water Clarity, Fish Journal. Uses Chart.js for visualizations. ~2800+ lines.
+- **`templates/index.html`** — Full SPA with embedded CSS + vanilla JS. Four tabs: Tide Calendar, Swell Report, Water Clarity, Fish Journal. Uses Chart.js for visualizations. ~2000+ lines.
 
 ## Key External APIs
 

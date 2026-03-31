@@ -45,35 +45,91 @@ CAPE_MAY_STATION = "8536110"   # Cape May, NJ                 (ferry terminal)
 # Ferry   → Low tide:  Delaware Bay draining creates the famous Cape May
 #            Rips; eels and bait funnel through, triggering the bite.
 SPOT_CONFIG: dict[str, dict] = {
+    # ── Ocean / Inlet spots ──────────────────────────────────────────────────
     "Corsons Inlet": {
         "station_id":    "8535221",
         "station_name":  "Ludlam Bay",
         "tide_type":     "H",
+        "zone":          "ocean",
         "location_long": "Corsons Inlet — Ocean City / Sea Isle City, NJ",
     },
     "Townsends Inlet": {
         "station_id":    "8535309",
         "station_name":  "Townsend Sound",
         "tide_type":     "H",
+        "zone":          "ocean",
         "location_long": "Townsends Inlet — Avalon / Sea Isle City, NJ",
     },
     "Hereford Inlet": {
         "station_id":    HEREFORD_STATION,
         "station_name":  "West Wildwood, Grassy Sound",
         "tide_type":     "H",
+        "zone":          "ocean",
         "location_long": "Hereford Inlet — Wildwood / Stone Harbor, NJ",
     },
     "Cape May Inlet": {
         "station_id":    "8535901",
         "station_name":  "Cape May Harbor",
         "tide_type":     "H",
+        "zone":          "ocean",
         "location_long": "Cape May Inlet — Cold Spring / Cape May Point, NJ",
     },
     "Cape May Ferry Terminal": {
         "station_id":    CAPE_MAY_STATION,
         "station_name":  "Cape May ferry terminal",
         "tide_type":     "L",
+        "zone":          "ocean",
         "location_long": "Cape May Ferry Terminal — Delaware Bay Rips",
+    },
+    # ── Back Bay spots ───────────────────────────────────────────────────────
+    "Grassy Sound": {
+        "station_id":    "8535661",
+        "station_name":  "Nummy Island, Grassy Sound Channel",
+        "tide_type":     "H",
+        "zone":          "back_bay",
+        "location_long": "Grassy Sound — Nummy Island / Wildwood, NJ",
+    },
+    "Stone Harbor": {
+        "station_id":    "8535581",
+        "station_name":  "Stone Harbor, Great Channel",
+        "tide_type":     "H",
+        "zone":          "back_bay",
+        "location_long": "Stone Harbor — Great Channel / Hereford Inlet, NJ",
+    },
+    "Avalon Back Bay": {
+        "station_id":    "8535805",
+        "station_name":  "Swain Channel, Taylor Sound",
+        "tide_type":     "H",
+        "zone":          "back_bay",
+        "location_long": "Avalon Back Bay — Swain Channel / Taylor Sound, NJ",
+    },
+    "Sea Isle Back Bay": {
+        "station_id":    "8535357",
+        "station_name":  "Stites Sound",
+        "tide_type":     "H",
+        "zone":          "back_bay",
+        "location_long": "Sea Isle Back Bay — Stites Sound, NJ",
+    },
+    "Townsends Back Bay": {
+        "station_id":    "8535451",
+        "station_name":  "Long Reach, Ingram Thorofare",
+        "tide_type":     "H",
+        "zone":          "back_bay",
+        "location_long": "Townsends Back Bay — Ingram Thorofare, NJ",
+    },
+    "Cape May Back Bay": {
+        "station_id":    "8535901",
+        "station_name":  "Cape May Harbor",
+        "tide_type":     "H",
+        "zone":          "back_bay",
+        "location_long": "Cape May Back Bay — Cape May Harbor, NJ",
+    },
+    "The Thorofare": {
+        "station_id":    "8535695",
+        "station_name":  "Old Turtle Thorofare, RR. bridge",
+        "tide_type":     "H",
+        "zone":          "back_bay",
+        "location_long": "The Thorofare — Old Turtle Thorofare / Wildwood, NJ",
     },
 }
 

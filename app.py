@@ -30,7 +30,12 @@ def _key(prefix: str, **kw) -> str:
 
 @app.route("/")
 def index():
-    return render_template("index.html", spots=SPOTS)
+    # Build spot metadata for the template (name, zone)
+    spot_meta = []
+    for name in SPOTS:
+        cfg = st.SPOT_CONFIG.get(name, {})
+        spot_meta.append({"name": name, "zone": cfg.get("zone", "ocean")})
+    return render_template("index.html", spots=SPOTS, spot_meta=spot_meta)
 
 
 # ── Tide calendar API ──────────────────────────────────────────────────────────

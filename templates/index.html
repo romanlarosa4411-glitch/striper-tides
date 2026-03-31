@@ -218,11 +218,29 @@
     .lb-fish{font-weight:800;color:var(--accent2)}
     .lb-bite{font-size:.7rem;color:var(--muted)}
 
-    /* spot filters */
+    /* spot filters (journal) */
     .spot-filters{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px}
     .spot-pill{background:var(--surf);border:1px solid var(--border);border-radius:20px;padding:5px 12px;font-size:.75rem;font-weight:600;cursor:pointer;color:var(--muted);font-family:inherit;transition:all .13s}
     .spot-pill.active{background:var(--accent);border-color:var(--accent);color:#fff}
     .spot-pill:hover:not(.active){border-color:var(--border2);color:var(--text)}
+
+    /* spot selector (calendar) */
+    .spot-selector{margin-bottom:16px;background:var(--card);border:1px solid var(--border);border-radius:13px;padding:12px 14px}
+    .spot-selector-head{display:flex;align-items:center;justify-content:space-between;cursor:pointer}
+    .spot-selector-title{font-size:.78rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+    .spot-selector-arrow{font-size:.7rem;color:var(--muted);transition:transform .2s}
+    .spot-selector-head.open .spot-selector-arrow{transform:rotate(90deg)}
+    .spot-selector-body{display:none;margin-top:10px}
+    .spot-selector-body.open{display:block}
+    .spot-zone-label{font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin:8px 0 6px;opacity:.7}
+    .spot-zone-label:first-child{margin-top:0}
+    .spot-check-grid{display:flex;flex-wrap:wrap;gap:6px}
+    .spot-check{display:flex;align-items:center;gap:5px;background:var(--surf);border:1px solid var(--border);border-radius:8px;padding:5px 10px;font-size:.72rem;font-weight:600;color:var(--muted);cursor:pointer;transition:all .13s;user-select:none}
+    .spot-check.active{background:var(--accent);border-color:var(--accent);color:#fff}
+    .spot-check:hover:not(.active){border-color:var(--border2);color:var(--text)}
+    .spot-selector-actions{display:flex;gap:8px;margin-top:10px}
+    .spot-selector-actions button{background:none;border:none;color:var(--accent);font-size:.68rem;font-weight:700;cursor:pointer;padding:0;font-family:inherit}
+    .spot-selector-actions button:hover{text-decoration:underline}
     .feed-label{font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:12px}
 
     /* session cards */
@@ -578,6 +596,23 @@
     </div>
     <div id="calContent" class="hidden">
       <div id="waterTempBar" class="water-temp-bar hidden"></div>
+      <!-- Spot selector -->
+      <div class="spot-selector" id="spotSelector">
+        <div class="spot-selector-head" id="spotSelectorHead" onclick="toggleSpotSelector()">
+          <span class="spot-selector-title">📍 My Spots <span id="spotCount"></span></span>
+          <span class="spot-selector-arrow">&#9654;</span>
+        </div>
+        <div class="spot-selector-body" id="spotSelectorBody">
+          <div class="spot-zone-label">Ocean / Inlet</div>
+          <div class="spot-check-grid" id="spotCheckOcean"></div>
+          <div class="spot-zone-label">Back Bay</div>
+          <div class="spot-check-grid" id="spotCheckBay"></div>
+          <div class="spot-selector-actions">
+            <button onclick="selectAllSpots()">Select All</button>
+            <button onclick="clearAllSpots()">Clear All</button>
+          </div>
+        </div>
+      </div>
       <div id="topDaysCard"></div>
       <div class="cal-nav">
         <button class="cal-nav-btn" id="prevMo">&#8249;</button>
@@ -911,6 +946,114 @@ let anglerName=localStorage.getItem('anglerName')||'', biteQuality=0, feedSpot='
 let swellChart=null, swellLoaded=false;
 viewMonth.setDate(1);
 
+// ── Spot selector (persisted in localStorage) ─────────────────────────────
+const SPOT_META = {{ spot_meta|tojson }};
+const ALL_SPOT_NAMES = SPOT_META.map(s=>s.name);
+let _selectedSpots = JSON.parse(localStorage.getItem('selectedSpots')||'null') || ALL_SPOT_NAMES.slice();
+
+function _saveSpots(){ localStorage.setItem('selectedSpots', JSON.stringify(_selectedSpots)); }
+
+function initSpotSelector(){
+  const oceanGrid=document.getElementById('spotCheckOcean');
+  const bayGrid=document.getElementById('spotCheckBay');
+  oceanGrid.innerHTML=''; bayGrid.innerHTML='';
+  for(const s of SPOT_META){
+    const el=document.createElement('div');
+    el.className='spot-check'+(_selectedSpots.includes(s.name)?' active':'');
+    el.textContent=s.name;
+    el.dataset.spot=s.name;
+    el.addEventListener('click',()=>{
+      if(_selectedSpots.includes(s.name)){
+        _selectedSpots=_selectedSpots.filter(x=>x!==s.name);
+        el.classList.remove('active');
+      }else{
+        _selectedSpots.push(s.name);
+        el.classList.add('active');
+      }
+      _saveSpots(); _onSpotsChanged();
+    });
+    if(s.zone==='back_bay') bayGrid.appendChild(el);
+    else oceanGrid.appendChild(el);
+  }
+  _updateSpotCount();
+}
+
+function toggleSpotSelector(){
+  const head=document.getElementById('spotSelectorHead');
+  const body=document.getElementById('spotSelectorBody');
+  head.classList.toggle('open'); body.classList.toggle('open');
+}
+
+function selectAllSpots(){
+  _selectedSpots=ALL_SPOT_NAMES.slice(); _saveSpots();
+  document.querySelectorAll('.spot-check').forEach(el=>el.classList.add('active'));
+  _onSpotsChanged();
+}
+
+function clearAllSpots(){
+  _selectedSpots=[]; _saveSpots();
+  document.querySelectorAll('.spot-check').forEach(el=>el.classList.remove('active'));
+  _onSpotsChanged();
+}
+
+function _updateSpotCount(){
+  document.getElementById('spotCount').textContent=`(${_selectedSpots.length}/${ALL_SPOT_NAMES.length})`;
+}
+
+function _filterEventsBySpots(events){
+  if(_selectedSpots.length===ALL_SPOT_NAMES.length) return events;
+  return events.filter(e=>_selectedSpots.includes(e.location));
+}
+
+function _onSpotsChanged(){
+  _updateSpotCount();
+  // Rebuild byDate from filtered events
+  byDate={};
+  const filtered=_filterEventsBySpots(allEvents);
+  for(const e of filtered){ if(!byDate[e.date])byDate[e.date]=[]; byDate[e.date].push(e); }
+  // Rebuild top days
+  _rebuildTopDays();
+  renderCal();
+  // If a day is selected, re-render its events
+  if(selectedDate){
+    const evs=byDate[selectedDate]||[];
+    renderEvents(evs);
+  }
+}
+
+function _rebuildTopDays(){
+  const today=todayStr();
+  const filtered=_filterEventsBySpots(allEvents);
+  const upcoming=filtered.filter(e=>e.date>=today&&(e.quality==='really_good'||e.quality==='good'));
+  const bestByDate={};
+  for(const e of upcoming){
+    if(!bestByDate[e.date]||e.score>bestByDate[e.date].score) bestByDate[e.date]=e;
+  }
+  const topDays=Object.values(bestByDate).sort((a,b)=>b.score-a.score).slice(0,5);
+  const topEl=document.getElementById('topDaysCard');
+  if(topDays.length){
+    let html='<div class="top-days"><div class="top-days-title">Top upcoming days</div>';
+    topDays.forEach((ev,i)=>{
+      const bd=new Date(ev.date+'T12:00:00');
+      const dayLabel=bd.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
+      const dotClass=ev.quality==='really_good'?'rg':'gd';
+      const detail=`${ev.location} · ${ev.time_12h||ev.time} · ${ev.daily_range}ft swing`;
+      html+=`<div class="top-day" onclick="selectDay('${ev.date}')">
+        <span class="top-day-rank">${i+1}</span>
+        <span class="top-day-dot ${dotClass}"></span>
+        <div class="top-day-info">
+          <div class="top-day-date">${dayLabel}</div>
+          <div class="top-day-detail">${detail}</div>
+        </div>
+        <span class="top-day-score">${ev.score}/100</span>
+        <span class="top-day-arrow">›</span>
+      </div>`;
+    });
+    html+='</div>';
+    topEl.innerHTML=html;
+  }else{ topEl.innerHTML=''; }
+}
+
 // ── Helpers ──────────────────────────────────────────────────────────────────
 const toHour = s => { const [h,m]=s.split(':').map(Number); return h+m/60; };
 const todayStr = () => new Date().toISOString().slice(0,10);
@@ -947,48 +1090,19 @@ async function fetchEvents(days){
   try{
     const data = await api(`/api/events?days=${days}`);
     allEvents=data.events; byDate={}; loadedDates=new Set();
-    for(const e of allEvents){ if(!byDate[e.date])byDate[e.date]=[]; byDate[e.date].push(e); }
+    // Filter events by selected spots, then build byDate index
+    const filtered=_filterEventsBySpots(allEvents);
+    for(const e of filtered){ if(!byDate[e.date])byDate[e.date]=[]; byDate[e.date].push(e); }
     // Mark all dates in the loaded window as clickable
     const rangeStart=new Date(); rangeStart.setHours(0,0,0,0);
     for(let i=0;i<days;i++){
       const d=new Date(rangeStart); d.setDate(d.getDate()+i);
       loadedDates.add(d.toISOString().slice(0,10));
     }
-    // Build "Top Days" — best upcoming days by highest score, deduped by date
-    const today = todayStr();
-    const upcoming = allEvents.filter(e => e.date >= today && (e.quality === 'really_good' || e.quality === 'good'));
-    // Dedupe: keep highest-scored event per date
-    const bestByDate = {};
-    for(const e of upcoming){
-      if(!bestByDate[e.date] || e.score > bestByDate[e.date].score) bestByDate[e.date] = e;
-    }
-    // Sort by score descending, take top 5
-    const topDays = Object.values(bestByDate).sort((a,b) => b.score - a.score).slice(0, 5);
-    const topEl = document.getElementById('topDaysCard');
-    if(topDays.length) {
-      let html = '<div class="top-days"><div class="top-days-title">Top upcoming days</div>';
-      topDays.forEach((ev, i) => {
-        const bd = new Date(ev.date + 'T12:00:00');
-        const dayLabel = bd.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
-        const dotClass = ev.quality === 'really_good' ? 'rg' : 'gd';
-        const detail = `${ev.location} · ${ev.time_12h || ev.time} · ${ev.daily_range}ft swing`;
-        html += `
-          <div class="top-day" onclick="selectDay('${ev.date}')">
-            <span class="top-day-rank">${i+1}</span>
-            <span class="top-day-dot ${dotClass}"></span>
-            <div class="top-day-info">
-              <div class="top-day-date">${dayLabel}</div>
-              <div class="top-day-detail">${detail}</div>
-            </div>
-            <span class="top-day-score">${ev.score}/100</span>
-            <span class="top-day-arrow">›</span>
-          </div>`;
-      });
-      html += '</div>';
-      topEl.innerHTML = html;
-    } else {
-      topEl.innerHTML = '';
-    }
+    // Init spot selector UI
+    initSpotSelector();
+    // Build top days (uses filtered events)
+    _rebuildTopDays();
     // Fetch 7-day weather for calendar overlay
     try{ weatherByDate = await api('/api/weather7day'); }catch(e){ weatherByDate={}; }
 
@@ -1343,33 +1457,46 @@ function renderSpotTides(allSpots){
   const gridExtra=document.getElementById('spotTidesGridExtra');
   grid.innerHTML='';
   gridExtra.innerHTML='';
-  const spotOrder=['Corsons Inlet','Townsends Inlet','Hereford Inlet','Cape May Inlet','Cape May Ferry Terminal'];
-  // Default spot = Cape May Inlet (or first available)
-  const defaultSpot = 'Cape May Inlet';
 
-  function spotRowHtml(name, spot){
+  // Only show spots the user has selected
+  const selectedSet=new Set(_selectedSpots);
+  const oceanSpots=SPOT_META.filter(s=>s.zone==='ocean'&&selectedSet.has(s.name));
+  const baySpots=SPOT_META.filter(s=>s.zone==='back_bay'&&selectedSet.has(s.name));
+  const orderedSpots=[...oceanSpots,...baySpots];
+
+  if(!orderedSpots.length){
+    wrap.classList.add('hidden'); return;
+  }
+
+  // Default: show first selected spot in main grid, rest in extra
+  const defaultSpot=orderedSpots[0].name;
+
+  function spotRowHtml(name, spot, zone){
     const evHtml=spot.events.map(ev=>{
       const cls=ev.is_target?`target-${spot.tide_type==='High'?'H':'L'}`:'other';
       return `<span class="spot-tide-ev ${cls}">${ev.is_target?'⭐ ':''}${ev.type} ${ev.time_12} · ${ev.height}ft</span>`;
     }).join('');
+    const zoneTag=zone==='back_bay'?'<span style="font-size:.55rem;background:var(--surf);border-radius:4px;padding:1px 5px;margin-left:4px;color:var(--muted)">BAY</span>':'';
     return `<div class="spot-tide-row">
-      <div class="spot-tide-name">${esc(name)}</div>
+      <div class="spot-tide-name">${esc(name)}${zoneTag}</div>
       <div class="spot-tide-events">${evHtml||'<span style="font-size:.7rem;color:var(--muted);padding:4px">no data</span>'}</div>
     </div>`;
   }
 
-  for(const name of spotOrder){
-    const spot=allSpots[name]; if(!spot) continue;
-    if(name === defaultSpot){
-      grid.insertAdjacentHTML('beforeend', spotRowHtml(name, spot));
-    } else {
-      gridExtra.insertAdjacentHTML('beforeend', spotRowHtml(name, spot));
+  for(const s of orderedSpots){
+    const spot=allSpots[s.name]; if(!spot) continue;
+    if(s.name===defaultSpot){
+      grid.insertAdjacentHTML('beforeend', spotRowHtml(s.name, spot, s.zone));
+    }else{
+      gridExtra.insertAdjacentHTML('beforeend', spotRowHtml(s.name, spot, s.zone));
     }
   }
   // Reset toggle state
+  const hasExtra=orderedSpots.length>1;
   document.getElementById('spotTidesExtra').classList.add('hidden');
-  document.getElementById('spotTidesToggle').textContent = 'Show all spots ▾';
-  _allSpotsExpanded = false;
+  document.getElementById('spotTidesToggle').textContent=hasExtra?`Show all spots (${orderedSpots.length}) ▾`:'';
+  document.getElementById('spotTidesToggle').style.display=hasExtra?'':'none';
+  _allSpotsExpanded=false;
   wrap.classList.remove('hidden');
 }
 

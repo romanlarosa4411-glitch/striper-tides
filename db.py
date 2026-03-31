@@ -8,11 +8,20 @@ from pathlib import Path
 DB_PATH = Path(__file__).parent / "striper_tides.db"
 
 SPOTS = [
+    # Ocean / Inlet
     "Corsons Inlet",
     "Townsends Inlet",
     "Hereford Inlet",
     "Cape May Inlet",
     "Cape May Ferry Terminal",
+    # Back Bay
+    "Grassy Sound",
+    "Stone Harbor",
+    "Avalon Back Bay",
+    "Sea Isle Back Bay",
+    "Townsends Back Bay",
+    "Cape May Back Bay",
+    "The Thorofare",
 ]
 
 

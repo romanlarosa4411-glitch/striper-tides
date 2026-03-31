@@ -110,6 +110,36 @@
     .lsq.major{background:rgba(34,197,94,.6)}
     .lsq.minor{background:rgba(250,204,21,.5)}
 
+    /* ══ HOW IT WORKS (onboarding) ═══════════════════════════════════════ */
+    .how-it-works{background:var(--surf);border:1px solid var(--border);border-radius:10px;margin-bottom:16px;overflow:hidden}
+    .hiw-toggle{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;cursor:pointer;font-size:.78rem;font-weight:600;color:var(--muted);border:none;background:none;width:100%;font-family:inherit;transition:color .15s}
+    .hiw-toggle:hover{color:var(--text)}
+    .hiw-toggle .hiw-arrow{transition:transform .2s;font-size:.7rem}
+    .hiw-toggle.open .hiw-arrow{transform:rotate(90deg)}
+    .hiw-body{display:none;padding:0 16px 14px;font-size:.73rem;color:var(--muted);line-height:1.6}
+    .hiw-body.open{display:block}
+    .hiw-factors{display:grid;grid-template-columns:1fr 1fr;gap:6px 16px;margin-top:8px}
+    .hiw-factor{display:flex;align-items:center;gap:6px}
+    .hiw-bar{width:40px;height:5px;border-radius:3px;background:var(--border);overflow:hidden;flex-shrink:0}
+    .hiw-bar-fill{height:100%;border-radius:3px;background:var(--accent)}
+    .hiw-label{font-size:.68rem;color:var(--muted)}
+    .hiw-pct{font-size:.62rem;color:var(--accent2);font-weight:700;margin-left:auto;white-space:nowrap}
+
+    /* ══ TOP DAYS ════════════════════════════════════════════════════════ */
+    .top-days{display:flex;flex-direction:column;gap:6px;margin-bottom:18px}
+    .top-days-title{font-size:.78rem;font-weight:700;color:var(--muted);margin-bottom:4px;display:flex;align-items:center;gap:6px}
+    .top-day{display:flex;align-items:center;gap:10px;background:var(--surf);border:1px solid var(--border);border-radius:10px;padding:10px 14px;cursor:pointer;transition:all .15s}
+    .top-day:hover{background:var(--surf2);border-color:var(--border2);transform:translateY(-1px)}
+    .top-day-rank{font-size:.9rem;font-weight:900;color:var(--accent2);min-width:18px}
+    .top-day-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+    .top-day-dot.rg{background:var(--rg);box-shadow:0 0 5px var(--rg-glow)}
+    .top-day-dot.gd{background:var(--good);box-shadow:0 0 5px var(--good-glow)}
+    .top-day-info{flex:1;min-width:0}
+    .top-day-date{font-size:.82rem;font-weight:700}
+    .top-day-detail{font-size:.7rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .top-day-score{font-size:.8rem;font-weight:800;color:var(--muted)}
+    .top-day-arrow{color:var(--muted);font-size:1rem}
+
     /* ══ DAY DETAIL ═══════════════════════════════════════════════════════ */
     .detail{margin-top:20px;background:var(--surf);border:1px solid var(--border);border-radius:14px;overflow:hidden;animation:fadeUp .2s ease}
     @keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
@@ -386,12 +416,7 @@
     .water-temp-bar .wt-label{font-size:.72rem;color:var(--muted);font-weight:600}
     .water-temp-bar .wt-status{font-size:.75rem;font-weight:700;padding:3px 10px;border-radius:12px;margin-left:auto}
 
-    .next-best{background:linear-gradient(135deg,var(--surf) 0%,var(--surf2) 100%);border:1px solid var(--border);border-left:3px solid var(--rg);border-radius:10px;padding:12px 16px;margin-bottom:18px;cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:12px}
-    .next-best:hover{border-color:var(--rg);background:var(--surf2)}
-    .next-best-date{font-size:1rem;font-weight:900;white-space:nowrap}
-    .next-best-detail{font-size:.78rem;color:var(--muted);flex:1}
-    .next-best-detail strong{color:var(--text)}
-    .next-best-arrow{color:var(--muted);font-size:1.2rem}
+    /* (next-best replaced by top-days) */
 
     /* Spot tides toggle */
     .spot-tides-toggle{background:none;border:1px solid var(--border);border-radius:7px;color:var(--muted);padding:5px 12px;font-size:.68rem;font-weight:600;cursor:pointer;font-family:inherit;margin-bottom:8px;transition:all .15s}
@@ -485,6 +510,14 @@
       /* Journal compact */
       .sstat{padding:8px 10px}
       .sstat-num{font-size:1.2rem}
+
+      /* How it works — single column on mobile */
+      .hiw-factors{grid-template-columns:1fr}
+
+      /* Top days — tighter */
+      .top-day{padding:8px 10px;gap:8px}
+      .top-day-date{font-size:.76rem}
+      .top-day-detail{font-size:.65rem}
     }
   </style>
 </head>
@@ -545,7 +578,7 @@
     </div>
     <div id="calContent" class="hidden">
       <div id="waterTempBar" class="water-temp-bar hidden"></div>
-      <div id="nextBestCard"></div>
+      <div id="topDaysCard"></div>
       <div class="cal-nav">
         <button class="cal-nav-btn" id="prevMo">&#8249;</button>
         <h2 id="moLabel"></h2>
@@ -556,11 +589,29 @@
       </div>
       <div id="calGrid" class="cal-grid"></div>
       <div class="legend">
-        <span class="legend-item"><span class="ldot gd"></span>Good tide</span>
+        <span class="legend-item"><span class="ldot gd"></span>Good</span>
         <span class="legend-item"><span class="ldot rg"></span>Really Good</span>
-        <span class="legend-item"><span class="ldot jn"></span>Journal entry</span>
+        <span class="legend-item"><span class="ldot jn"></span>Journal</span>
         <span class="legend-item"><span class="lsq major"></span>Solunar major</span>
         <span class="legend-item"><span class="lsq minor"></span>Minor</span>
+      </div>
+      <div class="how-it-works">
+        <button class="hiw-toggle" onclick="this.classList.toggle('open');this.nextElementSibling.classList.toggle('open')">
+          <span>How does scoring work?</span>
+          <span class="hiw-arrow">&#9654;</span>
+        </button>
+        <div class="hiw-body">
+          Each tide event is scored 0–100 based on how good it is for striper fishing. Days with higher scores have more events with gold/teal dots. Tap any day to see the full breakdown.
+          <div class="hiw-factors">
+            <div class="hiw-factor"><div class="hiw-bar"><div class="hiw-bar-fill" style="width:74%"></div></div><span class="hiw-label">Tidal Range</span><span class="hiw-pct">26%</span></div>
+            <div class="hiw-factor"><div class="hiw-bar"><div class="hiw-bar-fill" style="width:63%"></div></div><span class="hiw-label">Time of Day</span><span class="hiw-pct">22%</span></div>
+            <div class="hiw-factor"><div class="hiw-bar"><div class="hiw-bar-fill" style="width:43%"></div></div><span class="hiw-label">Season</span><span class="hiw-pct">15%</span></div>
+            <div class="hiw-factor"><div class="hiw-bar"><div class="hiw-bar-fill" style="width:31%"></div></div><span class="hiw-label">Wind (boost)</span><span class="hiw-pct">11%</span></div>
+            <div class="hiw-factor"><div class="hiw-bar"><div class="hiw-bar-fill" style="width:31%"></div></div><span class="hiw-label">Moon Phase</span><span class="hiw-pct">11%</span></div>
+            <div class="hiw-factor"><div class="hiw-bar"><div class="hiw-bar-fill" style="width:20%"></div></div><span class="hiw-label">Pressure (boost)</span><span class="hiw-pct">7%</span></div>
+            <div class="hiw-factor"><div class="hiw-bar"><div class="hiw-bar-fill" style="width:20%"></div></div><span class="hiw-label">Temp Trend (boost)</span><span class="hiw-pct">7%</span></div>
+          </div>
+        </div>
       </div>
 
       <!-- DAY DETAIL -->
@@ -903,24 +954,40 @@ async function fetchEvents(days){
       const d=new Date(rangeStart); d.setDate(d.getDate()+i);
       loadedDates.add(d.toISOString().slice(0,10));
     }
-    // Find next best day (first upcoming really_good or good event)
+    // Build "Top Days" — best upcoming days by highest score, deduped by date
     const today = todayStr();
     const upcoming = allEvents.filter(e => e.date >= today && (e.quality === 'really_good' || e.quality === 'good'));
-    const nextBestEl = document.getElementById('nextBestCard');
-    if(upcoming.length) {
-      const best = upcoming[0];
-      const bd = new Date(best.date + 'T12:00:00');
-      const dayLabel = bd.toLocaleDateString('en-US',{weekday:'long',month:'short',day:'numeric'});
-      const stars = best.quality === 'really_good' ? '★★★' : '★★';
-      const reason = `${best.location} · ${best.time_12h || best.time} · ${best.daily_range}ft swing`;
-      nextBestEl.innerHTML = `
-        <div class="next-best" onclick="selectDay('${best.date}')">
-          <div><div class="next-best-date">${stars} ${dayLabel}</div>
-          <div class="next-best-detail"><strong>Next prime window</strong> — ${reason}</div></div>
-          <div class="next-best-arrow">›</div>
-        </div>`;
+    // Dedupe: keep highest-scored event per date
+    const bestByDate = {};
+    for(const e of upcoming){
+      if(!bestByDate[e.date] || e.score > bestByDate[e.date].score) bestByDate[e.date] = e;
+    }
+    // Sort by score descending, take top 5
+    const topDays = Object.values(bestByDate).sort((a,b) => b.score - a.score).slice(0, 5);
+    const topEl = document.getElementById('topDaysCard');
+    if(topDays.length) {
+      let html = '<div class="top-days"><div class="top-days-title">Top upcoming days</div>';
+      topDays.forEach((ev, i) => {
+        const bd = new Date(ev.date + 'T12:00:00');
+        const dayLabel = bd.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
+        const dotClass = ev.quality === 'really_good' ? 'rg' : 'gd';
+        const detail = `${ev.location} · ${ev.time_12h || ev.time} · ${ev.daily_range}ft swing`;
+        html += `
+          <div class="top-day" onclick="selectDay('${ev.date}')">
+            <span class="top-day-rank">${i+1}</span>
+            <span class="top-day-dot ${dotClass}"></span>
+            <div class="top-day-info">
+              <div class="top-day-date">${dayLabel}</div>
+              <div class="top-day-detail">${detail}</div>
+            </div>
+            <span class="top-day-score">${ev.score}/100</span>
+            <span class="top-day-arrow">›</span>
+          </div>`;
+      });
+      html += '</div>';
+      topEl.innerHTML = html;
     } else {
-      nextBestEl.innerHTML = '';
+      topEl.innerHTML = '';
     }
     // Fetch 7-day weather for calendar overlay
     try{ weatherByDate = await api('/api/weather7day'); }catch(e){ weatherByDate={}; }

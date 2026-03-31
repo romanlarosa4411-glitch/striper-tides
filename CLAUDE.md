@@ -38,15 +38,15 @@ Hosted on Render.com, auto-deploys from `main` branch on GitHub (`romanlarosa441
 
 | API | Purpose | Key Constants |
 |-----|---------|---------------|
-| NOAA CO-OPS | Tide predictions (hilo + hourly) | 5 station IDs in `SPOT_CONFIG` |
+| NOAA CO-OPS | Tide predictions (hilo + hourly) | 12 station IDs in `SPOT_CONFIG` (5 ocean + 7 back bay) |
 | NWS api.weather.gov | Wind observations (KWWD) + hourly forecast (PHI/63,33) | Grid point covers Cape May County |
 | NDBC Buoys | Real-time wave data | 44009 (Cape May), 44025 (LBI) |
 | Open-Meteo Marine | GFS/ECMWF wave model forecasts | `ncep_gfswave025`, `ecmwf_wam025` |
 
 ## Data Flow
 
-1. `get_events(days)` is the master function — scores every tidal event across a date range using `_score_event()` (tidal range 0-35, time of day 0-30, moon 0-15, season 0-20)
-2. `/api/forecast/<date>` assembles a full day view: hourly tides for all 5 spots, solunar windows, marine conditions, solar/moon data, fishing outlook
+1. `get_events(days)` is the master function — scores every tidal event across a date range using `_score_event()` with 7 factors (raw max 135, normalized 0–100): tidal range 0-35, time of day 0-30, season 0-20, moon 0-15, plus three **boost-only** factors (wind 0-15, pressure trend 0-10, temp trend 0-10) that only add points, never subtract
+2. `/api/forecast/<date>` assembles a full day view: hourly tides for all 12 spots, solunar windows, marine conditions, solar/moon data, fishing outlook
 3. `/api/surf?spot=X&model=Y` returns wave history + 7-day forecast from Open-Meteo (or wind-estimated fallback via "striper" model)
 4. Clarity model in `get_clarity_forecast()` estimates turbidity from wave energy, wind, tidal range, and rain
 
@@ -54,9 +54,13 @@ Hosted on Render.com, auto-deploys from `main` branch on GitHub (`romanlarosa441
 
 - **Caching**: `_cache` dict in app.py keys by `prefix:today:params`. Refreshes daily. No invalidation needed since forecasts change by day.
 - **Graceful degradation**: All API calls wrapped in try/except. Missing data (buoys offline, API down) returns partial results rather than errors.
-- **Subordinate stations**: Hereford, Corsons, Townsends don't have direct NOAA hourly data. `fetch_tides_hourly()` fetches from Cape May (8536110) and applies time/height offsets via cosine interpolation.
+- **Spot selector**: Users pick their spots via the "My Spots" selector on the Tides tab. Selection persists in `localStorage('selectedSpots')`. Calendar events, top days, chart datasets, and spot tides all filter by selection. Spots have a `zone` field (`"ocean"` or `"back_bay"`).
+- **Chart spot toggles**: Tide chart shows one spot by default. Toggle chips above the chart let users overlay additional spot curves. State resets per day. `_chartVisibleSpots` tracks which are on. `_rebuildTideChart()` updates without re-fetching.
+- **Subordinate stations**: Most back bay and some ocean spots don't have direct NOAA hourly data. `fetch_tides_hourly()` fetches from Cape May (8536110) and applies time/height offsets via cosine interpolation.
 - **Surf models**: Three sources — GFS and ECMWF via Open-Meteo, plus proprietary "Striper Tides" wind-driven estimation as fallback when buoys are down.
 - **Scoring thresholds**: `BIG_SWING_PERCENTILE = 50` (top half of tidal ranges). Water temp prime: 50-68°F. Spring peak: May. Fall peak: Oct-Nov.
+- **Boost-only scoring**: Wind, pressure trend, and temp trend factors only add points (never penalize). Wind boost uses NWS forecast (7-day range), pressure uses KWWD observations (today only), temp trend uses NDBC 3-day lookback (transition months only: Mar-May, Sep-Dec).
+- **Swell tab**: Currently archived/hidden. Code remains in template but tab button is commented out.
 
 ## Mobile Responsive
 
@@ -66,8 +70,9 @@ The app has a full mobile layout (`@media max-width: 600px`). Key mobile behavio
 - Swell table samples every 3h on mobile (8 cols) vs 6h on desktop (12 cols)
 - Day pills group by 1 day on mobile, 3 on desktop (`_getWindowDays()`)
 - Spot tides default to one spot with "Show all spots" toggle
-- Stats bar replaced with single "Next Best Day" card
+- Stats bar replaced with ranked "Top 5 Days" list
+- Chart spot toggles wrap across rows on small screens
 
 ## Geography
 
-All 5 fishing spots are in Cape May County, NJ. Coordinates center around 38.93°N, 74.86°W. Timezone is `America/New_York`. Surf spots (LBI, Ocean City, Avalon, Cape May) have different beach orientations affecting offshore wind classification.
+12 fishing spots in Cape May County, NJ (5 ocean/inlet + 7 back bay). Coordinates center around 38.93°N, 74.86°W. Timezone is `America/New_York`. Ocean spots: Corsons Inlet, Townsends Inlet, Hereford Inlet, Cape May Inlet, Cape May Point. Back bay spots: Grassy Sound, Stone Harbor, Avalon Back Bay, Sea Isle Back Bay, Townsends Back Bay, Cape May Back Bay, The Thorofare. Surf spots (LBI, Ocean City, Avalon, Cape May) have different beach orientations affecting offshore wind classification.

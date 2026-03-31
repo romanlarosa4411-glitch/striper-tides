@@ -24,13 +24,13 @@
 
     /* ══ HERO ══════════════════════════════════════════════════════════════ */
     .hero{position:relative;background:linear-gradient(180deg,#030c18 0%,#071628 60%,var(--bg) 100%);padding:24px 24px 0;overflow:hidden}
-    .hero-inner{max-width:1060px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;position:relative;z-index:2}
+    .hero-inner{max-width:1060px;margin:0 auto;display:flex;flex-direction:column;align-items:center;position:relative;z-index:2}
     .logo-row{display:flex;align-items:center;gap:10px}
-    .logo-icon{font-size:1.7rem;filter:drop-shadow(0 0 14px rgba(245,158,11,.65));animation:bobble 3.5s ease-in-out infinite}
+    .logo-img{width:120px;height:120px;border-radius:50%;object-fit:cover;filter:drop-shadow(0 0 14px rgba(245,158,11,.45))}
     @keyframes bobble{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
     .logo-text{font-size:1.35rem;font-weight:900;letter-spacing:-.5px;background:linear-gradient(135deg,#deeeff 0%,#60a5fa 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
     .logo-sub{font-size:.62rem;font-weight:500;color:var(--muted);letter-spacing:.14em;text-transform:uppercase;-webkit-text-fill-color:var(--muted);margin-top:1px}
-    .hero-actions{display:flex;align-items:center;gap:8px}
+    .hero-actions{display:flex;align-items:center;gap:8px;margin-top:8px}
     .hero-btn{background:var(--surf2);border:1px solid var(--border);color:var(--text);padding:7px 14px;border-radius:8px;cursor:pointer;font-size:.8rem;font-weight:600;font-family:inherit;transition:all .15s}
     .hero-btn:hover{background:var(--surf3);border-color:var(--border2)}
     .wave-wrap{position:relative;height:52px;margin-top:22px;overflow:hidden}
@@ -462,6 +462,7 @@
 
       /* Hero compact */
       .hero{padding:16px 14px 0}
+      .logo-img{width:90px;height:90px}
       .logo-text{font-size:1.1rem}
       .hero-btn{font-size:.7rem;padding:5px 10px}
       .wave-wrap{height:36px;margin-top:14px}
@@ -557,14 +558,7 @@
 <div class="hero">
   <div class="hero-inner">
     <div class="logo-row">
-      <span class="logo-icon">🎣</span>
-      <div>
-        <div class="logo-text">Striper Tides</div>
-        <div class="logo-sub">Cape May · Wildwood · NJ Shore</div>
-      </div>
-    </div>
-    <div class="hero-actions">
-      <button class="hero-btn" id="exportBtn">↓ Export .ics</button>
+      <img src="/static/logo.jpg" alt="Striper Tides" class="logo-img">
     </div>
   </div>
   <div class="wave-wrap">

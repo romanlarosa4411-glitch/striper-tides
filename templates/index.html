@@ -241,6 +241,13 @@
     .spot-selector-actions{display:flex;gap:8px;margin-top:10px}
     .spot-selector-actions button{background:none;border:none;color:var(--accent);font-size:.68rem;font-weight:700;cursor:pointer;padding:0;font-family:inherit}
     .spot-selector-actions button:hover{text-decoration:underline}
+
+    /* chart spot toggles */
+    .chart-spot-toggles{display:flex;gap:5px;flex-wrap:wrap;padding:0 18px;margin-bottom:4px}
+    .chart-spot-tog{display:flex;align-items:center;gap:4px;background:var(--surf);border:1px solid var(--border);border-radius:6px;padding:3px 9px;font-size:.65rem;font-weight:600;color:var(--muted);cursor:pointer;transition:all .13s;user-select:none;font-family:inherit}
+    .chart-spot-tog.on{border-color:var(--cst-color,var(--accent));color:var(--text);background:var(--surf2)}
+    .chart-spot-tog:hover{border-color:var(--border2);color:var(--text)}
+    .chart-spot-tog .cst-swatch{width:8px;height:8px;border-radius:50%;flex-shrink:0}
     .feed-label{font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:12px}
 
     /* session cards */
@@ -668,6 +675,8 @@
           <span><span class="sol-dot major"></span>Major solunar window (2h)</span>
           <span><span class="sol-dot minor"></span>Minor window (1h)</span>
         </div>
+        <!-- chart spot toggles -->
+        <div class="chart-spot-toggles" id="chartSpotToggles"></div>
         <!-- chart + events side by side -->
         <div class="detail-body">
           <div>
@@ -938,6 +947,7 @@ const TOD = {dawn:'🌅 Dawn',dusk:'🌇 Dusk',night:'🌙 Night',day:'☀️ Da
 const BITE_LABEL = ['','😐 Slow','🐟 Decent','🎣 Good','🔥 Hot','🚀 Red Hot'];
 const BITE_CLASS = ['','hot1','hot2','hot3','hot4','hot5'];
 const FLAMES = ['','·','🔥','🔥🔥','🔥🔥🔥','🔥🔥🔥🔥🔥'];
+const SPOT_COLORS=['#3b82f6','#14b8a6','#f59e0b','#818cf8','#ec4899','#a855f7','#ef4444','#22d3ee','#84cc16','#fb923c','#f472b6','#6ee7b7'];
 
 // ── State ────────────────────────────────────────────────────────────────────
 let allEvents=[], byDate={}, journalDates=new Set(), currentDays=90;
@@ -1241,10 +1251,89 @@ function renderEvents(evs){
   }
 }
 
+// ── Chart spot toggle state ───────────────────────────────────────────────────
+let _chartVisibleSpots = null;
+let _lastForecastData = null, _lastForecastSolar = null, _lastForecastSolunar = null, _lastForecastEvs = null, _lastForecastDs = null;
+
+function _shortSpotName(name){
+  return name.replace('Cape May Ferry Terminal','CM Ferry')
+    .replace('Cape May Inlet','CM Inlet')
+    .replace('Cape May Back Bay','CM Back Bay')
+    .replace(' Inlet','')
+    .replace(' Back Bay',' Bay');
+}
+
+function _buildChartDatasets(curves, data, chartableSpots){
+  const parse = arr => arr.map(p=>({x:toHour(p.t.split(' ')[1]),y:parseFloat(p.v)}));
+  const ds = [];
+  let idx = 0;
+  for(const name of chartableSpots){
+    if(!_chartVisibleSpots.has(name)){ idx++; continue; }
+    const raw = curves[name] || (name==='Hereford Inlet'?data.hereford:name==='Cape May Ferry Terminal'?data.cape_may:[]);
+    if(!raw.length){ idx++; continue; }
+    const color = SPOT_COLORS[idx % SPOT_COLORS.length];
+    const isPrimary = idx === 0 || _chartVisibleSpots.size <= 3;
+    ds.push({
+      label: _shortSpotName(name),
+      data: parse(raw),
+      borderColor: color,
+      backgroundColor: _chartVisibleSpots.size===1 ? color+'18' : 'transparent',
+      fill: _chartVisibleSpots.size===1,
+      tension: .4,
+      pointRadius: isPrimary ? 2 : 0,
+      borderWidth: isPrimary ? 2.5 : 1.5,
+      borderDash: [],
+    });
+    idx++;
+  }
+  return ds;
+}
+
+function _renderChartSpotToggles(chartableSpots){
+  const wrap = document.getElementById('chartSpotToggles');
+  wrap.innerHTML = '';
+  if(chartableSpots.length <= 1) return; // no need for toggles with 1 spot
+  chartableSpots.forEach((name, i) => {
+    const color = SPOT_COLORS[i % SPOT_COLORS.length];
+    const isOn = _chartVisibleSpots.has(name);
+    const el = document.createElement('button');
+    el.className = 'chart-spot-tog' + (isOn ? ' on' : '');
+    el.style.setProperty('--cst-color', color);
+    el.innerHTML = `<span class="cst-swatch" style="background:${color}"></span>${_shortSpotName(name)}`;
+    el.addEventListener('click', () => {
+      if(_chartVisibleSpots.has(name)){
+        if(_chartVisibleSpots.size <= 1) return; // must keep at least 1
+        _chartVisibleSpots.delete(name);
+      } else {
+        _chartVisibleSpots.add(name);
+      }
+      _rebuildTideChart();
+    });
+    wrap.appendChild(el);
+  });
+}
+
+function _rebuildTideChart(){
+  if(!_lastForecastData) return;
+  const data = _lastForecastData;
+  const curves = data.hourly_curves || {};
+  const chartableSpots = _selectedSpots.filter(s => {
+    const raw = curves[s] || (s==='Hereford Inlet'?data.hereford:s==='Cape May Ferry Terminal'?data.cape_may:[]);
+    return raw && raw.length > 0;
+  });
+  _renderChartSpotToggles(chartableSpots);
+  const datasets = _buildChartDatasets(curves, data, chartableSpots);
+  if(tideChart){
+    tideChart.data.datasets = datasets;
+    tideChart.update('none');
+  }
+}
+
 // ── Forecast (chart + wind + solunar + spot tides + outlook) ──────────────────
 async function loadForecast(ds, solar, evs){
   const spinner=document.getElementById('chartSpinner'); spinner.classList.remove('hidden');
   if(tideChart){tideChart.destroy();tideChart=null;}
+  document.getElementById('chartSpotToggles').innerHTML='';
   document.getElementById('windRow').innerHTML='';
   document.getElementById('solWindows').innerHTML='';
   document.getElementById('outlookSlot').innerHTML='';
@@ -1313,7 +1402,6 @@ async function loadForecast(ds, solar, evs){
     }
 
     // ── Tide chart ────────────────────────────────────────────────────────
-    const parse = arr => arr.map(p=>({x:toHour(p.t.split(' ')[1]),y:parseFloat(p.v)}));
     const nowHour = ds===todayStr() ? new Date().getHours()+new Date().getMinutes()/60 : null;
     const solunar = data.solunar||[];
 
@@ -1365,31 +1453,31 @@ async function loadForecast(ds, solar, evs){
       }
     };
 
-    // Build datasets — primary pair bold+filled, others thin+subtle
-    const SPOT_CHART = [
-      {key:'Hereford Inlet',     color:'#3b82f6', primary:true},
-      {key:'Cape May Ferry Terminal', color:'#14b8a6', primary:true},
-      {key:'Corsons Inlet',      color:'#f59e0b', primary:false},
-      {key:'Townsends Inlet',    color:'#818cf8', primary:false},
-      {key:'Cape May Inlet',     color:'#ec4899', primary:false},
-    ];
+    // Build datasets dynamically from selected spots
     const curves = data.hourly_curves || {};
-    const datasets = SPOT_CHART.map(s=>{
-      const raw = curves[s.key] || (s.key==='Hereford Inlet'?data.hereford:s.key==='Cape May Ferry Terminal'?data.cape_may:[]);
-      if(!raw.length) return null;
-      const shortName = s.key==='Cape May Inlet'?'CM Inlet':s.key==='Cape May Ferry Terminal'?'CM Ferry':s.key.replace(' Inlet','');
-      return {
-        label: shortName,
-        data: parse(raw),
-        borderColor: s.primary ? s.color : s.color+'99',
-        backgroundColor: s.primary ? s.color+'12' : 'transparent',
-        fill: s.primary,
-        tension: .4,
-        pointRadius: s.primary ? 2 : 0,
-        borderWidth: s.primary ? 2.5 : 1.3,
-        borderDash: s.primary ? [] : [4,3],
-      };
-    }).filter(Boolean);
+    // Store curves globally so chart toggle can rebuild without re-fetching
+    _lastForecastData = data;
+    _lastForecastSolar = solar2;
+    _lastForecastSolunar = solunar;
+    _lastForecastEvs = evs;
+    _lastForecastDs = ds;
+
+    // Determine which spots to show on chart — only selected spots that have curve data
+    const chartableSpots = _selectedSpots.filter(s => {
+      const raw = curves[s] || (s==='Hereford Inlet'?data.hereford:s==='Cape May Ferry Terminal'?data.cape_may:[]);
+      return raw && raw.length > 0;
+    });
+
+    // On first load, show just the first spot. Track which are "on" for the chart.
+    if(!_chartVisibleSpots || _chartVisibleSpots._date !== ds){
+      _chartVisibleSpots = new Set(chartableSpots.length ? [chartableSpots[0]] : []);
+      _chartVisibleSpots._date = ds;
+    }
+
+    // Render toggle chips
+    _renderChartSpotToggles(chartableSpots);
+
+    const datasets = _buildChartDatasets(curves, data, chartableSpots);
 
     tideChart=new Chart(document.getElementById('tideChart'),{
       type:'line',

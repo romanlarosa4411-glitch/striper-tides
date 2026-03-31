@@ -91,7 +91,7 @@ def api_forecast(date_str):
                     hourly_curves[spot_name] = []
             # Legacy keys for backwards compat
             hereford   = hourly_curves.get("Hereford Inlet", [])
-            cape_may   = hourly_curves.get("Cape May Ferry Terminal", [])
+            cape_may   = hourly_curves.get("Cape May Point", [])
             all_spots  = st.fetch_all_spots_hilo(d)
             solunar    = st.get_solunar(d)
             conditions = st.fetch_marine_conditions(d)

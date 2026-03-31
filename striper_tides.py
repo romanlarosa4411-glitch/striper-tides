@@ -74,12 +74,12 @@ SPOT_CONFIG: dict[str, dict] = {
         "zone":          "ocean",
         "location_long": "Cape May Inlet — Cold Spring / Cape May Point, NJ",
     },
-    "Cape May Ferry Terminal": {
+    "Cape May Point": {
         "station_id":    CAPE_MAY_STATION,
         "station_name":  "Cape May ferry terminal",
         "tide_type":     "L",
         "zone":          "ocean",
-        "location_long": "Cape May Ferry Terminal — Delaware Bay Rips",
+        "location_long": "Cape May Point — Delaware Bay Rips",
     },
     # ── Back Bay spots ───────────────────────────────────────────────────────
     "Grassy Sound": {
@@ -934,7 +934,7 @@ def get_events(days: int = 90) -> dict:
     # Cape May has the most complete data and is a good regional proxy for
     # tidal energy — a big swing here means strong currents at all 5 spots.
     daily: dict[str, dict[str, list[float]]] = {}
-    for t in spot_tides.get("Cape May Ferry Terminal", []):
+    for t in spot_tides.get("Cape May Point", []):
         day = t["t"][:10]
         v   = float(t["v"])
         if day not in daily:

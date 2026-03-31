@@ -13,7 +13,7 @@ SPOTS = [
     "Townsends Inlet",
     "Hereford Inlet",
     "Cape May Inlet",
-    "Cape May Ferry Terminal",
+    "Cape May Point",
     # Back Bay
     "Grassy Sound",
     "Stone Harbor",

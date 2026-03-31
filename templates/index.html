@@ -175,9 +175,14 @@
     /* ── fishing events sidebar ───────────────────────────────────────── */
     .detail-body{display:grid;grid-template-columns:1fr 250px}
     @media(max-width:720px){.detail-body{grid-template-columns:1fr}}
-    .ev-panel{padding:14px 16px;border-left:1px solid var(--border);display:flex;flex-direction:column;gap:8px}
+    .ev-panel{padding:14px 16px;border-left:1px solid var(--border);display:flex;flex-direction:column;gap:0}
     @media(max-width:640px){.ev-panel{border-left:none;border-top:1px solid var(--border)}}
     .ev-label{font-size:.66rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--muted)}
+    .ev-toggle{display:flex;align-items:center;justify-content:space-between;cursor:pointer;padding:4px 0 8px;user-select:none}
+    .ev-toggle .ev-arrow{font-size:.6rem;color:var(--muted);transition:transform .2s}
+    .ev-toggle.open .ev-arrow{transform:rotate(90deg)}
+    .ev-list{display:none;flex-direction:column;gap:8px}
+    .ev-list.open{display:flex}
     .ev-card{background:var(--bg);border:1px solid var(--border);border-left-width:3px;border-radius:8px;padding:9px 11px}
     .ev-card.rg{border-left-color:var(--rg)}
     .ev-card.gd{border-left-color:var(--good)}
@@ -1217,7 +1222,7 @@ async function selectDay(ds){
     document.getElementById('moonBadge').innerHTML='';
     document.getElementById('sunBar').style.background='var(--border)';
     document.getElementById('sunLabels').innerHTML='';
-    document.getElementById('evPanel').innerHTML='<div class="ev-label">Prime Windows</div><div class="no-events" style="padding:8px 0 4px">Fetching forecast…</div>';
+    document.getElementById('evPanel').innerHTML='<div class="ev-toggle"><div class="ev-label">Prime Windows</div></div><div class="no-events" style="padding:8px 0 4px">Fetching forecast…</div>';
   }
 
   await loadForecast(ds, evs.length ? evs[0].solar : null, evs);
@@ -1233,11 +1238,18 @@ function renderSunBar(s){
 
 function renderEvents(evs){
   const panel=document.getElementById('evPanel');
-  panel.innerHTML='<div class="ev-label">Prime Windows</div>';
+  const count=evs.length;
+  panel.innerHTML=`
+    <div class="ev-toggle" onclick="this.classList.toggle('open');this.nextElementSibling.classList.toggle('open')">
+      <div class="ev-label">Prime Windows${count?` (${count})`:''}</div>
+      <span class="ev-arrow">&#9654;</span>
+    </div>
+    <div class="ev-list"></div>`;
+  const list=panel.querySelector('.ev-list');
   for(const e of evs){
     const rg=e.quality==='really_good';
     const score=e.score||'';
-    panel.insertAdjacentHTML('beforeend',`
+    list.insertAdjacentHTML('beforeend',`
       <div class="ev-card ${rg?'rg':'gd'}">
         <div style="display:flex;align-items:center;justify-content:space-between">
           <div class="ev-q">${rg?'★★★ REALLY GOOD':'★★ GOOD'}</div>
@@ -1256,7 +1268,7 @@ let _chartVisibleSpots = null;
 let _lastForecastData = null, _lastForecastSolar = null, _lastForecastSolunar = null, _lastForecastEvs = null, _lastForecastDs = null;
 
 function _shortSpotName(name){
-  return name.replace('Cape May Ferry Terminal','CM Ferry')
+  return name.replace('Cape May Point','CM Point')
     .replace('Cape May Inlet','CM Inlet')
     .replace('Cape May Back Bay','CM Back Bay')
     .replace(' Inlet','')
@@ -1269,7 +1281,7 @@ function _buildChartDatasets(curves, data, chartableSpots){
   let idx = 0;
   for(const name of chartableSpots){
     if(!_chartVisibleSpots.has(name)){ idx++; continue; }
-    const raw = curves[name] || (name==='Hereford Inlet'?data.hereford:name==='Cape May Ferry Terminal'?data.cape_may:[]);
+    const raw = curves[name] || (name==='Hereford Inlet'?data.hereford:name==='Cape May Point'?data.cape_may:[]);
     if(!raw.length){ idx++; continue; }
     const color = SPOT_COLORS[idx % SPOT_COLORS.length];
     const isPrimary = idx === 0 || _chartVisibleSpots.size <= 3;
@@ -1318,7 +1330,7 @@ function _rebuildTideChart(){
   const data = _lastForecastData;
   const curves = data.hourly_curves || {};
   const chartableSpots = _selectedSpots.filter(s => {
-    const raw = curves[s] || (s==='Hereford Inlet'?data.hereford:s==='Cape May Ferry Terminal'?data.cape_may:[]);
+    const raw = curves[s] || (s==='Hereford Inlet'?data.hereford:s==='Cape May Point'?data.cape_may:[]);
     return raw && raw.length > 0;
   });
   _renderChartSpotToggles(chartableSpots);
@@ -1464,7 +1476,7 @@ async function loadForecast(ds, solar, evs){
 
     // Determine which spots to show on chart — only selected spots that have curve data
     const chartableSpots = _selectedSpots.filter(s => {
-      const raw = curves[s] || (s==='Hereford Inlet'?data.hereford:s==='Cape May Ferry Terminal'?data.cape_may:[]);
+      const raw = curves[s] || (s==='Hereford Inlet'?data.hereford:s==='Cape May Point'?data.cape_may:[]);
       return raw && raw.length > 0;
     });
 
@@ -1509,7 +1521,7 @@ async function loadForecast(ds, solar, evs){
 function renderOutlook(outlook, evs){
   // Update event panel message when no starred events
   if(!evs.length){
-    document.getElementById('evPanel').innerHTML=`<div class="ev-label">Prime Windows</div>
+    document.getElementById('evPanel').innerHTML=`<div class="ev-toggle"><div class="ev-label">Prime Windows</div></div>
       <div class="no-events" style="padding:6px 0 8px;font-size:.75rem">No starred windows today</div>`;
   }
 

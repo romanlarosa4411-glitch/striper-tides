@@ -438,25 +438,7 @@ def clarity_report_post():
 
 if __name__ == "__main__":
     import os
-    import threading
     init_db()
     port = int(os.environ.get("PORT", 5001))
     print(f"\n🎣  Striper Tides — http://localhost:{port}\n")
-
-    def _warm_cache():
-        """Pre-load the events cache in the background so the first visitor is fast."""
-        import time
-        time.sleep(2)  # Let Flask start first
-        try:
-            today = date.today().isoformat()
-            for days in [30, 90]:
-                key = _key("events", days=days)
-                if key not in _cache:
-                    print(f"[cache] warming events ({days}d)...")
-                    _cache[key] = st.get_events(days)
-                    print(f"[cache] events ({days}d) ready")
-        except Exception as e:
-            print(f"[cache] warm failed: {e}")
-
-    threading.Thread(target=_warm_cache, daemon=True).start()
-    app.run(debug=False, host="0.0.0.0", port=port, use_reloader=False)
+    app.run(debug=False, host="0.0.0.0", port=port, use_reloader=False, threaded=True)

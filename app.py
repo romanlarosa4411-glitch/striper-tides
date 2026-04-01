@@ -16,6 +16,7 @@ from db import SPOTS, get_conn, init_db
 
 app    = Flask(__name__)
 LOCAL_TZ = ZoneInfo(st.TIMEZONE)
+init_db()
 
 # ── In-memory cache (keyed by today's date so it refreshes each day) ──────────
 _cache: dict = {}

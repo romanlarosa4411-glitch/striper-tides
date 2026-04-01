@@ -24,6 +24,7 @@ import math
 import subprocess
 import uuid
 from collections import defaultdict
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import date, datetime, timedelta, timezone as _tz
 from pathlib import Path
 from zoneinfo import ZoneInfo
@@ -922,13 +923,18 @@ def get_events(days: int = 90) -> dict:
     today    = date.today()
     end_date = today + timedelta(days=days)
 
-    # ── Fetch hilo predictions for all spots ─────────────────────────────────
+    # ── Fetch hilo predictions for all spots (parallel) ───────────────────────
     spot_tides: dict[str, list[dict]] = {}
-    for spot, cfg in SPOT_CONFIG.items():
+    def _fetch_spot_tides(spot, cfg):
         try:
-            spot_tides[spot] = fetch_tides(cfg["station_id"], today, end_date)
+            return spot, fetch_tides(cfg["station_id"], today, end_date)
         except Exception:
-            spot_tides[spot] = []
+            return spot, []
+    with ThreadPoolExecutor(max_workers=6) as pool:
+        futs = [pool.submit(_fetch_spot_tides, s, c) for s, c in SPOT_CONFIG.items()]
+        for f in as_completed(futs):
+            spot, tides = f.result()
+            spot_tides[spot] = tides
 
     # ── Daily tidal range from Cape May reference station ────────────────────
     # Cape May has the most complete data and is a good regional proxy for
@@ -958,12 +964,24 @@ def get_events(days: int = 90) -> dict:
     boost_pressure_mb: float = None
     boost_temp_change: float = None
 
-    # Fetch conditions for today + next 7 days (wind per hour)
+    # Fetch conditions for today + next 7 days (wind per hour) — parallel
     forecast_end = min(today + timedelta(days=7), end_date)
-    for day_off in range((forecast_end - today).days + 1):
-        d_fc = today + timedelta(days=day_off)
+    def _fetch_boost(d_fc, day_off):
         try:
             cond = fetch_marine_conditions(d_fc)
+            return d_fc, day_off, cond
+        except Exception:
+            return d_fc, day_off, None
+
+    with ThreadPoolExecutor(max_workers=4) as pool:
+        boost_futs = [pool.submit(_fetch_boost, today + timedelta(days=i), i)
+                      for i in range((forecast_end - today).days + 1)]
+        # Also fetch temp trend in parallel
+        temp_fut = pool.submit(lambda: fetch_water_temp_trend(3))
+        for f in as_completed(boost_futs):
+            d_fc, day_off, cond = f.result()
+            if cond is None:
+                continue
             hourly_fc = cond.get("hourly", [])
             wind_data = {}
             for h in hourly_fc:
@@ -971,18 +989,13 @@ def get_events(days: int = 90) -> dict:
                     wind_data[h["hour"]] = {"mph": h["wind_mph"], "deg": h["wind_deg"]}
             if wind_data:
                 boost_wind[d_fc.isoformat()] = wind_data
-            # Pressure trend only from today's observations
             if day_off == 0 and cond.get("pressure_trend_mb") is not None:
                 boost_pressure_mb = cond["pressure_trend_mb"]
+        try:
+            temp_trend = temp_fut.result()
+            boost_temp_change = temp_trend.get("change_f")
         except Exception:
             pass
-
-    # Water temp trend (3-day lookback, applies to all events)
-    try:
-        temp_trend = fetch_water_temp_trend(3)
-        boost_temp_change = temp_trend.get("change_f")
-    except Exception:
-        pass
 
     # ── Score and collect events ─────────────────────────────────────────────
     events: list[dict] = []

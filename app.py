@@ -82,13 +82,19 @@ def api_forecast(date_str):
     if key not in _cache:
         try:
             d          = date.fromisoformat(date_str)
-            # Hourly curves for all 5 spots
+            # Hourly curves for all spots (parallel)
+            from concurrent.futures import ThreadPoolExecutor, as_completed
             hourly_curves = {}
-            for spot_name, cfg in st.SPOT_CONFIG.items():
+            def _fetch_hourly(name, cfg):
                 try:
-                    hourly_curves[spot_name] = st.fetch_tides_hourly(cfg["station_id"], d)
+                    return name, st.fetch_tides_hourly(cfg["station_id"], d)
                 except Exception:
-                    hourly_curves[spot_name] = []
+                    return name, []
+            with ThreadPoolExecutor(max_workers=6) as pool:
+                futs = [pool.submit(_fetch_hourly, n, c) for n, c in st.SPOT_CONFIG.items()]
+                for f in as_completed(futs):
+                    name, data = f.result()
+                    hourly_curves[name] = data
             # Legacy keys for backwards compat
             hereford   = hourly_curves.get("Hereford Inlet", [])
             cape_may   = hourly_curves.get("Cape May Point", [])

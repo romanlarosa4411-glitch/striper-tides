@@ -26,12 +26,6 @@ def _key(prefix: str, **kw) -> str:
     parts = "&".join(f"{k}={v}" for k, v in sorted(kw.items()))
     return f"{prefix}:{today}:{parts}"
 
-# Pre-warm cache at import time (gunicorn --preload runs this once, all workers inherit)
-import os as _os
-if _os.environ.get("PORT"):  # Only on Render, not local dev
-    print("[cache] pre-warming 30d events...")
-    _cache[_key("events", days=30)] = st.get_events(30)
-    print("[cache] 30d ready")
 
 
 # ── Pages ─────────────────────────────────────────────────────────────────────

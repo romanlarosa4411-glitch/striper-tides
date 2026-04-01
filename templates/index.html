@@ -584,11 +584,6 @@
     <button class="tab" data-tab="clarity"><span class="tab-full">💧 Water Clarity</span><span class="tab-short">💧 Clarity</span></button>
     <button class="tab" data-tab="journal"><span class="tab-full">📖 Fish Journal</span><span class="tab-short">📖 Journal</span></button>
     <div class="tab-spacer"></div>
-    <div class="days-group">
-      <button class="days-btn active" data-days="30">30d</button>
-      <button class="days-btn" data-days="90">90d</button>
-      <button class="days-btn" data-days="180">180d</button>
-    </div>
   </div>
 </div>
 
@@ -956,7 +951,7 @@ const FLAMES = ['','·','🔥','🔥🔥','🔥🔥🔥','🔥🔥🔥🔥🔥']
 const SPOT_COLORS=['#3b82f6','#14b8a6','#f59e0b','#818cf8','#ec4899','#a855f7','#ef4444','#22d3ee','#84cc16','#fb923c','#f472b6','#6ee7b7'];
 
 // ── State ────────────────────────────────────────────────────────────────────
-let allEvents=[], byDate={}, journalDates=new Set(), currentDays=30;
+let allEvents=[], byDate={}, journalDates=new Set(), currentDays=90;
 let viewMonth=new Date(), selectedDate=null, tideChart=null, loadedDates=new Set(), weatherByDate={};
 let anglerName=localStorage.getItem('anglerName')||'', biteQuality=0, feedSpot='';
 let swellChart=null, swellLoaded=false;

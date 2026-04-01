@@ -32,7 +32,6 @@ if _os.environ.get("PORT"):  # Only on Render, not local dev
     print("[cache] pre-warming 30d events...")
     _cache[_key("events", days=30)] = st.get_events(30)
     print("[cache] 30d ready")
-    return f"{prefix}:{today}:{parts}"
 
 
 # ── Pages ─────────────────────────────────────────────────────────────────────

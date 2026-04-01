@@ -1119,12 +1119,14 @@ async function fetchEvents(days){
     initSpotSelector();
     // Build top days (uses filtered events)
     _rebuildTopDays();
-    // Fetch 7-day weather for calendar overlay
-    try{ weatherByDate = await api('/api/weather7day'); }catch(e){ weatherByDate={}; }
 
+    // Show calendar immediately — don't wait for weather
     document.getElementById('calLoad').classList.add('hidden');
     document.getElementById('calContent').classList.remove('hidden');
     renderCal();
+
+    // Fetch 7-day weather in background, re-render when ready
+    api('/api/weather7day').then(w=>{ weatherByDate=w; renderCal(); }).catch(()=>{});
 
     // Fetch and show today's water temp prominently
     try{

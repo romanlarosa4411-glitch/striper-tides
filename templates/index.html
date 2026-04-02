@@ -1621,7 +1621,6 @@ document.querySelectorAll('.days-btn').forEach(b=>b.addEventListener('click',()=
 }));
 document.getElementById('prevMo').addEventListener('click',()=>{viewMonth.setMonth(viewMonth.getMonth()-1);renderCal();});
 document.getElementById('nextMo').addEventListener('click',()=>{viewMonth.setMonth(viewMonth.getMonth()+1);renderCal();});
-document.getElementById('exportBtn').addEventListener('click',()=>{window.location.href=`/api/export?days=${currentDays}`;});
 
 // ══ JOURNAL ═══════════════════════════════════════════════════════════════════
 function initJournal(){

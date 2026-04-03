@@ -818,7 +818,7 @@ def get_day_fishing_outlook(d: date, water_temp_f=None, wind_mph=None, wind_deg=
     if moon_pct < 8 or moon_pct > 92:
         moon_rating = "new_full"
         phase_label = "New Moon 🌑" if moon_pct < 8 else "Full Moon 🌕"
-        mood        = "New moon = darkest nights, fish hunt shallow. Excellent." if moon_pct < 8 else "Full moon = bright nights + big tides. Topwater after dark."
+        mood        = "New moon = darkest nights, fish hunt shallow. Excellent." if moon_pct < 8 else "Full moon = bright lights + big tides. Work plugs or soft plastics in moving current around dock lights — or fish pitch black moving water away from the crowds."
         moon_text   = f"{phase_label} ({moon_pct}%) — spring tides, biggest swings of the month. {mood}"
     elif 40 <= moon_pct <= 60:
         moon_rating = "quarter"

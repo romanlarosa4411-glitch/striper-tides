@@ -112,6 +112,18 @@
 
     /* ══ HOW IT WORKS (onboarding) ═══════════════════════════════════════ */
     .how-it-works{background:var(--surf);border:1px solid var(--border);border-radius:10px;margin-bottom:16px;overflow:hidden}
+    /* ── Weekly Report ────────────────────────────────────────────────── */
+    .field-report{background:var(--surf);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:10px;margin-bottom:16px;overflow:hidden}
+    .field-report-toggle{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;cursor:pointer;border:none;background:none;width:100%;font-family:inherit}
+    .field-report-toggle-left{display:flex;align-items:baseline;gap:10px}
+    .field-report-label{font-size:.7rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);white-space:nowrap}
+    .field-report-week{font-size:.75rem;color:var(--muted)}
+    .field-report-arrow{font-size:.65rem;color:var(--muted);transition:transform .2s;display:inline-block}
+    .field-report.open .field-report-arrow{transform:rotate(90deg)}
+    .field-report-body-wrap{display:none;padding:0 16px 14px}
+    .field-report.open .field-report-body-wrap{display:block}
+    .field-report-title{font-size:.95rem;font-weight:700;color:var(--text);margin-bottom:6px}
+    .field-report-body{font-size:.85rem;color:var(--muted);line-height:1.55}
     .hiw-toggle{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;cursor:pointer;font-size:.78rem;font-weight:600;color:var(--muted);border:none;background:none;width:100%;font-family:inherit;transition:color .15s}
     .hiw-toggle:hover{color:var(--text)}
     .hiw-toggle .hiw-arrow{transition:transform .2s;font-size:.7rem}
@@ -624,6 +636,22 @@
         </div>
       </div>
       <div id="topDaysCard"></div>
+
+      <!-- WEEKLY REPORT — update text below each week -->
+      <div class="field-report open">
+        <button class="field-report-toggle" onclick="this.closest('.field-report').classList.toggle('open')">
+          <div class="field-report-toggle-left">
+            <span class="field-report-label">Weekly Report</span>
+            <span class="field-report-week">Week of Mar 31</span>
+          </div>
+          <span class="field-report-arrow">&#9654;</span>
+        </button>
+        <div class="field-report-body-wrap">
+          <div class="field-report-title">Early April — First Signs of Life</div>
+          <div class="field-report-body">Water temps are creeping out of the low 40s as air temps push into the upper 60s — the warmup is underway. Most of the recent action has been upriver, where locals have been holding. The first waves of migratory fish are due any day now, and the usual spots will start coming alive as they filter in. Expectations should stay low for now, but fish are coming. Get your gear sorted.</div>
+        </div>
+      </div>
+
       <div class="cal-nav">
         <button class="cal-nav-btn" id="prevMo">&#8249;</button>
         <h2 id="moLabel"></h2>

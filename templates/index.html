@@ -1072,10 +1072,11 @@ function _onSpotsChanged(){
   // Rebuild top days
   _rebuildTopDays();
   renderCal();
-  // If a day is selected, re-render its events
+  // If a day is selected, re-render its events and refresh the chart
   if(selectedDate){
     const evs=byDate[selectedDate]||[];
     renderEvents(evs);
+    _rebuildTideChart();
   }
 }
 
@@ -1388,6 +1389,14 @@ function _rebuildTideChart(){
     const raw = curves[s] || (s==='Hereford Inlet'?data.hereford:s==='Cape May Point'?data.cape_may:[]);
     return raw && raw.length > 0;
   });
+  // Prune any spots removed from My Spots so we never end up with 0 visible datasets
+  if(_chartVisibleSpots){
+    for(const s of [..._chartVisibleSpots]){
+      if(!chartableSpots.includes(s)) _chartVisibleSpots.delete(s);
+    }
+    if(_chartVisibleSpots.size === 0 && chartableSpots.length)
+      _chartVisibleSpots.add(chartableSpots[0]);
+  }
   _renderChartSpotToggles(chartableSpots);
   const datasets = _buildChartDatasets(curves, data, chartableSpots);
   if(tideChart){

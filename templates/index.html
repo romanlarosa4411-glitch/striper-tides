@@ -199,6 +199,7 @@
 
     /* ── fishing events sidebar ───────────────────────────────────────── */
     .detail-body{display:grid;grid-template-columns:1fr 250px}
+    .detail-body>div{min-width:0}
     @media(max-width:720px){.detail-body{grid-template-columns:1fr}}
     .ev-panel{padding:14px 16px;border-left:1px solid var(--border);display:flex;flex-direction:column;gap:0}
     @media(max-width:640px){.ev-panel{border-left:none;border-top:1px solid var(--border)}}

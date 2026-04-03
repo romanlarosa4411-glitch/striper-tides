@@ -859,15 +859,35 @@ def get_day_fishing_outlook(d: date, water_temp_f=None, wind_mph=None, wind_deg=
         if card in ("NE", "E") and wind_mph <= 20:
             wind_rating = "great"
             wind_text   = f"{card} {spd} mph — NE wind is prime for NJ inlets. Pins bait to jetties and the beach. Go fish."
+        elif card in ("NE", "E"):
+            wind_rating = "great"
+            wind_text   = f"{card} {spd} mph — strong NE pushing hard. Fish pinned tight to structure; incoming tide windows extremely fast. Stay on the jetties."
         elif card in ("NW", "N") and wind_mph <= 18:
             wind_rating = "good"
             wind_text   = f"{card} {spd} mph — cleans up the surf, activates the bite after storms. Solid conditions."
-        elif card in ("W",) and wind_mph <= 15:
-            wind_rating = "good"
-            wind_text   = f"W {spd} mph — west wind pushes bunker schools to the beach in fall. Worth a look."
+        elif card in ("W",):
+            if wind_mph <= 12:
+                wind_rating = "great"
+                wind_text   = f"W {spd} mph — glassy conditions. Calm surf, good visibility, comfortable all around."
+            elif wind_mph <= 20:
+                wind_rating = "good"
+                wind_text   = f"W {spd} mph — good conditions. Surf clean and manageable, fish active on moving water."
+            elif month in (9, 10, 11):
+                wind_rating = "good"
+                wind_text   = f"W {spd} mph — west wind pushing bunker schools to the beach. Worth a look."
+            else:
+                wind_rating = "neutral"
+                wind_text   = f"W {spd} mph — clean surf conditions but rough in the back bay. Ocean side fishable, bay spots a grind."
         elif card in ("S", "SW", "SSW", "SSE", "SE"):
-            wind_rating = "bad"
-            wind_text   = f"{card} {spd} mph — south/SW wind shuts the bite down. Warms surface water, pushes dirty water. Consider skipping."
+            if wind_mph <= 12:
+                wind_rating = "neutral"
+                wind_text   = f"{card} {spd} mph — light southerly. Not ideal but still fishable; back bay and protected spots hold up fine."
+            elif wind_mph <= 20:
+                wind_rating = "caution"
+                wind_text   = f"{card} {spd} mph — moderate S/SW. Open beaches get choppy and murky; back bay and lee-side jetties still worth fishing."
+            else:
+                wind_rating = "bad"
+                wind_text   = f"{card} {spd} mph — blown out conditions. Dirty water pushed inshore, surf messy. Tough day out there."
         elif wind_mph > 22:
             wind_rating = "rough"
             wind_text   = f"{card} {spd} mph — too windy for comfortable fishing. Jetties dangerous; surf messy."
@@ -881,7 +901,7 @@ def get_day_fishing_outlook(d: date, water_temp_f=None, wind_mph=None, wind_deg=
         "prime": 0, "warming": 0, "warm": -1, "too_warm": -2,
         "cold": -1, "too_cold": -2, "unknown": 0,
     }.get(temp_rating, 0)
-    wind_adj = {"great": 1, "good": 0, "neutral": 0, "bad": -1, "rough": -1, "unknown": 0}.get(wind_rating, 0)
+    wind_adj = {"great": 1, "good": 0, "neutral": 0, "caution": 0, "bad": -1, "rough": -1, "unknown": 0}.get(wind_rating, 0)
     overall  = max(0, min(4, base + temp_adj + wind_adj))
 
     _LABELS = ["Skip It",  "Slow Day", "Worth a Shot", "Good Day", "GO NOW 🎣"]

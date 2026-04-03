@@ -144,7 +144,14 @@
     .hiw-pct{font-size:.62rem;color:var(--accent2);font-weight:700;margin-left:auto;white-space:nowrap}
 
     /* ══ TOP DAYS ════════════════════════════════════════════════════════ */
-    .top-days{display:flex;flex-direction:column;gap:6px;margin-bottom:18px}
+    .top-days-card{background:var(--surf);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:10px;margin-bottom:16px;overflow:hidden}
+    .top-days-toggle{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;cursor:pointer;border:none;background:none;width:100%;font-family:inherit}
+    .top-days-toggle-label{font-size:.7rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--accent)}
+    .top-days-toggle-arrow{font-size:.65rem;color:var(--muted);transition:transform .2s;display:inline-block}
+    .top-days-card.open .top-days-toggle-arrow{transform:rotate(90deg)}
+    .top-days-body{display:none;padding:0 16px 14px}
+    .top-days-card.open .top-days-body{display:block}
+    .top-days{display:flex;flex-direction:column;gap:6px;margin-bottom:0}
     .top-days-title{font-size:.78rem;font-weight:700;color:var(--muted);margin-bottom:4px;display:flex;align-items:center;gap:6px}
     .top-day{display:flex;align-items:center;gap:10px;background:var(--surf);border:1px solid var(--border);border-radius:10px;padding:10px 14px;cursor:pointer;transition:all .15s}
     .top-day:hover{background:var(--surf2);border-color:var(--border2);transform:translateY(-1px)}
@@ -1091,7 +1098,13 @@ function _rebuildTopDays(){
   const topDays=Object.values(bestByDate).sort((a,b)=>b.score-a.score).slice(0,5);
   const topEl=document.getElementById('topDaysCard');
   if(topDays.length){
-    let html='<div class="top-days"><div class="top-days-title">Top upcoming days</div>';
+    const isOpen=localStorage.getItem('topDaysOpen')!=='false';
+    let html=`<div class="top-days-card${isOpen?' open':''}">
+      <button class="top-days-toggle" onclick="this.closest('.top-days-card').classList.toggle('open');localStorage.setItem('topDaysOpen',this.closest('.top-days-card').classList.contains('open'))">
+        <span class="top-days-toggle-label">Top Upcoming Days</span>
+        <span class="top-days-toggle-arrow">&#9654;</span>
+      </button>
+      <div class="top-days-body"><div class="top-days">`;
     topDays.forEach((ev,i)=>{
       const bd=new Date(ev.date+'T12:00:00');
       const dayLabel=bd.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
@@ -1108,7 +1121,7 @@ function _rebuildTopDays(){
         <span class="top-day-arrow">›</span>
       </div>`;
     });
-    html+='</div>';
+    html+='</div></div></div>';
     topEl.innerHTML=html;
   }else{ topEl.innerHTML=''; }
 }

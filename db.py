@@ -46,6 +46,7 @@ def init_db() -> None:
                 bite_quality  INTEGER NOT NULL DEFAULT 1,  -- 1 (slow) to 5 (red hot)
                 water_temp_f  REAL,
                 notes         TEXT,
+                image_path    TEXT,               -- relative path under static/uploads/journal/
                 -- NOAA-derived conditions (auto-filled at log time)
                 tide_type     TEXT,   -- 'Rising' | 'Falling' | 'High' | 'Low'
                 tide_height_ft REAL,
@@ -75,6 +76,11 @@ def init_db() -> None:
 
             CREATE INDEX IF NOT EXISTS idx_clarity_date ON clarity_reports(report_date);
         """)
+        # Migration: add image_path to existing databases that predate this column
+        try:
+            conn.execute("ALTER TABLE journal_entries ADD COLUMN image_path TEXT")
+        except Exception:
+            pass  # Column already exists
 
 
 if __name__ == "__main__":

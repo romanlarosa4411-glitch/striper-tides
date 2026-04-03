@@ -282,6 +282,15 @@
     .sc-conditions{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
     .sc-cond{background:var(--bg);border:1px solid var(--border);border-radius:20px;padding:3px 9px;font-size:.72rem;font-weight:500;color:var(--muted)}
     .sc-notes{margin-top:9px;font-size:.78rem;color:#7aa8cc;font-style:italic;border-left:2px solid var(--border2);padding-left:10px;line-height:1.55}
+    .sc-photo{margin-top:10px}
+    .sc-photo img{width:150px;height:150px;object-fit:cover;border-radius:8px;cursor:pointer;border:1px solid var(--border);transition:opacity .15s}
+    .sc-photo img:hover{opacity:.85}
+    /* Lightbox */
+    .lightbox{display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:9999;align-items:center;justify-content:center}
+    .lightbox.open{display:flex}
+    .lightbox img{max-width:92vw;max-height:88vh;border-radius:10px;box-shadow:0 8px 40px rgba(0,0,0,.6)}
+    .lightbox-close{position:absolute;top:18px;right:22px;font-size:1.8rem;color:#fff;cursor:pointer;line-height:1;opacity:.8}
+    .lightbox-close:hover{opacity:1}
     .feed-empty{background:var(--surf);border:1px dashed var(--border);border-radius:12px;padding:40px 24px;text-align:center;color:var(--muted);font-size:.88rem}
 
     /* name banner */
@@ -845,6 +854,10 @@
           <div class="fg">
             <label class="fl">Notes <span style="font-weight:400;text-transform:none;letter-spacing:0">&nbsp;optional</span></label>
             <textarea class="fta" id="fNotes" placeholder="What worked, what didn't…"></textarea>
+          </div>
+          <div class="fg">
+            <label class="fl">Photo <span style="font-weight:400;text-transform:none;letter-spacing:0">&nbsp;optional</span></label>
+            <input class="fi" type="file" id="fPhoto" accept="image/*" style="padding:6px"/>
           </div>
           <button class="sub-btn" id="submitBtn">Log Session</button>
           <div id="formFB"></div>
@@ -1726,6 +1739,7 @@ async function loadFeed(spot){
             ${e.tidal_range_ft?`<span class="sc-cond">↕ ${e.tidal_range_ft} ft range</span>`:''}
           </div>
           ${e.notes?`<div class="sc-notes">${esc(e.notes)}</div>`:''}
+          ${e.image_path?`<div class="sc-photo"><img src="/static/${esc(e.image_path)}" alt="Session photo" loading="lazy" onclick="openLightbox(this.src)"/></div>`:''}
         </div>
       </div>`);
 
@@ -1773,10 +1787,19 @@ document.getElementById('submitBtn').addEventListener('click', async()=>{
       body:JSON.stringify({angler_name:anglerName,spot,session_date:fdate,time_start:start,time_end:end,
         fish_count:fish,bite_quality:biteQuality,water_temp_f:temp?parseFloat(temp):null,notes})});
     if(!res.ok){const e=await res.json();throw new Error(e.error||'Server error');}
+    const entry=await res.json();
+    // Upload photo if selected
+    const photoFile=document.getElementById('fPhoto').files[0];
+    if(photoFile){
+      btn.textContent='Uploading photo…';
+      const fd=new FormData(); fd.append('image',photoFile);
+      await fetch(`/api/journal/${entry.id}/image`,{method:'POST',body:fd});
+    }
     fb.innerHTML='<div class="fb-ok">✓ Logged! Your crew can see it now.</div>';
     document.getElementById('fFish').value=0;document.getElementById('fishVal').textContent='0';
     document.querySelectorAll('.bite-opt').forEach(b=>b.classList.remove('sel'));
     document.getElementById('fTemp').value='';document.getElementById('fNotes').value='';
+    document.getElementById('fPhoto').value='';
     biteQuality=0;
     loadFeed(feedSpot);loadLeaderboard();loadStats();
     setTimeout(()=>fb.innerHTML='',5000);
@@ -2411,6 +2434,28 @@ document.getElementById('crSubmit')?.addEventListener('click',async()=>{
 // ── Boot ──────────────────────────────────────────────────────────────────────
 fetchEvents(currentDays);
 loadFeed();
+
+// ── Lightbox ──────────────────────────────────────────────────────────────────
+function openLightbox(src){
+  const lb=document.getElementById('lightbox');
+  document.getElementById('lightboxImg').src=src;
+  lb.classList.add('open');
+}
+function closeLightbox(){
+  const lb=document.getElementById('lightbox');
+  lb.classList.remove('open');
+  document.getElementById('lightboxImg').src='';
+}
+document.getElementById('lightbox').addEventListener('click',function(e){
+  if(e.target===this||e.target.classList.contains('lightbox-close')) closeLightbox();
+});
+document.addEventListener('keydown',e=>{if(e.key==='Escape') closeLightbox();});
 </script>
+
+<!-- Lightbox overlay -->
+<div class="lightbox" id="lightbox">
+  <span class="lightbox-close" title="Close">&times;</span>
+  <img id="lightboxImg" src="" alt="Session photo"/>
+</div>
 </body>
 </html>

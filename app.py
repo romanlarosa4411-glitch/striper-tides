@@ -6,10 +6,13 @@ Run: python3 app.py  →  http://localhost:5001
 
 import io
 import json
+import uuid
 from datetime import date, datetime
+from pathlib import Path
 from zoneinfo import ZoneInfo
 
 from flask import Flask, jsonify, render_template, request, send_file
+from PIL import Image
 
 import striper_tides as st
 from db import SPOTS, get_conn, init_db
@@ -17,6 +20,12 @@ from db import SPOTS, get_conn, init_db
 app    = Flask(__name__)
 LOCAL_TZ = ZoneInfo(st.TIMEZONE)
 init_db()
+
+# ── Upload directories ─────────────────────────────────────────────────────────
+_UPLOAD_FULL  = Path(__file__).parent / "static" / "uploads" / "journal" / "full"
+_UPLOAD_THUMB = Path(__file__).parent / "static" / "uploads" / "journal" / "thumbs"
+_UPLOAD_FULL.mkdir(parents=True, exist_ok=True)
+_UPLOAD_THUMB.mkdir(parents=True, exist_ok=True)
 
 # ── In-memory cache (keyed by today's date so it refreshes each day) ──────────
 _cache: dict = {}
@@ -298,6 +307,46 @@ def journal_post():
         ).fetchone()
 
     return jsonify(dict(row)), 201
+
+
+@app.route("/api/journal/<int:entry_id>/image", methods=["POST"])
+def journal_upload_image(entry_id):
+    """Attach a photo to an existing journal entry. Returns thumb + full URLs."""
+    with get_conn() as conn:
+        row = conn.execute("SELECT id FROM journal_entries WHERE id=?", (entry_id,)).fetchone()
+    if not row:
+        return jsonify({"error": "Entry not found"}), 404
+
+    if "image" not in request.files:
+        return jsonify({"error": "No image file provided"}), 400
+    f = request.files["image"]
+    if not f or not f.filename:
+        return jsonify({"error": "No image file provided"}), 400
+
+    uid = uuid.uuid4().hex[:6]
+    filename = f"{entry_id}_{uid}.jpg"
+
+    try:
+        img = Image.open(f.stream).convert("RGB")
+
+        full_img = img.copy()
+        full_img.thumbnail((1200, 1200), Image.LANCZOS)
+        full_img.save(_UPLOAD_FULL / filename, "JPEG", quality=85)
+
+        thumb_img = img.copy()
+        thumb_img.thumbnail((300, 300), Image.LANCZOS)
+        thumb_img.save(_UPLOAD_THUMB / f"thumb_{filename}", "JPEG", quality=85)
+    except Exception as exc:
+        return jsonify({"error": f"Image processing failed: {exc}"}), 400
+
+    image_path = f"uploads/journal/full/{filename}"
+    with get_conn() as conn:
+        conn.execute("UPDATE journal_entries SET image_path=? WHERE id=?", (image_path, entry_id))
+
+    return jsonify({
+        "image_url": f"/static/uploads/journal/full/{filename}",
+        "thumb_url": f"/static/uploads/journal/thumbs/thumb_{filename}",
+    }), 200
 
 
 @app.route("/api/journal/intel")

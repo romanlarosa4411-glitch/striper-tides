@@ -4,3 +4,4 @@ ephem
 icalendar
 flask
 gunicorn
+Pillow

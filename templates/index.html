@@ -50,6 +50,7 @@
 
     /* ══ TABS ══════════════════════════════════════════════════════════════ */
     .tab-bar{background:var(--surf);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100}
+    html{scroll-padding-top:50px}
     .tab-bar-inner{max-width:1060px;margin:0 auto;display:flex;align-items:center;padding:0 16px}
     .tab{background:none;border:none;border-bottom:2px solid transparent;color:var(--muted);padding:13px 18px;cursor:pointer;font-size:.84rem;font-weight:600;font-family:inherit;transition:all .15s;white-space:nowrap}
     .tab:hover{color:var(--text)}
@@ -1282,7 +1283,8 @@ async function selectDay(ds){
   }
 
   await loadForecast(ds, evs.length ? evs[0].solar : null, evs);
-  det.scrollIntoView({behavior:'smooth',block:'nearest'});
+  const tabBarH = document.querySelector('.tab-bar')?.offsetHeight ?? 0;
+  window.scrollTo({top: det.getBoundingClientRect().top + window.scrollY - tabBarH, behavior:'smooth'});
 }
 
 function renderSunBar(s){

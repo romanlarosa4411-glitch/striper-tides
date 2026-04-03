@@ -1102,7 +1102,8 @@ function _rebuildTopDays(){
   const topDays=Object.values(bestByDate).sort((a,b)=>b.score-a.score).slice(0,5);
   const topEl=document.getElementById('topDaysCard');
   if(topDays.length){
-    const isOpen=localStorage.getItem('topDaysOpen')!=='false';
+    const _stored=localStorage.getItem('topDaysOpen');
+    const isOpen=_stored!==null?_stored!=='false':window.innerWidth>600;
     let html=`<div class="top-days-card${isOpen?' open':''}">
       <button class="top-days-toggle" onclick="this.closest('.top-days-card').classList.toggle('open');localStorage.setItem('topDaysOpen',this.closest('.top-days-card').classList.contains('open'))">
         <span class="top-days-toggle-label">Top Upcoming Days</span>

@@ -910,6 +910,10 @@
             <label class="fl">Photo <span style="font-weight:400;text-transform:none;letter-spacing:0">&nbsp;optional</span></label>
             <input class="fi" type="file" id="fPhoto" accept="image/*" style="padding:6px"/>
           </div>
+          <label style="display:flex;align-items:center;gap:8px;font-size:.8rem;color:var(--muted);cursor:pointer;margin-bottom:4px">
+            <input type="checkbox" id="fHideLocation" style="width:15px;height:15px;accent-color:var(--accent);cursor:pointer"/>
+            Hide my location — show as "Undisclosed" on the public feed
+          </label>
           <button class="sub-btn" id="submitBtn">Log Session</button>
           <div id="formFB"></div>
         </div>
@@ -1802,7 +1806,7 @@ async function loadFeed(spot){
         <div class="sc-header ${cls}">
           <div>
             <div class="sc-angler">${esc(e.angler_name)}</div>
-            <div class="sc-spot">📍 ${esc(e.spot)}</div>
+            <div class="sc-spot">📍 ${e.hide_location?'Undisclosed Location':esc(e.spot)}</div>
           </div>
           <div>
             <div class="sc-quality-label ${cls}">${BITE_LABEL[bq]}</div>
@@ -1832,7 +1836,7 @@ async function loadFeed(spot){
         </div>
       </div>`);
 
-    if(isHot && e.session_date===todayStr()) showHotBanner(e);
+    if(isHot && !e.hide_location && e.session_date===todayStr()) showHotBanner(e);
   }
 }
 
@@ -1874,7 +1878,8 @@ document.getElementById('submitBtn').addEventListener('click', async()=>{
   try{
     const res=await fetch('/api/journal',{method:'POST',headers:{'Content-Type':'application/json'},
       body:JSON.stringify({angler_name:anglerName,spot,session_date:fdate,time_start:start,time_end:end,
-        fish_count:fish,bite_quality:biteQuality,water_temp_f:temp?parseFloat(temp):null,notes})});
+        fish_count:fish,bite_quality:biteQuality,water_temp_f:temp?parseFloat(temp):null,notes,
+        hide_location:document.getElementById('fHideLocation').checked})});
     if(!res.ok){const e=await res.json();throw new Error(e.error||'Server error');}
     const entry=await res.json();
     // Upload photo if selected

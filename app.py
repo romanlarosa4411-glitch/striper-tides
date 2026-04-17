@@ -216,7 +216,7 @@ def journal_list():
     with get_conn() as conn:
         if spot:
             rows = conn.execute(
-                "SELECT * FROM journal_entries WHERE spot=? ORDER BY session_date DESC, time_start DESC LIMIT ?",
+                "SELECT * FROM journal_entries WHERE spot=? AND hide_location=0 ORDER BY session_date DESC, time_start DESC LIMIT ?",
                 (spot, limit)
             ).fetchall()
         else:
@@ -285,8 +285,8 @@ def journal_post():
                (angler_name, spot, session_date, time_start, time_end,
                 fish_count, bite_quality, water_temp_f, notes,
                 tide_type, tide_height_ft, tidal_range_ft,
-                moon_phase, moon_pct, time_of_day)
-               VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
+                moon_phase, moon_pct, time_of_day, hide_location)
+               VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
             (
                 data["angler_name"].strip(),
                 data["spot"],
@@ -299,6 +299,7 @@ def journal_post():
                 (data.get("notes") or "").strip() or None,
                 tide_type, tide_height, tidal_range,
                 moon_phase, moon_pct_val, time_of_day_val,
+                1 if data.get("hide_location") else 0,
             ),
         )
         entry_id = cur.lastrowid
@@ -485,6 +486,19 @@ def clarity_report_post():
         ).fetchone()
 
     return jsonify(dict(row)), 201
+
+
+@app.route('/sitemap.xml')
+def sitemap():
+    xml = '''<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>https://stripertides.com/</loc>
+    <changefreq>daily</changefreq>
+    <priority>1.0</priority>
+  </url>
+</urlset>'''
+    return app.response_class(xml, mimetype='application/xml')
 
 
 if __name__ == "__main__":

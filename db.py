@@ -8,13 +8,13 @@ from pathlib import Path
 DB_PATH = Path(__file__).parent / "striper_tides.db"
 
 SPOTS = [
-    # Ocean / Inlet
+    # Cape May County — Ocean / Inlet
     "Corsons Inlet",
     "Townsends Inlet",
     "Hereford Inlet",
     "Cape May Inlet",
     "Cape May Point",
-    # Back Bay
+    # Cape May County — Back Bay
     "Grassy Sound",
     "Stone Harbor",
     "Avalon Back Bay",
@@ -22,6 +22,23 @@ SPOTS = [
     "Townsends Back Bay",
     "Cape May Back Bay",
     "The Thorofare",
+    # Atlantic County
+    "Atlantic City Back Bay",
+    "Somers Point Back Bay",
+    "Absecon Inlet",
+    "Great Egg Harbor Inlet",
+    # Ocean County
+    "LBI Back Bay",
+    "Barnegat Inlet",
+    "Island Beach SP",
+    # Raritan Bay
+    "Perth Amboy",
+    "Keyport",
+    "Keansburg",
+    # Monmouth County
+    "Manasquan Inlet",
+    "Shark River Inlet",
+    "Sandy Hook",
 ]
 
 
@@ -54,6 +71,7 @@ def init_db() -> None:
                 moon_phase    TEXT,
                 moon_pct      INTEGER,
                 time_of_day   TEXT,   -- 'dawn' | 'day' | 'dusk' | 'night'
+                hide_location INTEGER NOT NULL DEFAULT 0,  -- 1 = show "Undisclosed Location" publicly
                 created_at    TEXT    NOT NULL DEFAULT (datetime('now'))
             );
 
@@ -76,11 +94,15 @@ def init_db() -> None:
 
             CREATE INDEX IF NOT EXISTS idx_clarity_date ON clarity_reports(report_date);
         """)
-        # Migration: add image_path to existing databases that predate this column
-        try:
-            conn.execute("ALTER TABLE journal_entries ADD COLUMN image_path TEXT")
-        except Exception:
-            pass  # Column already exists
+        # Migrations for columns added after initial release
+        for migration in [
+            "ALTER TABLE journal_entries ADD COLUMN image_path TEXT",
+            "ALTER TABLE journal_entries ADD COLUMN hide_location INTEGER NOT NULL DEFAULT 0",
+        ]:
+            try:
+                conn.execute(migration)
+            except Exception:
+                pass
 
 
 if __name__ == "__main__":

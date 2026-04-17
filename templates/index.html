@@ -274,6 +274,11 @@
     .spot-selector-actions{display:flex;gap:8px;margin-top:10px}
     .spot-selector-actions button{background:none;border:none;color:var(--accent);font-size:.68rem;font-weight:700;cursor:pointer;padding:0;font-family:inherit}
     .spot-selector-actions button:hover{text-decoration:underline}
+    .spot-search{width:100%;box-sizing:border-box;background:var(--surf);border:1px solid var(--border);border-radius:8px;padding:6px 10px;font-size:.75rem;color:var(--text);font-family:inherit;outline:none;margin-bottom:10px}
+    .spot-search:focus{border-color:var(--accent)}
+    .spot-search::placeholder{color:var(--muted);opacity:.7}
+    .spot-check.search-hidden{display:none}
+    .spot-zone-label.search-hidden{display:none}
 
     /* chart spot toggles */
     .chart-spot-toggles{display:flex;gap:5px;flex-wrap:wrap;padding:0 18px;margin-bottom:4px}
@@ -642,9 +647,10 @@
           <span class="spot-selector-arrow">&#9654;</span>
         </div>
         <div class="spot-selector-body" id="spotSelectorBody">
-          <div class="spot-zone-label">Ocean / Inlet</div>
+          <input class="spot-search" id="spotSearch" type="text" placeholder="Search spots…" oninput="_filterSpotSearch(this.value)">
+          <div class="spot-zone-label" id="spotLabelOcean">Ocean / Inlet</div>
           <div class="spot-check-grid" id="spotCheckOcean"></div>
-          <div class="spot-zone-label">Back Bay</div>
+          <div class="spot-zone-label" id="spotLabelBay">Back Bay</div>
           <div class="spot-check-grid" id="spotCheckBay"></div>
           <div class="spot-selector-actions">
             <button onclick="selectAllSpots()">Select All</button>
@@ -659,13 +665,13 @@
         <button class="field-report-toggle" onclick="this.closest('.field-report').classList.toggle('open')">
           <div class="field-report-toggle-left">
             <span class="field-report-label">Weekly Report</span>
-            <span class="field-report-week">Week of Mar 31</span>
+            <span class="field-report-week">Week of Apr 14</span>
           </div>
           <span class="field-report-arrow">&#9654;</span>
         </button>
         <div class="field-report-body-wrap">
-          <div class="field-report-title">Early April — First Signs of Life</div>
-          <div class="field-report-body">Water temps are creeping out of the low 40s as air temps push into the upper 60s — the warmup is underway. Most of the recent action has been upriver, where locals have been holding. The first waves of migratory fish are due any day now, and the usual spots will start coming alive as they filter in. Expectations should stay low for now, but fish are coming. Get your gear sorted.</div>
+          <div class="field-report-title">Mid April — Fish Are Here</div>
+          <div class="field-report-body">The fish are here. If you've been waiting for a sign to grab the rod bag and get on the beach, this is it. Action has been steady but not fast. You're not going to get bit on every tide, but the anglers putting in the time are finding windows. Upper 30s are showing up more consistently now and the bigger class is right behind them. The 40 inch fish are moving. Not a question of if, just when they decide to show at your feet. Inlet mouths and back bay structure have been most productive when the current is ripping. Bunker presence is scattered but improving. Find the bait and you'll find the bass. Water temps are in the sweet spot. The run is just getting started and it only stacks up through the end of the month. Get out there. The tides don't care if you have other plans.</div>
         </div>
       </div>
 
@@ -1018,7 +1024,7 @@ viewMonth.setDate(1);
 // ── Spot selector (persisted in localStorage) ─────────────────────────────
 const SPOT_META = {{ spot_meta|tojson }};
 const ALL_SPOT_NAMES = SPOT_META.map(s=>s.name);
-let _selectedSpots = JSON.parse(localStorage.getItem('selectedSpots')||'null') || ALL_SPOT_NAMES.slice();
+let _selectedSpots = JSON.parse(localStorage.getItem('selectedSpots')||'null') || [];
 
 function _saveSpots(){ localStorage.setItem('selectedSpots', JSON.stringify(_selectedSpots)); }
 
@@ -1051,6 +1057,25 @@ function toggleSpotSelector(){
   const head=document.getElementById('spotSelectorHead');
   const body=document.getElementById('spotSelectorBody');
   head.classList.toggle('open'); body.classList.toggle('open');
+  if(!body.classList.contains('open')){
+    const inp=document.getElementById('spotSearch');
+    if(inp){inp.value=''; _filterSpotSearch('');}
+  }
+}
+
+function _filterSpotSearch(q){
+  const query=q.trim().toLowerCase();
+  document.querySelectorAll('.spot-check').forEach(el=>{
+    const match=!query||el.dataset.spot.toLowerCase().includes(query);
+    const active=_selectedSpots.includes(el.dataset.spot);
+    el.classList.toggle('search-hidden',!match&&!active);
+  });
+  const oceanGrid=document.getElementById('spotCheckOcean');
+  const bayGrid=document.getElementById('spotCheckBay');
+  const oceanAllHidden=oceanGrid&&[...oceanGrid.querySelectorAll('.spot-check')].every(el=>el.classList.contains('search-hidden'));
+  const bayAllHidden=bayGrid&&[...bayGrid.querySelectorAll('.spot-check')].every(el=>el.classList.contains('search-hidden'));
+  document.getElementById('spotLabelOcean').classList.toggle('search-hidden',!!oceanAllHidden);
+  document.getElementById('spotLabelBay').classList.toggle('search-hidden',!!bayAllHidden);
 }
 
 function selectAllSpots(){
@@ -1127,6 +1152,8 @@ function _rebuildTopDays(){
     });
     html+='</div></div></div>';
     topEl.innerHTML=html;
+  }else if(_selectedSpots.length===0){
+    topEl.innerHTML='<div style="font-size:.75rem;color:var(--muted);text-align:center;padding:12px 0">Add your spots above to see top upcoming days</div>';
   }else{ topEl.innerHTML=''; }
 }
 
@@ -1187,6 +1214,8 @@ async function fetchEvents(days){
     }
     // Init spot selector UI
     initSpotSelector();
+    // Auto-open selector if no spots chosen yet
+    if(_selectedSpots.length===0) toggleSpotSelector();
     // Build top days (uses filtered events)
     _rebuildTopDays();
 

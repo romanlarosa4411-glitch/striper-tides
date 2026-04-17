@@ -12,7 +12,7 @@ from pathlib import Path
 from zoneinfo import ZoneInfo
 
 from flask import Flask, jsonify, render_template, request, send_file
-from PIL import Image
+from PIL import Image, ImageOps
 
 import striper_tides as st
 from db import SPOTS, get_conn, init_db
@@ -328,7 +328,7 @@ def journal_upload_image(entry_id):
     filename = f"{entry_id}_{uid}.jpg"
 
     try:
-        img = Image.open(f.stream).convert("RGB")
+        img = ImageOps.exif_transpose(Image.open(f.stream)).convert("RGB")
 
         full_img = img.copy()
         full_img.thumbnail((1200, 1200), Image.LANCZOS)
@@ -486,6 +486,12 @@ def clarity_report_post():
         ).fetchone()
 
     return jsonify(dict(row)), 201
+
+
+@app.route('/robots.txt')
+def robots():
+    txt = "User-agent: *\nAllow: /\nSitemap: https://striper-tides.onrender.com/sitemap.xml"
+    return app.response_class(txt, mimetype='text/plain')
 
 
 @app.route('/sitemap.xml')

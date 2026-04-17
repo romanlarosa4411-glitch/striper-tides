@@ -3,8 +3,12 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-  <title>Striper Tides</title>
-  <meta property="og:title" content="Striper Tides"/>
+  <title>Striper Tides | Cape May County Fishing Forecast</title>
+  <meta name="description" content="Tide forecasts, solunar windows, and fishing conditions for Cape May County, NJ. Striper fishing reports, water clarity, and best times to fish the Jersey Shore."/>
+  <meta name="keywords" content="striper fishing NJ, Cape May tides, fishing forecast New Jersey, striped bass Cape May, Jersey Shore fishing, solunar tables NJ, Cape May County fishing, striper tides, tide chart Cape May, fishing conditions NJ"/>
+  <meta name="robots" content="index, follow"/>
+  <link rel="canonical" href="https://striper-tides.onrender.com"/>
+  <meta property="og:title" content="Striper Tides | Cape May County Fishing Forecast"/>
   <meta property="og:description" content="Tide forecasts, solunar windows &amp; fishing conditions for Cape May County, NJ"/>
   <meta property="og:image" content="https://striper-tides.onrender.com/static/logo.jpg"/>
   <meta property="og:url" content="https://striper-tides.onrender.com"/>
@@ -321,9 +325,10 @@
     /* Lightbox */
     .lightbox{display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:9999;align-items:center;justify-content:center}
     .lightbox.open{display:flex}
-    .lightbox img{max-width:92vw;max-height:88vh;border-radius:10px;box-shadow:0 8px 40px rgba(0,0,0,.6)}
-    .lightbox-close{position:absolute;top:18px;right:22px;font-size:1.8rem;color:#fff;cursor:pointer;line-height:1;opacity:.8}
+    .lightbox img{max-width:92vw;max-height:82vh;border-radius:10px;box-shadow:0 8px 40px rgba(0,0,0,.6);cursor:pointer}
+    .lightbox-close{position:absolute;top:12px;right:14px;font-size:2rem;color:#fff;cursor:pointer;line-height:1;opacity:.9;padding:6px 12px;background:rgba(0,0,0,.45);border-radius:8px}
     .lightbox-close:hover{opacity:1}
+    .lightbox-hint{position:absolute;bottom:16px;left:50%;transform:translateX(-50%);font-size:.72rem;color:rgba(255,255,255,.5);pointer-events:none;white-space:nowrap}
     .feed-empty{background:var(--surf);border:1px dashed var(--border);border-radius:12px;padding:40px 24px;text-align:center;color:var(--muted);font-size:.88rem}
 
     /* name banner */
@@ -2541,7 +2546,7 @@ function closeLightbox(){
   document.getElementById('lightboxImg').src='';
 }
 document.getElementById('lightbox').addEventListener('click',function(e){
-  if(e.target===this||e.target.classList.contains('lightbox-close')) closeLightbox();
+  if(e.target===this||e.target.classList.contains('lightbox-close')||e.target.id==='lightboxImg') closeLightbox();
 });
 document.addEventListener('keydown',e=>{if(e.key==='Escape') closeLightbox();});
 </script>
@@ -2550,6 +2555,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape') closeLightbox();});
 <div class="lightbox" id="lightbox">
   <span class="lightbox-close" title="Close">&times;</span>
   <img id="lightboxImg" src="" alt="Session photo"/>
+  <span class="lightbox-hint">Tap photo or X to close</span>
 </div>
 </body>
 </html>

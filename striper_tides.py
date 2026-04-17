@@ -132,6 +132,101 @@ SPOT_CONFIG: dict[str, dict] = {
         "zone":          "back_bay",
         "location_long": "The Thorofare — Old Turtle Thorofare / Wildwood, NJ",
     },
+    # ── Atlantic County ──────────────────────────────────────────────────────
+    "Atlantic City Back Bay": {
+        "station_id":    "8534720",
+        "station_name":  "Atlantic City",
+        "tide_type":     "H",
+        "zone":          "back_bay",
+        "location_long": "Atlantic City Back Bay — Absecon Bay / AC Harbor, NJ",
+    },
+    "Somers Point Back Bay": {
+        "station_id":    "8534691",
+        "station_name":  "Great Egg Harbor River",
+        "tide_type":     "H",
+        "zone":          "back_bay",
+        "location_long": "Somers Point — Great Egg Harbor Bay, NJ",
+    },
+    "Absecon Inlet": {
+        "station_id":    "8534720",
+        "station_name":  "Atlantic City",
+        "tide_type":     "H",
+        "zone":          "ocean",
+        "location_long": "Absecon Inlet — Atlantic City / Longport, NJ",
+    },
+    "Great Egg Harbor Inlet": {
+        "station_id":    "8534691",
+        "station_name":  "Great Egg Harbor River",
+        "tide_type":     "H",
+        "zone":          "ocean",
+        "location_long": "Great Egg Harbor Inlet — Ocean City / Longport, NJ",
+    },
+    # ── Ocean County ─────────────────────────────────────────────────────────
+    "LBI Back Bay": {
+        "station_id":    "8533631",
+        "station_name":  "High Bar, Barnegat Bay",
+        "tide_type":     "H",
+        "zone":          "back_bay",
+        "location_long": "LBI Back Bay — High Bar Harbor / Barnegat Bay, NJ",
+    },
+    "Barnegat Inlet": {
+        "station_id":    "8533615",
+        "station_name":  "Barnegat Inlet (Inside)",
+        "tide_type":     "H",
+        "zone":          "ocean",
+        "location_long": "Barnegat Inlet — Barnegat Light, NJ",
+    },
+    "Island Beach SP": {
+        "station_id":    "8533615",
+        "station_name":  "Barnegat Inlet (Inside)",
+        "tide_type":     "H",
+        "zone":          "ocean",
+        "location_long": "Island Beach State Park — Seaside Park, NJ",
+    },
+    # ── Raritan Bay ──────────────────────────────────────────────────────────
+    "Perth Amboy": {
+        "station_id":    "8531232",
+        "station_name":  "South Amboy, Raritan River",
+        "tide_type":     "H",
+        "zone":          "back_bay",
+        "location_long": "Perth Amboy — Raritan River mouth / Raritan Bay, NJ",
+    },
+    "Keyport": {
+        "station_id":    "8531545",
+        "station_name":  "Keyport, Raritan Bay",
+        "tide_type":     "H",
+        "zone":          "back_bay",
+        "location_long": "Keyport — Raritan Bay, NJ",
+    },
+    "Keansburg": {
+        "station_id":    "8531545",
+        "station_name":  "Keyport, Raritan Bay",
+        "tide_type":     "H",
+        "zone":          "back_bay",
+        "location_long": "Keansburg — Raritan Bay, NJ",
+    },
+    # ── Monmouth County ──────────────────────────────────────────────────────
+    "Manasquan Inlet": {
+        "station_id":    "8532591",
+        "station_name":  "Manasquan Inlet",
+        "tide_type":     "H",
+        "zone":          "ocean",
+        "location_long": "Manasquan Inlet — Point Pleasant / Manasquan, NJ",
+    },
+    "Shark River Inlet": {
+        "station_id":    "8532322",
+        "station_name":  "Shark River Hills",
+        "tide_type":     "H",
+        "zone":          "ocean",
+        "location_long": "Shark River Inlet — Belmar / Neptune, NJ",
+    },
+    "Sandy Hook": {
+        "station_id":    "8531680",
+        "station_name":  "Sandy Hook",
+        "tide_type":     "H",
+        "zone":          "ocean",
+        "location_long": "Sandy Hook — Gateway NRA / Raritan Bay, NJ",
+    },
 }
 
 # Legacy alias — app.py references this

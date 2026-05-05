@@ -999,18 +999,18 @@ def get_day_fishing_outlook(d: date, water_temp_f=None, wind_mph=None, wind_deg=
         if water_temp_f is not None:
             if water_temp_f < 52:
                 fl_status = "slow"
-                fl_text   = f"Water at {water_temp_f}°F — too cold. Flounder are not feeding inshore."
+                fl_text   = f"Water at {water_temp_f}°F — too cold for flounder inshore. Early season key is finding warmer water — back bay flats and dark-bottom shallows that heat up in the sun can run several degrees warmer than the main channel. Focus there on sunny days."
             elif water_temp_f < 56:
-                fl_status = "slow"
-                fl_text   = f"Water at {water_temp_f}°F — borderline. A few fish possible in protected, dark-bottom spots that hold heat, but not worth targeting."
+                fl_status = "fair" if month == 4 else "slow"
+                fl_text   = f"Water at {water_temp_f}°F — early season flounder mode. Main channels are still cold. Target sun-warmed back bay flats and protected shallows with dark bottom on sunny afternoons — those spots can be 4-5°F warmer and hold fish when everywhere else is dead."
             elif water_temp_f <= 72:
                 # Direction matters: drops are worse than rises
                 if temp_change_f is not None and temp_change_f <= -4:
                     fl_status = "slow"
-                    fl_text   = f"Water at {water_temp_f}°F but dropping hard ({temp_change_f:+.1f}°F over 3 days). Cold front has dulled the bite — flounder retreat to deeper, stable water. Tough day."
+                    fl_text   = f"Water at {water_temp_f}°F but dropping hard ({temp_change_f:+.1f}°F over 3 days). Cold front has dulled the bite — flounder retreat to deeper, stable water. Back bay flats that were warm are now cold. Tough day."
                 elif temp_change_f is not None and temp_change_f <= -2:
                     fl_status = "fair"
-                    fl_text   = f"Water at {water_temp_f}°F with a noticeable drop ({temp_change_f:+.1f}°F trend). Bite may be suppressed. Fish slower and deeper, target wind-protected pockets."
+                    fl_text   = f"Water at {water_temp_f}°F with a noticeable drop ({temp_change_f:+.1f}°F trend). Bite may be suppressed. Fish slower and deeper, stick to wind-protected pockets."
                 elif temp_change_f is not None and temp_change_f >= 2:
                     fl_status = "good" if month in (5, 6) else "fair"
                     fl_text   = f"Water at {water_temp_f}°F and rising ({temp_change_f:+.1f}°F over 3 days) — flounder moving shallower and feeding. Good window."
@@ -1023,7 +1023,7 @@ def get_day_fishing_outlook(d: date, water_temp_f=None, wind_mph=None, wind_deg=
                 fl_text   = f"Water at {water_temp_f}°F — too warm. Flounder have pushed to deeper structure."
         else:
             fl_status = "fair"
-            fl_text   = "Flounder season is open. Stable water temps between 56-72°F (sweet spot 62-66°F) are prime."
+            fl_text   = "Flounder season is open. Early season key is finding warm water — sun-baked back bay flats can run several degrees above the main channel and hold fish before temps come up everywhere. Sweet spot once things warm is 62-66°F."
         species.append({"name": "Flounder", "icon": "🎣", "status": fl_status, "text": fl_text})
 
     # Weakfish: active May-October, water 60-72°F, love big moon strong tides

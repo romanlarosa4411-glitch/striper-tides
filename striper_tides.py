@@ -898,7 +898,7 @@ def get_day_fishing_outlook(d: date, water_temp_f=None, wind_mph=None, wind_deg=
         2:  ("Winter",       "very_slow",  "Deep winter. Water in the 30s-40s°F — fish are far offshore. Almost nothing inshore."),
         3:  ("Early Spring", "building",   "Holdover schoolies in back bays, lethargic. Mid-month: if water hits 44°F+ try slow soft plastics on big tide days."),
         4:  ("Spring Run",   "excellent",  "Migratory fish arriving from Chesapeake. Moving tides push bait through inlets. Be there at the moving water windows."),
-        5:  ("Spring Peak",  "excellent",  "TRUE PEAK. Bunker (menhaden) schools arrive and fish go absolutely wild. Corsons and Townsends especially productive. Don't miss this month."),
+        5:  ("Spring Peak",  "excellent",  "TRUE PEAK. Bunker schools are in, inlets are firing, beaches and bay are fully invaded. Go find fish now."),
         6:  ("Late Spring",  "good",       "Spring run tapering. Larger fish still around. Night fishing picks up — fish moving shallower in dark."),
         7:  ("Summer",       "slow",       "Inshore water >68°F — fish have pushed offshore or north. Target night tides and deep structure. Mostly a waiting game."),
         8:  ("Late Summer",  "fair",       "Adult bunker schools return. Dawn/dusk blitzes possible near inlets when bait schools up. Worth checking early AM."),

@@ -130,7 +130,9 @@ def api_forecast(date_str):
                         conditions["water_temp_latest"] = True
                 except Exception:
                     pass
-            outlook    = st.get_day_fishing_outlook(d, water_temp, wind_mph, wind_deg)
+            temp_trend = st.fetch_water_temp_trend(lookback_days=3)
+            temp_change_f = temp_trend.get("change_f")
+            outlook    = st.get_day_fishing_outlook(d, water_temp, wind_mph, wind_deg, temp_change_f)
             _cache[key] = {
                 "hereford":      hereford,
                 "cape_may":      cape_may,

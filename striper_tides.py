@@ -876,7 +876,7 @@ def fetch_all_spots_hilo(d: date) -> dict:
     return result
 
 
-def get_day_fishing_outlook(d: date, water_temp_f=None, wind_mph=None, wind_deg=None) -> dict:
+def get_day_fishing_outlook(d: date, water_temp_f=None, wind_mph=None, wind_deg=None, temp_change_f=None) -> dict:
     """
     Return a fishing outlook assessment for any day.
     Combines season, moon phase, and water temp into a go/no-go rating
@@ -990,6 +990,69 @@ def get_day_fishing_outlook(d: date, water_temp_f=None, wind_mph=None, wind_deg=
             wind_rating = "neutral"
             wind_text   = f"{card} {spd} mph — neutral conditions. Not helping, not hurting."
 
+    # Species conditions  ─────────────────────────────────────────────────────
+    species = []
+
+    # Flounder: active April-July in NJ, active range 56-72°F, sweet spot 62-66°F.
+    # Drops hurt far more than rises — cold fronts dull bite substantially even within range.
+    if month in (4, 5, 6, 7):
+        if water_temp_f is not None:
+            if water_temp_f < 52:
+                fl_status = "slow"
+                fl_text   = f"Water at {water_temp_f}°F — too cold. Flounder are not feeding inshore."
+            elif water_temp_f < 56:
+                fl_status = "slow"
+                fl_text   = f"Water at {water_temp_f}°F — borderline. A few fish possible in protected, dark-bottom spots that hold heat, but not worth targeting."
+            elif water_temp_f <= 72:
+                # Direction matters: drops are worse than rises
+                if temp_change_f is not None and temp_change_f <= -4:
+                    fl_status = "slow"
+                    fl_text   = f"Water at {water_temp_f}°F but dropping hard ({temp_change_f:+.1f}°F over 3 days). Cold front has dulled the bite — flounder retreat to deeper, stable water. Tough day."
+                elif temp_change_f is not None and temp_change_f <= -2:
+                    fl_status = "fair"
+                    fl_text   = f"Water at {water_temp_f}°F with a noticeable drop ({temp_change_f:+.1f}°F trend). Bite may be suppressed. Fish slower and deeper, target wind-protected pockets."
+                elif temp_change_f is not None and temp_change_f >= 2:
+                    fl_status = "good" if month in (5, 6) else "fair"
+                    fl_text   = f"Water at {water_temp_f}°F and rising ({temp_change_f:+.1f}°F over 3 days) — flounder moving shallower and feeding. Good window."
+                else:
+                    fl_status = "good" if month in (5, 6) else "fair"
+                    stable_note = "Sweet spot." if 62 <= water_temp_f <= 66 else "Good range."
+                    fl_text   = f"Water at {water_temp_f}°F — stable. {stable_note} Work sandy bottom near structure with slow presentations."
+            else:
+                fl_status = "slow"
+                fl_text   = f"Water at {water_temp_f}°F — too warm. Flounder have pushed to deeper structure."
+        else:
+            fl_status = "fair"
+            fl_text   = "Flounder season is open. Stable water temps between 56-72°F (sweet spot 62-66°F) are prime."
+        species.append({"name": "Flounder", "icon": "🎣", "status": fl_status, "text": fl_text})
+
+    # Weakfish: active May-October, water 60-72°F, love big moon strong tides
+    if month in (5, 6, 7, 8, 9, 10):
+        wk_parts = []
+        wk_status = "fair"
+        if water_temp_f is not None:
+            if water_temp_f < 58:
+                wk_status = "slow"
+                wk_parts.append(f"water at {water_temp_f}°F is still a touch cold for them")
+            elif water_temp_f <= 72:
+                wk_status = "good"
+                wk_parts.append(f"water at {water_temp_f}°F is right in their wheelhouse")
+            else:
+                wk_status = "fair"
+                wk_parts.append(f"water at {water_temp_f}°F is warm — still around but pushed deeper")
+        if moon_pct < 15 or moon_pct > 85:
+            wk_parts.append("big moon pushing strong tides — prime time for weakfish in the back bay on moving water")
+            if wk_status != "slow":
+                wk_status = "great"
+        elif 40 <= moon_pct <= 60:
+            wk_parts.append("neap tide week means slower current — pick your moving water windows carefully")
+            if wk_status == "good":
+                wk_status = "fair"
+        else:
+            wk_parts.append("moderate tidal push — back bay structure and inlet mouths worth working")
+        wk_text = "Weakfish: " + "; ".join(wk_parts) + "."
+        species.append({"name": "Weakfish", "icon": "🎣", "status": wk_status, "text": wk_text})
+
     # Overall rating (0 = skip → 4 = GO)  ────────────────────────────────────
     base = {"excellent": 4, "good": 3, "building": 2, "fair": 2, "slow": 1, "very_slow": 0}.get(season_rating, 1)
     temp_adj = {
@@ -1019,6 +1082,7 @@ def get_day_fishing_outlook(d: date, water_temp_f=None, wind_mph=None, wind_deg=
         "overall_label": _LABELS[overall],
         "overall_color": _COLORS[overall],
         "overall_icon":  _ICONS[overall],
+        "species":       species,
     }
 
 

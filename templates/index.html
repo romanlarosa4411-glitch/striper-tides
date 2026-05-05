@@ -670,13 +670,13 @@
         <button class="field-report-toggle" onclick="this.closest('.field-report').classList.toggle('open')">
           <div class="field-report-toggle-left">
             <span class="field-report-label">Weekly Report</span>
-            <span class="field-report-week">Week of Apr 14</span>
+            <span class="field-report-week">Week of May 5</span>
           </div>
           <span class="field-report-arrow">&#9654;</span>
         </button>
         <div class="field-report-body-wrap">
-          <div class="field-report-title">Mid April — Fish Are Here</div>
-          <div class="field-report-body">The fish are here. If you've been waiting for a sign to grab the rod bag and get on the beach, this is it. Action has been steady but not fast. You're not going to get bit on every tide, but the anglers putting in the time are finding windows. Upper 30s are showing up more consistently now and the bigger class is right behind them. The 40 inch fish are moving. Not a question of if, just when they decide to show at your feet. Inlet mouths and back bay structure have been most productive when the current is ripping. Bunker presence is scattered but improving. Find the bait and you'll find the bass. Water temps are in the sweet spot. The run is just getting started and it only stacks up through the end of the month. Get out there. The tides don't care if you have other plans.</div>
+          <div class="field-report-title">Early May — Peak Season, Every Front Is Firing</div>
+          <div class="field-report-body">This is it. Striper season is at its true peak and the fishing matches that. Flounder season kicked off May 4th and people are already doing well. The bass are stacked and the bigger class is mixed in. Cow fish are around. If you've been grinding for a shot at a real one, now is the window. Beach and inlets are on fire and the back bay is equally productive depending on the tide. Work the current and you'll find them. Bluefish and weakfish are pushing in now too, which tells you everything you need to know about where we are in the season. The bait migration is in full swing and the predators are right behind it. Multiple species in the mix means more shots on every outing. Get out there before the summer crowds and the warming water change things up. This stretch does not last long.</div>
         </div>
       </div>
 
@@ -913,7 +913,14 @@
           </div>
           <div class="fg">
             <label class="fl">Photo <span style="font-weight:400;text-transform:none;letter-spacing:0">&nbsp;optional</span></label>
-            <input class="fi" type="file" id="fPhoto" accept="image/*" style="padding:6px"/>
+            <input type="file" id="fPhoto" accept="image/*" style="display:none"/>
+            <div id="photoPickerWrap">
+              <button type="button" class="sub-btn" id="photoPickBtn" style="width:auto;padding:6px 14px;font-size:.8rem">Choose Photo</button>
+              <div id="photoPreview" style="display:none;margin-top:8px;position:relative;width:fit-content">
+                <img id="photoPreviewImg" style="width:100px;height:100px;object-fit:cover;border-radius:8px;border:1px solid var(--border);display:block"/>
+                <button type="button" id="photoRemoveBtn" style="position:absolute;top:-8px;right:-8px;width:22px;height:22px;border-radius:50%;background:#e53e3e;color:#fff;border:none;cursor:pointer;font-size:14px;line-height:1;display:flex;align-items:center;justify-content:center;padding:0">&times;</button>
+              </div>
+            </div>
           </div>
           <label style="display:flex;align-items:center;gap:8px;font-size:.8rem;color:var(--muted);cursor:pointer;margin-bottom:4px">
             <input type="checkbox" id="fHideLocation" style="width:15px;height:15px;accent-color:var(--accent);cursor:pointer"/>
@@ -1652,6 +1659,13 @@ function renderOutlook(outlook, evs){
     const windIcon={'great':'💨','good':'🌬️','neutral':'〰️','bad':'⚠️','rough':'🚫','unknown':''}[outlook.wind_rating]||'🌬️';
     rows.push(`<div class="outlook-row"><span class="outlook-icon">${windIcon}</span><div class="outlook-text">${esc(outlook.wind_text)}</div></div>`);
   }
+  if(outlook.species&&outlook.species.length){
+    const statusColor={'great':'#10b981','good':'#f59e0b','fair':'#94a3b8','slow':'#64748b'};
+    for(const sp of outlook.species){
+      const dot=`<span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:${statusColor[sp.status]||'#94a3b8'};margin-right:5px;flex-shrink:0;margin-top:5px"></span>`;
+      rows.push(`<div class="outlook-row"><span class="outlook-icon">${sp.icon}</span><div class="outlook-text"><strong>${esc(sp.name)}</strong> ${dot}${esc(sp.text)}</div></div>`);
+    }
+  }
 
   document.getElementById('outlookSlot').innerHTML=`
     <div class="outlook-wrap">
@@ -1866,6 +1880,25 @@ document.querySelectorAll('.bite-opt').forEach(b=>b.addEventListener('click',()=
 // Fish slider
 document.getElementById('fFish').addEventListener('input',function(){document.getElementById('fishVal').textContent=this.value;});
 
+// Photo picker
+document.getElementById('photoPickBtn').addEventListener('click',()=>document.getElementById('fPhoto').click());
+document.getElementById('fPhoto').addEventListener('change',function(){
+  const file=this.files[0];
+  if(!file)return;
+  const url=URL.createObjectURL(file);
+  document.getElementById('photoPreviewImg').src=url;
+  document.getElementById('photoPreview').style.display='block';
+  document.getElementById('photoPickBtn').style.display='none';
+});
+document.getElementById('photoRemoveBtn').addEventListener('click',()=>{
+  document.getElementById('fPhoto').value='';
+  const img=document.getElementById('photoPreviewImg');
+  URL.revokeObjectURL(img.src);
+  img.src='';
+  document.getElementById('photoPreview').style.display='none';
+  document.getElementById('photoPickBtn').style.display='';
+});
+
 // Submit
 document.getElementById('submitBtn').addEventListener('click', async()=>{
   const fb=document.getElementById('formFB'), btn=document.getElementById('submitBtn');
@@ -1899,6 +1932,8 @@ document.getElementById('submitBtn').addEventListener('click', async()=>{
     document.querySelectorAll('.bite-opt').forEach(b=>b.classList.remove('sel'));
     document.getElementById('fTemp').value='';document.getElementById('fNotes').value='';
     document.getElementById('fPhoto').value='';
+    document.getElementById('photoPreview').style.display='none';
+    document.getElementById('photoPickBtn').style.display='';
     biteQuality=0;
     loadFeed(feedSpot);loadLeaderboard();loadStats();
     setTimeout(()=>fb.innerHTML='',5000);

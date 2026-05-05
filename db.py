@@ -93,6 +93,16 @@ def init_db() -> None:
             );
 
             CREATE INDEX IF NOT EXISTS idx_clarity_date ON clarity_reports(report_date);
+
+            -- Bite Talk: lightweight community comment thread
+            CREATE TABLE IF NOT EXISTS comments (
+                id           INTEGER PRIMARY KEY AUTOINCREMENT,
+                angler_name  TEXT NOT NULL,
+                message      TEXT NOT NULL,
+                created_at   TEXT NOT NULL DEFAULT (datetime('now'))
+            );
+
+            CREATE INDEX IF NOT EXISTS idx_comments_created ON comments(created_at);
         """)
         # Migrations for columns added after initial release
         for migration in [

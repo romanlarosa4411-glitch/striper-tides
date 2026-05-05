@@ -490,6 +490,30 @@ def clarity_report_post():
     return jsonify(dict(row)), 201
 
 
+@app.route("/api/comments", methods=["GET"])
+def comments_list():
+    with get_conn() as conn:
+        rows = conn.execute(
+            "SELECT id, angler_name, message, created_at FROM comments ORDER BY created_at DESC LIMIT 30"
+        ).fetchall()
+    return jsonify([dict(r) for r in rows])
+
+
+@app.route("/api/comments", methods=["POST"])
+def comments_post():
+    data = request.get_json(force=True)
+    name = (data.get("angler_name") or "").strip()[:30]
+    message = (data.get("message") or "").strip()[:280]
+    if not name or not message:
+        return jsonify({"error": "Name and message required"}), 400
+    with get_conn() as conn:
+        cur = conn.execute(
+            "INSERT INTO comments (angler_name, message) VALUES (?, ?)", (name, message)
+        )
+        row = conn.execute("SELECT * FROM comments WHERE id=?", (cur.lastrowid,)).fetchone()
+    return jsonify(dict(row)), 201
+
+
 @app.route('/robots.txt')
 def robots():
     txt = "User-agent: *\nAllow: /\nSitemap: https://striper-tides.onrender.com/sitemap.xml"

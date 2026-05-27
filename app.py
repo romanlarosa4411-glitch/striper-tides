@@ -516,16 +516,19 @@ def comments_post():
 
 @app.route('/robots.txt')
 def robots():
-    txt = "User-agent: *\nAllow: /\nSitemap: https://striper-tides.onrender.com/sitemap.xml"
+    txt = "User-agent: *\nAllow: /\nSitemap: https://stripertides.com/sitemap.xml"
     return app.response_class(txt, mimetype='text/plain')
 
 
 @app.route('/sitemap.xml')
 def sitemap():
-    xml = '''<?xml version="1.0" encoding="UTF-8"?>
+    from datetime import date
+    today = date.today().isoformat()
+    xml = f'''<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://stripertides.com/</loc>
+    <lastmod>{today}</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>

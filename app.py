@@ -41,11 +41,15 @@ def _key(prefix: str, **kw) -> str:
 
 @app.route("/")
 def index():
-    # Build spot metadata for the template (name, zone)
+    # Build spot metadata for the template (name, zone, region)
     spot_meta = []
     for name in SPOTS:
         cfg = st.SPOT_CONFIG.get(name, {})
-        spot_meta.append({"name": name, "zone": cfg.get("zone", "ocean")})
+        spot_meta.append({
+            "name":   name,
+            "zone":   cfg.get("zone", "ocean"),
+            "region": cfg.get("region", "cape_may"),
+        })
     return render_template("index.html", spots=SPOTS, spot_meta=spot_meta)
 
 

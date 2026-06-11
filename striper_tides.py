@@ -138,6 +138,7 @@ SPOT_CONFIG: dict[str, dict] = {
         "station_name":  "Atlantic City",
         "tide_type":     "H",
         "zone":          "back_bay",
+        "region":        "atlantic",
         "location_long": "Atlantic City Back Bay — Absecon Bay / AC Harbor, NJ",
     },
     "Somers Point Back Bay": {
@@ -145,6 +146,7 @@ SPOT_CONFIG: dict[str, dict] = {
         "station_name":  "Great Egg Harbor River",
         "tide_type":     "H",
         "zone":          "back_bay",
+        "region":        "atlantic",
         "location_long": "Somers Point — Great Egg Harbor Bay, NJ",
     },
     "Absecon Inlet": {
@@ -152,6 +154,7 @@ SPOT_CONFIG: dict[str, dict] = {
         "station_name":  "Atlantic City",
         "tide_type":     "H",
         "zone":          "ocean",
+        "region":        "atlantic",
         "location_long": "Absecon Inlet — Atlantic City / Longport, NJ",
     },
     "Great Egg Harbor Inlet": {
@@ -159,6 +162,7 @@ SPOT_CONFIG: dict[str, dict] = {
         "station_name":  "Great Egg Harbor River",
         "tide_type":     "H",
         "zone":          "ocean",
+        "region":        "atlantic",
         "location_long": "Great Egg Harbor Inlet — Ocean City / Longport, NJ",
     },
     # ── Ocean County ─────────────────────────────────────────────────────────
@@ -167,6 +171,7 @@ SPOT_CONFIG: dict[str, dict] = {
         "station_name":  "High Bar, Barnegat Bay",
         "tide_type":     "H",
         "zone":          "back_bay",
+        "region":        "ocean",
         "location_long": "LBI Back Bay — High Bar Harbor / Barnegat Bay, NJ",
     },
     "Barnegat Inlet": {
@@ -174,6 +179,7 @@ SPOT_CONFIG: dict[str, dict] = {
         "station_name":  "Barnegat Inlet (Inside)",
         "tide_type":     "H",
         "zone":          "ocean",
+        "region":        "ocean",
         "location_long": "Barnegat Inlet — Barnegat Light, NJ",
     },
     "Island Beach SP": {
@@ -181,6 +187,7 @@ SPOT_CONFIG: dict[str, dict] = {
         "station_name":  "Barnegat Inlet (Inside)",
         "tide_type":     "H",
         "zone":          "ocean",
+        "region":        "ocean",
         "location_long": "Island Beach State Park — Seaside Park, NJ",
     },
     # ── Raritan Bay ──────────────────────────────────────────────────────────
@@ -189,6 +196,7 @@ SPOT_CONFIG: dict[str, dict] = {
         "station_name":  "South Amboy, Raritan River",
         "tide_type":     "H",
         "zone":          "back_bay",
+        "region":        "raritan",
         "location_long": "Perth Amboy — Raritan River mouth / Raritan Bay, NJ",
     },
     "Keyport": {
@@ -196,6 +204,7 @@ SPOT_CONFIG: dict[str, dict] = {
         "station_name":  "Keyport, Raritan Bay",
         "tide_type":     "H",
         "zone":          "back_bay",
+        "region":        "raritan",
         "location_long": "Keyport — Raritan Bay, NJ",
     },
     "Keansburg": {
@@ -203,6 +212,7 @@ SPOT_CONFIG: dict[str, dict] = {
         "station_name":  "Keyport, Raritan Bay",
         "tide_type":     "H",
         "zone":          "back_bay",
+        "region":        "raritan",
         "location_long": "Keansburg — Raritan Bay, NJ",
     },
     # ── Monmouth County ──────────────────────────────────────────────────────
@@ -211,6 +221,7 @@ SPOT_CONFIG: dict[str, dict] = {
         "station_name":  "Manasquan Inlet",
         "tide_type":     "H",
         "zone":          "ocean",
+        "region":        "monmouth",
         "location_long": "Manasquan Inlet — Point Pleasant / Manasquan, NJ",
     },
     "Shark River Inlet": {
@@ -218,6 +229,7 @@ SPOT_CONFIG: dict[str, dict] = {
         "station_name":  "Shark River Hills",
         "tide_type":     "H",
         "zone":          "ocean",
+        "region":        "monmouth",
         "location_long": "Shark River Inlet — Belmar / Neptune, NJ",
     },
     "Sandy Hook": {
@@ -225,12 +237,50 @@ SPOT_CONFIG: dict[str, dict] = {
         "station_name":  "Sandy Hook",
         "tide_type":     "H",
         "zone":          "ocean",
+        "region":        "monmouth",
         "location_long": "Sandy Hook — Gateway NRA / Raritan Bay, NJ",
     },
 }
 
 # Legacy alias — app.py references this
 SPOT_STATIONS = SPOT_CONFIG
+
+# ── Regional forecast data sources ────────────────────────────────────────────
+# Maps region key → NWS obs station, centre lat/lon (for NWS grid URL lookup),
+# NOAA water-temp station, seasonal offset in months vs Cape May (positive =
+# month is shifted forward in _score_event, so April up north scores like May).
+REGION_CONFIG: dict[str, dict] = {
+    "cape_may": {
+        "obs_station":  "KWWD",
+        "lat": 38.93, "lon": -74.86,
+        "temp_station": CAPE_MAY_STATION,
+        "season_offset": 0,
+    },
+    "atlantic": {
+        "obs_station":  "KACY",
+        "lat": 39.36, "lon": -74.44,
+        "temp_station": "8534720",
+        "season_offset": 0,
+    },
+    "ocean": {
+        "obs_station":  "KACY",
+        "lat": 39.76, "lon": -74.12,
+        "temp_station": "8534720",
+        "season_offset": 1,   # months: spring run ~1 month earlier than Cape May
+    },
+    "monmouth": {
+        "obs_station":  "KBLM",
+        "lat": 40.20, "lon": -74.02,
+        "temp_station": "8531680",
+        "season_offset": 1,   # months: spring run ~1 month earlier than Cape May
+    },
+    "raritan": {
+        "obs_station":  "KBLM",
+        "lat": 40.47, "lon": -74.01,
+        "temp_station": "8531680",
+        "season_offset": 1,   # months: spring run ~1 month earlier than Cape May
+    },
+}
 
 # ── Location for solar calculations (Wildwood / Cape May area) ────────────────
 TIMEZONE = "America/New_York"
@@ -509,6 +559,24 @@ _NWS_FORECAST      = "https://api.weather.gov/gridpoints/PHI/63,33/forecast/hour
 _NWS_FORECAST_DAILY = "https://api.weather.gov/gridpoints/PHI/63,33/forecast"
 _NWS_OBS_URL       = "https://api.weather.gov/stations/KWWD/observations"  # Cape May County Airport ASOS
 
+
+from functools import lru_cache as _lru_cache
+
+@_lru_cache(maxsize=10)
+def _nws_forecast_url(lat: float, lon: float, hourly: bool = True) -> str:
+    """Resolve NWS grid forecast URL from lat/lon via the /points/ API. Cached."""
+    try:
+        r = requests.get(
+            f"https://api.weather.gov/points/{lat},{lon}",
+            headers=_NWS_HEADERS, timeout=10
+        )
+        r.raise_for_status()
+        props = r.json()["properties"]
+        return props["forecastHourly"] if hourly else props["forecast"]
+    except Exception:
+        return (_NWS_FORECAST if hourly else _NWS_FORECAST_DAILY)
+
+
 _WIND_DIR_DEG = {
     "N": 0, "NNE": 22, "NE": 45, "ENE": 67,
     "E": 90, "ESE": 112, "SE": 135, "SSE": 157,
@@ -519,11 +587,13 @@ _WIND_DIR_DEG = {
 _KMH_TO_MPH = 0.621371
 
 
-def fetch_marine_conditions(d: date) -> dict:
+def fetch_marine_conditions(d: date, region_cfg: dict = None) -> dict:
     """
-    Wind: KWWD ASOS observations for past/current hours, NWS PHI forecast for future.
-    Water temp: NOAA CO-OPS observed readings at Cape May station.
+    Wind: obs station ASOS observations for past/current hours, NWS forecast for future.
+    Water temp: NOAA CO-OPS observed readings at the appropriate regional station.
     Falls back gracefully if either source is unavailable.
+
+    region_cfg: optional entry from REGION_CONFIG. If None, defaults to Cape May sources.
     """
     hourly: list[dict] = [{
         "hour": h, "wind_mph": None, "wind_deg": None,
@@ -532,7 +602,16 @@ def fetch_marine_conditions(d: date) -> dict:
 
     local_tz = ZoneInfo(TIMEZONE)
 
-    # ── Wind pass 1: KWWD ASOS observations (real data for past hours) ────
+    # Resolve regional sources (fall back to Cape May defaults if not provided)
+    obs_station  = region_cfg["obs_station"] if region_cfg else "KWWD"
+    obs_url      = f"https://api.weather.gov/stations/{obs_station}/observations"
+    forecast_url = (
+        _nws_forecast_url(region_cfg["lat"], region_cfg["lon"])
+        if region_cfg else _NWS_FORECAST
+    )
+    temp_station = region_cfg["temp_station"] if region_cfg else CAPE_MAY_STATION
+
+    # ── Wind pass 1: ASOS observations (real data for past hours) ────────
     try:
         # Determine proper UTC offset for the target date (handles EST/EDT)
         _ref_dt  = datetime(d.year, d.month, d.day, 12, tzinfo=local_tz)
@@ -541,7 +620,7 @@ def fetch_marine_conditions(d: date) -> dict:
         from_str = f"{d.isoformat()}T00:00:00{_off_str}"
         to_str   = f"{d.isoformat()}T23:59:59{_off_str}"
         resp_obs = requests.get(
-            _NWS_OBS_URL,
+            obs_url,
             params={"start": from_str, "end": to_str},
             headers=_NWS_HEADERS,
             timeout=15,
@@ -591,7 +670,7 @@ def fetch_marine_conditions(d: date) -> dict:
 
     # ── Wind pass 2: NWS forecast (fills future hours, overrides where better) ──
     try:
-        resp = requests.get(_NWS_FORECAST, headers=_NWS_HEADERS, timeout=15)
+        resp = requests.get(forecast_url, headers=_NWS_HEADERS, timeout=15)
         resp.raise_for_status()
         periods  = resp.json()["properties"]["periods"]
         date_str = d.isoformat()
@@ -619,7 +698,7 @@ def fetch_marine_conditions(d: date) -> dict:
         resp2 = requests.get(
             NOAA_URL,
             params={
-                "station":    CAPE_MAY_STATION,
+                "station":    temp_station,
                 "product":    "water_temperature",
                 "time_zone":  "lst_ldt",
                 "units":      "english",
@@ -724,10 +803,12 @@ def fetch_7day_weather() -> dict:
         return {}
 
 
-def fetch_water_temp_trend(lookback_days: int = 3) -> dict:
+def fetch_water_temp_trend(lookback_days: int = 3, station_id: str = None) -> dict:
     """
     Fetch water temp from NOAA CO-OPS for the past N days and calculate trend.
     Returns {"current_f": float, "prev_f": float, "change_f": float} or empty dict.
+
+    station_id: NOAA CO-OPS station to query. Defaults to CAPE_MAY_STATION if None.
     """
     try:
         end_d   = date.today()
@@ -735,7 +816,7 @@ def fetch_water_temp_trend(lookback_days: int = 3) -> dict:
         resp = requests.get(
             NOAA_URL,
             params={
-                "station":    CAPE_MAY_STATION,
+                "station":    station_id or CAPE_MAY_STATION,
                 "product":    "water_temperature",
                 "time_zone":  "lst_ldt",
                 "units":      "english",
@@ -776,7 +857,8 @@ def fetch_water_temp_trend(lookback_days: int = 3) -> dict:
 def _score_event(range_pct: float, tod: str, moon_phase: str, month: int,
                   wind_mph: float = None, wind_deg: float = None,
                   pressure_trend_mb: float = None,
-                  temp_change_f: float = None) -> int:
+                  temp_change_f: float = None,
+                  season_offset: int = 0) -> int:
     """
     Score a tide event 0–135 (normalized to 0–100) across seven factors.
 
@@ -802,6 +884,10 @@ def _score_event(range_pct: float, tod: str, moon_phase: str, month: int,
         "Waxing Crescent": 5, "Waning Crescent": 5,
     }.get(moon_phase, 5)
 
+    # Apply season_offset (months) — spring run arrives earlier at northern spots.
+    # Shift effective month forward so April at Sandy Hook scores like May at Cape May.
+    _eff_month = ((month - 1 + season_offset) % 12) + 1 if season_offset else month
+
     season_pts = {
         5: 20, 4: 18,   # spring: May peak, April building
         10: 20, 11: 20, # fall peak (both critical months South Jersey)
@@ -809,7 +895,7 @@ def _score_event(range_pct: float, tod: str, moon_phase: str, month: int,
         3: 12, 12: 8,   # cold-water spring start / late fall tail
         8: 3,  2: 0,    # possible late-summer blitzes / deep winter
         1: 0,  7: 0,    # January and July: fish are gone
-    }.get(month, 0)
+    }.get(_eff_month, 0)
 
     # ── Wind boost (0-15) — boost only, no penalty ────────────────────────
     wind_pts = 0
@@ -1138,29 +1224,50 @@ def get_events(days: int = 90) -> dict:
     n             = len(sorted_ranges)
     threshold     = sorted_ranges[int(n * BIG_SWING_PERCENTILE / 100)] if n else 4.0
 
-    # ── Fetch boost data (wind, pressure, temp trend) for near-term scoring ──
+    # ── Fetch boost data (wind, pressure, temp trend) per region ─────────────
     # Wind + pressure: available for ~7 days (NWS forecast) / today (observations)
-    # Temp trend: 3-day lookback, same value applies to all near-term events
-    boost_wind: dict[str, dict] = {}   # day_str → {hour → {mph, deg}}
-    boost_pressure_mb: float = None
-    boost_temp_change: float = None
+    # Temp trend: 3-day lookback from each region's NOAA temp station
+    #
+    # region_boost[region_key] = {
+    #   "wind":         {day_str: {hour: {mph, deg}}},
+    #   "pressure_mb":  float or None   (today only),
+    #   "temp_change":  float or None,
+    # }
+    region_keys  = set(cfg.get("region", "cape_may") for cfg in SPOT_CONFIG.values())
+    region_boost: dict[str, dict] = {
+        rk: {"wind": {}, "pressure_mb": None, "temp_change": None}
+        for rk in region_keys
+    }
 
-    # Fetch conditions for today + next 7 days (wind per hour) — parallel
     forecast_end = min(today + timedelta(days=7), end_date)
-    def _fetch_boost(d_fc, day_off):
-        try:
-            cond = fetch_marine_conditions(d_fc)
-            return d_fc, day_off, cond
-        except Exception:
-            return d_fc, day_off, None
 
-    with ThreadPoolExecutor(max_workers=4) as pool:
-        boost_futs = [pool.submit(_fetch_boost, today + timedelta(days=i), i)
-                      for i in range((forecast_end - today).days + 1)]
-        # Also fetch temp trend in parallel
-        temp_fut = pool.submit(lambda: fetch_water_temp_trend(3))
+    def _fetch_boost(d_fc, day_off, rk):
+        try:
+            rc   = REGION_CONFIG.get(rk, REGION_CONFIG["cape_may"])
+            cond = fetch_marine_conditions(d_fc, rc)
+            return d_fc, day_off, rk, cond
+        except Exception:
+            return d_fc, day_off, rk, None
+
+    def _fetch_temp_trend(rk):
+        try:
+            rc = REGION_CONFIG.get(rk, REGION_CONFIG["cape_may"])
+            return rk, fetch_water_temp_trend(3, station_id=rc["temp_station"])
+        except Exception:
+            return rk, {}
+
+    # Submit all fetches across all regions + days in parallel
+    max_workers = max(8, len(region_keys) * 4)
+    with ThreadPoolExecutor(max_workers=max_workers) as pool:
+        boost_futs = [
+            pool.submit(_fetch_boost, today + timedelta(days=i), i, rk)
+            for rk in region_keys
+            for i in range((forecast_end - today).days + 1)
+        ]
+        temp_futs = {rk: pool.submit(_fetch_temp_trend, rk) for rk in region_keys}
+
         for f in as_completed(boost_futs):
-            d_fc, day_off, cond = f.result()
+            d_fc, day_off, rk, cond = f.result()
             if cond is None:
                 continue
             hourly_fc = cond.get("hourly", [])
@@ -1169,23 +1276,28 @@ def get_events(days: int = 90) -> dict:
                 if h["wind_mph"] is not None and h["wind_deg"] is not None:
                     wind_data[h["hour"]] = {"mph": h["wind_mph"], "deg": h["wind_deg"]}
             if wind_data:
-                boost_wind[d_fc.isoformat()] = wind_data
+                region_boost[rk]["wind"][d_fc.isoformat()] = wind_data
             if day_off == 0 and cond.get("pressure_trend_mb") is not None:
-                boost_pressure_mb = cond["pressure_trend_mb"]
-        try:
-            temp_trend = temp_fut.result()
-            boost_temp_change = temp_trend.get("change_f")
-        except Exception:
-            pass
+                region_boost[rk]["pressure_mb"] = cond["pressure_trend_mb"]
+
+        for rk, tf in temp_futs.items():
+            try:
+                _, trend = tf.result()
+                region_boost[rk]["temp_change"] = trend.get("change_f")
+            except Exception:
+                pass
 
     # ── Score and collect events ─────────────────────────────────────────────
     events: list[dict] = []
 
     for spot, tides in spot_tides.items():
-        cfg       = SPOT_CONFIG[spot]
-        want_type = cfg["tide_type"]
-        tide_word = "High" if want_type == "H" else "Low"
-        loc_long  = cfg["location_long"]
+        cfg          = SPOT_CONFIG[spot]
+        want_type    = cfg["tide_type"]
+        tide_word    = "High" if want_type == "H" else "Low"
+        loc_long     = cfg["location_long"]
+        region_key   = cfg.get("region", "cape_may")
+        season_off   = REGION_CONFIG.get(region_key, REGION_CONFIG["cape_may"])["season_offset"]
+        rboost       = region_boost.get(region_key, {"wind": {}, "pressure_mb": None, "temp_change": None})
 
         for t in tides:
             if t["type"] != want_type:
@@ -1205,9 +1317,9 @@ def get_events(days: int = 90) -> dict:
             # Percentile rank of today's tidal range within the loaded window
             rng_pct = bisect.bisect_left(sorted_ranges, swing) / len(sorted_ranges)
 
-            # Get boost data for this event's day/hour (if available)
+            # Get boost data for this event's day/hour from the spot's region
             ev_wind_mph, ev_wind_deg = None, None
-            day_wind = boost_wind.get(day_str)
+            day_wind = rboost["wind"].get(day_str)
             if day_wind:
                 # Use wind at the event's hour
                 hw = day_wind.get(dt.hour)
@@ -1215,13 +1327,14 @@ def get_events(days: int = 90) -> dict:
                     ev_wind_mph, ev_wind_deg = hw["mph"], hw["deg"]
 
             # Pressure trend only applies to today
-            ev_pressure = boost_pressure_mb if day_str == today.isoformat() else None
+            ev_pressure = rboost["pressure_mb"] if day_str == today.isoformat() else None
 
             score = _score_event(
                 rng_pct, tod, moon_label, d.month,
                 wind_mph=ev_wind_mph, wind_deg=ev_wind_deg,
                 pressure_trend_mb=ev_pressure,
-                temp_change_f=boost_temp_change,
+                temp_change_f=rboost["temp_change"],
+                season_offset=season_off,
             )
 
             if score < 35:

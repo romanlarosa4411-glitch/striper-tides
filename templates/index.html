@@ -3,14 +3,16 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-  <title>Striper Tides | Cape May County Fishing Forecast</title>
-  <meta name="description" content="Tide forecasts, solunar windows, and fishing conditions for Cape May County, NJ. Striper fishing reports, water clarity, and best times to fish the Jersey Shore."/>
-  <meta name="keywords" content="striper fishing NJ, Cape May tides, fishing forecast New Jersey, striped bass Cape May, Jersey Shore fishing, solunar tables NJ, Cape May County fishing, striper tides, tide chart Cape May, fishing conditions NJ"/>
+  <title>Striper Tides | New Jersey Fishing Forecast &amp; Tide Charts</title>
+  <meta name="description" content="Tide forecasts, solunar windows, and fishing conditions for the Jersey Shore from Sandy Hook to Cape May. Striper fishing scores, water clarity, and the best times to fish 25 NJ spots."/>
+  <meta name="keywords" content="striper fishing NJ, fishing forecast New Jersey, striped bass NJ, Jersey Shore fishing, solunar tables NJ, Cape May fishing, Barnegat Inlet stripers, Sandy Hook striper fishing, Raritan Bay stripers, Manasquan Inlet, Island Beach State Park fishing, tide chart NJ, fishing conditions NJ"/>
   <meta name="robots" content="index, follow"/>
   <link rel="canonical" href="https://stripertides.com"/>
-  <meta property="og:title" content="Striper Tides | Cape May County Fishing Forecast"/>
-  <meta property="og:description" content="Tide forecasts, solunar windows &amp; fishing conditions for Cape May County, NJ"/>
-  <meta property="og:image" content="https://stripertides.com/static/logo.jpg"/>
+  <meta property="og:title" content="Striper Tides | New Jersey Fishing Forecast &amp; Tide Charts"/>
+  <meta property="og:description" content="Tide forecasts, solunar windows &amp; fishing conditions for 25 spots on the Jersey Shore, Sandy Hook to Cape May"/>
+  <meta property="og:image" content="https://stripertides.com/static/og.jpg"/>
+  <meta property="og:image:width" content="1200"/>
+  <meta property="og:image:height" content="630"/>
   <meta property="og:url" content="https://stripertides.com"/>
   <meta property="og:type" content="website"/>
   <meta name="twitter:card" content="summary_large_image"/>
@@ -22,14 +24,14 @@
         "@type": "WebSite",
         "name": "Striper Tides",
         "url": "https://stripertides.com",
-        "description": "Tide forecasts, solunar windows, and fishing conditions for Cape May County, NJ."
+        "description": "Tide forecasts, solunar windows, and fishing conditions for the New Jersey Shore, Sandy Hook to Cape May."
       },
       {
         "@type": "WebApplication",
         "name": "Striper Tides",
         "url": "https://stripertides.com",
         "applicationCategory": "SportsApplication",
-        "description": "Real-time tide forecasts, solunar fishing windows, water clarity, and fishing conditions for Cape May County, New Jersey. Covers 12 spots including Cape May Inlet, Corsons Inlet, Hereford Inlet, Townsends Inlet, and back bay locations. Tracks striped bass, flounder, and weakfish conditions.",
+        "description": "Real-time tide forecasts, solunar fishing windows, water clarity, and fishing conditions for the New Jersey Shore. Covers 25 spots including Cape May Inlet, Hereford Inlet, Absecon Inlet, Barnegat Inlet, Island Beach State Park, Manasquan Inlet, Sandy Hook, Raritan Bay, and back bay locations. Tracks striped bass, flounder, and weakfish conditions.",
         "operatingSystem": "Web",
         "offers": {
           "@type": "Offer",
@@ -38,20 +40,20 @@
         },
         "areaServed": {
           "@type": "Place",
-          "name": "Cape May County, New Jersey, USA",
+          "name": "New Jersey Shore, USA",
           "geo": {
             "@type": "GeoCoordinates",
-            "latitude": "38.93",
-            "longitude": "-74.86"
+            "latitude": "39.70",
+            "longitude": "-74.20"
           }
         },
         "featureList": [
-          "Tide predictions for Cape May County inlets and back bays",
+          "Tide predictions for New Jersey inlets and back bays",
           "Solunar fishing windows and moon phase calendar",
           "Water clarity forecasts",
           "Striped bass fishing reports",
           "Flounder and weakfish conditions",
-          "Wave and surf reports for Cape May County",
+          "Wave and surf reports for the Jersey Shore",
           "Community fishing reports and Bite Talk"
         ]
       }
@@ -59,7 +61,7 @@
   }
   </script>
   <link rel="icon" type="image/png" href="/static/favicon.png"/>
-  <link rel="apple-touch-icon" href="/static/favicon.png"/>
+  <link rel="apple-touch-icon" href="/static/apple-touch-icon.png"/>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
@@ -715,10 +717,7 @@
         </div>
         <div class="spot-selector-body" id="spotSelectorBody">
           <input class="spot-search" id="spotSearch" type="text" placeholder="Search spots…" oninput="_filterSpotSearch(this.value)">
-          <div class="spot-zone-label" id="spotLabelOcean">Ocean / Inlet</div>
-          <div class="spot-check-grid" id="spotCheckOcean"></div>
-          <div class="spot-zone-label" id="spotLabelBay">Back Bay</div>
-          <div class="spot-check-grid" id="spotCheckBay"></div>
+          <div id="spotCheckGroups"></div>
           <div class="spot-selector-actions">
             <button onclick="selectAllSpots()">Select All</button>
             <button onclick="clearAllSpots()">Clear All</button>
@@ -1100,7 +1099,7 @@
 
       <div style="margin-bottom:32px;">
         <div style="font-size:.72rem;font-weight:700;color:var(--accent2);letter-spacing:.08em;text-transform:uppercase;margin-bottom:12px;">About Striper Tides</div>
-        <p style="color:var(--muted);font-size:.84rem;line-height:1.7;margin:0 0 10px;">Striper Tides is a free fishing forecast app for Cape May County, New Jersey. It combines NOAA tide predictions, solunar windows, moon phase data, water temperature, wind, and wave conditions into a daily fishing score for 12 spots across Cape May County's ocean inlets and back bay channels. Updated every day of the fishing season.</p>
+        <p style="color:var(--muted);font-size:.84rem;line-height:1.7;margin:0 0 10px;">Striper Tides is a free fishing forecast app for the New Jersey Shore. It combines NOAA tide predictions, solunar windows, moon phase data, water temperature, wind, and wave conditions into a daily fishing score for 25 spots from Sandy Hook to Cape May, covering ocean inlets, surf beaches, and back bay channels. Updated every day of the fishing season.</p>
         <p style="color:var(--muted);font-size:.84rem;line-height:1.7;margin:0;">Built for striped bass, flounder, and weakfish anglers fishing the Jersey Shore from Corsons Inlet down to Cape May Point.</p>
       </div>
 
@@ -1109,23 +1108,23 @@
         <div style="display:grid;gap:10px;">
           <div style="background:var(--surf);border:1px solid var(--border);border-radius:10px;padding:14px 16px;">
             <div style="font-size:.84rem;font-weight:700;color:var(--text);margin-bottom:5px;">Corsons Inlet</div>
-            <div style="font-size:.78rem;color:var(--muted);line-height:1.6;">Barrier island tidal inlet between Ocean City and Strathmere. Strong tidal current on the drop makes this a top producer for striped bass and bluefish during spring and fall migrations.</div>
+            <div style="font-size:.78rem;color:var(--muted);line-height:1.6;">One of the most consistent striper and bluefish inlets in Cape May County. The channel cuts hard to the north side and the rip that forms on the outgoing tide is where fish stack. Stripers and blues work the current seam aggressively from late April through June and again in October and November. The beach on the south side offers surf access to the rip from the sand. Swim shads, bucktails, and live spot work well on the drop. The inlet also produces strong fluke action in May and June on the incoming tide over the sandy channel edges.</div>
           </div>
           <div style="background:var(--surf);border:1px solid var(--border);border-radius:10px;padding:14px 16px;">
             <div style="font-size:.84rem;font-weight:700;color:var(--text);margin-bottom:5px;">Townsends Inlet</div>
-            <div style="font-size:.78rem;color:var(--muted);line-height:1.6;">Shallow inlet between Avalon and Sea Isle City. Productive for early season stripers and fluke on moving tides with back bay access on both sides.</div>
+            <div style="font-size:.78rem;color:var(--muted);line-height:1.6;">A shallower, narrower inlet between Avalon and Sea Isle City that warms early in spring and holds fish longer into fall. The back bay access on both sides makes this a flexible spot depending on wind and tide. Schoolie stripers and fluke are consistent through May and June and the inlet mouth produces on the last two hours of the outgoing and the first hour of the incoming. Bucktails and paddle tails on the bottom are the standard presentation. Sea robin are plentiful here in summer which tells you the bait is always around.</div>
           </div>
           <div style="background:var(--surf);border:1px solid var(--border);border-radius:10px;padding:14px 16px;">
             <div style="font-size:.84rem;font-weight:700;color:var(--text);margin-bottom:5px;">Hereford Inlet</div>
-            <div style="font-size:.78rem;color:var(--muted);line-height:1.6;">Wide, fast inlet between Stone Harbor and North Wildwood. Known for large fall striper runs and strong current that holds bait through the outgoing tide.</div>
+            <div style="font-size:.78rem;color:var(--muted);line-height:1.6;">One of the wider inlets on the Cape May County coast with powerful tidal flow and multiple channel edges to work. The rips off the lighthouse side are a landmark bass and bluefish spot during the spring run. Plugging the current seam with surface poppers and swimmers at first light in May and October is as good as it gets on the Jersey Shore. The inlet stays productive all season with weakfish and fluke joining stripers and blues through summer. Boat anglers can work the deeper cuts on the outgoing for late season bass into November.</div>
           </div>
           <div style="background:var(--surf);border:1px solid var(--border);border-radius:10px;padding:14px 16px;">
             <div style="font-size:.84rem;font-weight:700;color:var(--text);margin-bottom:5px;">Cape May Inlet</div>
-            <div style="font-size:.78rem;color:var(--muted);line-height:1.6;">Major inlet at the southern tip of New Jersey where Delaware Bay and the Atlantic converge. Year round bluefish, weakfish, and striped bass with heavy bait migration in May and October.</div>
+            <div style="font-size:.78rem;color:var(--muted);line-height:1.6;">The premier inlet in South Jersey and arguably the best single striper spot in Cape May County during the spring and fall migrations. This is a major working inlet where Delaware Bay and the Atlantic meet, creating powerful tidal rips that funnel bait and hold fish for days at a time. The spring run in late April and May sees some of the biggest stripers of the year stacking in the rips. Bucktails, darters, and large swim shads on the outgoing tide at dawn and dusk are the standard approach. Weakfish, bluefish, and fluke are all caught here regularly through summer. The jetties on both sides provide surf access to the rip.</div>
           </div>
           <div style="background:var(--surf);border:1px solid var(--border);border-radius:10px;padding:14px 16px;">
             <div style="font-size:.84rem;font-weight:700;color:var(--text);margin-bottom:5px;">Cape May Point</div>
-            <div style="font-size:.78rem;color:var(--muted);line-height:1.6;">The southernmost tip of New Jersey and a prime striper migration corridor in spring and fall. Surf and jetty access with strong rip currents forming on the outgoing tide.</div>
+            <div style="font-size:.78rem;color:var(--muted);line-height:1.6;">The southernmost tip of New Jersey where the Delaware Bay current meets the Atlantic and creates the most famous striper rip in South Jersey. Fish stage here during both the spring and fall migrations making it a two season destination. The point is primarily a surf and wading spot with jetty access on the bay side. The rip forms strongest on the outgoing tide and concentrates baitfish right on the beach, bringing stripers in within casting range. Poppers and needlefish worked through the rip at dawn are the go to presentation. This is also a prime bluefish spot when bunker schools push by in October.</div>
           </div>
         </div>
       </div>
@@ -1135,31 +1134,107 @@
         <div style="display:grid;gap:10px;">
           <div style="background:var(--surf);border:1px solid var(--border);border-radius:10px;padding:14px 16px;">
             <div style="font-size:.84rem;font-weight:700;color:var(--text);margin-bottom:5px;">Grassy Sound</div>
-            <div style="font-size:.78rem;color:var(--muted);line-height:1.6;">Shallow back bay channel near Wildwood Crest. Warm water concentrates flounder and stripers early in the season when ocean temps are still cold.</div>
+            <div style="font-size:.78rem;color:var(--muted);line-height:1.6;">A shallow, grassy back bay channel near Wildwood Crest that is one of the first spots to come alive in spring as warming water pushes into the back bay system ahead of the ocean. Flounder fishing here in late April and early May can be exceptional before ocean temps draw fish out to the inlets. Schoolie stripers work the sod bank edges on the incoming tide through May and June. The channel is narrow and the fishing is tighter than the open bay spots, which means lighter tackle and finesse presentations work better here. Bloodworms and Berkley Gulp on a fluke rig are the standard bottom approach.</div>
           </div>
           <div style="background:var(--surf);border:1px solid var(--border);border-radius:10px;padding:14px 16px;">
             <div style="font-size:.84rem;font-weight:700;color:var(--text);margin-bottom:5px;">Stone Harbor Back Bay</div>
-            <div style="font-size:.78rem;color:var(--muted);line-height:1.6;">Protected channels behind Stone Harbor with good weakfish and flounder structure along the marsh edges on the incoming tide.</div>
+            <div style="font-size:.78rem;color:var(--muted);line-height:1.6;">Protected back bay channels behind Stone Harbor with a mix of marsh edge structure, channel edges, and open flat areas. This system holds weakfish through summer and is one of the more consistent spots for them at dawn and dusk on the big tides around new and full moon. Flounder are also consistent from late April through June. The channel edges on the outgoing tide are where stripers work in spring. Light jig heads with soft plastics are versatile enough to cover weakfish and schoolie bass in the same presentation. The protected water makes this fishable even in a moderate southwest wind.</div>
           </div>
           <div style="background:var(--surf);border:1px solid var(--border);border-radius:10px;padding:14px 16px;">
             <div style="font-size:.84rem;font-weight:700;color:var(--text);margin-bottom:5px;">Avalon Back Bay</div>
-            <div style="font-size:.78rem;color:var(--muted);line-height:1.6;">Strong tidal flow through the channels near Avalon. Stripers stack up on the outgoing tide in fall and it is one of the more consistent back bay spots on the chart.</div>
+            <div style="font-size:.78rem;color:var(--muted);line-height:1.6;">Strong tidal exchange through the channels behind Avalon creates reliable current that concentrates baitfish and holds predators on both the incoming and outgoing tide. Fall stripers stack on the outgoing in October and November as water temps drop and fish begin their southward push. Schoolie bass and bluefish move through in spring as well. The back bay here is more open than the southern systems which means plugging the edges with small swimmers and paddle tails covers water efficiently. Fluke are present from May through July on the sandy bottom sections of the channel.</div>
           </div>
           <div style="background:var(--surf);border:1px solid var(--border);border-radius:10px;padding:14px 16px;">
             <div style="font-size:.84rem;font-weight:700;color:var(--text);margin-bottom:5px;">Sea Isle Back Bay</div>
-            <div style="font-size:.78rem;color:var(--muted);line-height:1.6;">Sheltered flats with good flounder action from late April through June. Warming water arrives here before the ocean, making it one of the first spots worth fishing in spring.</div>
+            <div style="font-size:.78rem;color:var(--muted);line-height:1.6;">Sheltered flats and channels behind Sea Isle City that warm ahead of the ocean and consistently produce the first flounder of the season in April and early May. Doormats push through this system during the late April and May window before moving out to the ocean inlets. The flat water makes for easy boat fishing and fish tend to concentrate on the subtle bottom transitions where sand meets soft bottom. Bloodworms and live killies are the traditional baits here. Weakfish work these flats on summer evenings and schoolie stripers use the channel edges in spring and fall.</div>
           </div>
           <div style="background:var(--surf);border:1px solid var(--border);border-radius:10px;padding:14px 16px;">
             <div style="font-size:.84rem;font-weight:700;color:var(--text);margin-bottom:5px;">Townsends Back Bay</div>
-            <div style="font-size:.78rem;color:var(--muted);line-height:1.6;">Productive channel running behind Avalon and Sea Isle City. Consistent weakfish action in summer evenings around new and full moon tides.</div>
+            <div style="font-size:.78rem;color:var(--muted);line-height:1.6;">A productive back bay channel running behind Avalon and Sea Isle City with strong tidal flow and some of the most consistent weakfish action in the county through summer. This is one of the better spots for targeting weakfish on light tackle at dawn and dusk on the big tides. Small bucktails, curly tail grubs, and soft plastic swimmers on light jig heads are the standard approach. Flounder are also present in May and June. The channel runs close to navigable water for small boats and the structure along the marsh edges gives fish ambush points to work with the current.</div>
           </div>
           <div style="background:var(--surf);border:1px solid var(--border);border-radius:10px;padding:14px 16px;">
             <div style="font-size:.84rem;font-weight:700;color:var(--text);margin-bottom:5px;">Cape May Back Bay</div>
-            <div style="font-size:.78rem;color:var(--muted);line-height:1.6;">Warm, shallow back bay near Cape May Harbor and one of the first spots to fish for flounder in April. Doormat fluke and weakfish through July.</div>
+            <div style="font-size:.78rem;color:var(--muted);line-height:1.6;">Warm, shallow back bay water near Cape May Harbor that heats up early in spring and holds some of the best early season flounder action in the county. April flounder here can be exceptional and doormats are possible in May and June as bait concentrates in the harbor channels. Weakfish work this system through summer and the proximity to Cape May Inlet means stripers and blues push in on the tide through spring and fall. The area around the harbor entrance is particularly productive on the outgoing tide when current pulls bait out of the back bay and into the channel. Shedder crab and bucktails are worth carrying here all season.</div>
           </div>
           <div style="background:var(--surf);border:1px solid var(--border);border-radius:10px;padding:14px 16px;">
             <div style="font-size:.84rem;font-weight:700;color:var(--text);margin-bottom:5px;">The Thorofare</div>
-            <div style="font-size:.78rem;color:var(--muted);line-height:1.6;">The main back bay channel connecting Cape May Harbor to the back bay system. Strong current, deep holes, and consistent striper action on the outgoing tide.</div>
+            <div style="font-size:.78rem;color:var(--muted);line-height:1.6;">The main arterial channel of the Cape May back bay system with some of the strongest tidal flow and deepest structure in the back bay. Deep holes along the channel edges hold stripers through spring and fall and the current here is strong enough to put quality fish on the feed even in the middle of the tide. This is one of the better big bass spots in the back bay, especially on the outgoing tide in October and November. Bunker chunk and heavy bucktails work the holes while paddle tail swimbaits cover the current seams. Weakfish also use this channel heavily in summer. The strong current means heavier presentations than anywhere else in the back bay.</div>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-bottom:32px;">
+        <div style="font-size:.72rem;font-weight:700;color:var(--accent2);letter-spacing:.08em;text-transform:uppercase;margin-bottom:12px;">Atlantic County</div>
+        <div style="display:grid;gap:10px;">
+          <div style="background:var(--surf);border:1px solid var(--border);border-radius:10px;padding:14px 16px;">
+            <div style="font-size:.84rem;font-weight:700;color:var(--text);margin-bottom:5px;">Great Egg Harbor Inlet</div>
+            <div style="font-size:.78rem;color:var(--muted);line-height:1.6;">A smaller inlet at the southern end of Atlantic County between Ocean City and Sea Isle City with strong tidal rips on the outgoing tide. Good striper fishing in spring and fall with the rip forming at the mouth on the drop. Fluke stack in the channel on the incoming tide from May through July. Access from the beach or by boat from the back bay side. This inlet sees less pressure than the bigger inlets to the north and south which means the fish can be a little less boat shy.</div>
+          </div>
+          <div style="background:var(--surf);border:1px solid var(--border);border-radius:10px;padding:14px 16px;">
+            <div style="font-size:.84rem;font-weight:700;color:var(--text);margin-bottom:5px;">Somers Point Back Bay</div>
+            <div style="font-size:.78rem;color:var(--muted);line-height:1.6;">Where Great Egg Harbor Bay meets the main back bay system near Somers Point. A historically productive area for stripers and weakfish where the mouths of the tidal rivers concentrate bait and hold fish on both tides. Spring stripers work the current seams and fall bass push through heading south. Good flounder action in spring and the protected water makes it fishable in conditions that would shut down the inlets. The deeper channels near the bay mouth hold fish later into the season.</div>
+          </div>
+          <div style="background:var(--surf);border:1px solid var(--border);border-radius:10px;padding:14px 16px;">
+            <div style="font-size:.84rem;font-weight:700;color:var(--text);margin-bottom:5px;">Atlantic City Back Bay</div>
+            <div style="font-size:.78rem;color:var(--muted);line-height:1.6;">The back bay channels behind Atlantic City and the barrier islands offer a mix of tidal channels, marina structure, and open bay areas. Stripers push through in spring and fall using the channel edges and marina pilings as ambush points. Bluefish are common in the bay through summer. Weakfish and flounder work the flats from May through July. The proximity to multiple inlets means strong tidal flow through the whole system and the pilings around the casino and marina complex hold sheepshead through summer.</div>
+          </div>
+          <div style="background:var(--surf);border:1px solid var(--border);border-radius:10px;padding:14px 16px;">
+            <div style="font-size:.84rem;font-weight:700;color:var(--text);margin-bottom:5px;">Absecon Inlet</div>
+            <div style="font-size:.78rem;color:var(--muted);line-height:1.6;">The main ocean inlet at Atlantic City. A wide, deep, high traffic inlet with serious tidal rips and one of the better big striper inlets on the central Jersey Shore during spring and fall migrations. Bluefish are consistent through summer. The jetties on both sides provide surf and rock access to the rip. Bunker schools stack in the mouth of this inlet in October and the bass fishing during those pushes can be exceptional. Heavy bucktails and large swimmers worked through the current seam are the standard approach.</div>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-bottom:32px;">
+        <div style="font-size:.72rem;font-weight:700;color:var(--accent2);letter-spacing:.08em;text-transform:uppercase;margin-bottom:12px;">Ocean County</div>
+        <div style="display:grid;gap:10px;">
+          <div style="background:var(--surf);border:1px solid var(--border);border-radius:10px;padding:14px 16px;">
+            <div style="font-size:.84rem;font-weight:700;color:var(--text);margin-bottom:5px;">LBI Back Bay</div>
+            <div style="font-size:.78rem;color:var(--muted);line-height:1.6;">Little Egg Harbor and Manahawkin Bay form one of the largest back bay systems on the Jersey Shore with a massive amount of marsh edge structure, channel edges, and open water to explore. Stripers, weakfish, and flounder all use this system through the season. The western shore channels are particularly productive for spring stripers and the tidal flow through the channels behind LBI holds fish all season long. Light to medium tackle with paddle tails and soft plastics covers the most water efficiently here.</div>
+          </div>
+          <div style="background:var(--surf);border:1px solid var(--border);border-radius:10px;padding:14px 16px;">
+            <div style="font-size:.84rem;font-weight:700;color:var(--text);margin-bottom:5px;">Barnegat Inlet</div>
+            <div style="font-size:.78rem;color:var(--muted);line-height:1.6;">One of the most famous striper inlets on the entire East Coast. The north jetty at Barnegat is legendary for big fall stripers from late October through December and the rip formed by the current pouring through the inlet creates world class striper fishing that draws anglers from across the region. Large plugs, bunker chunk, and heavy bucktails are the standard approach. In spring the inlet is equally productive as the migration moves north. The inlet entrance is one of the most powerful and dangerous on the coast and boat anglers need to respect the conditions here.</div>
+          </div>
+          <div style="background:var(--surf);border:1px solid var(--border);border-radius:10px;padding:14px 16px;">
+            <div style="font-size:.84rem;font-weight:700;color:var(--text);margin-bottom:5px;">Island Beach State Park</div>
+            <div style="font-size:.78rem;color:var(--muted);line-height:1.6;">A pristine undeveloped barrier island with miles of surf fishing access and some of the best beach striper fishing in New Jersey. Stripers work the gutters and sandbars along the beachfront in spring and fall and bluefish hit poppers in the wash all summer. The south end near Barnegat Inlet is the most productive zone and fish concentrate in the rip that runs along the beach here on the outgoing tide. A buggy permit is required for oceanside beach access and the park fills fast on good weather weekends in peak season.</div>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-bottom:32px;">
+        <div style="font-size:.72rem;font-weight:700;color:var(--accent2);letter-spacing:.08em;text-transform:uppercase;margin-bottom:12px;">Raritan Bay</div>
+        <div style="display:grid;gap:10px;">
+          <div style="background:var(--surf);border:1px solid var(--border);border-radius:10px;padding:14px 16px;">
+            <div style="font-size:.84rem;font-weight:700;color:var(--text);margin-bottom:5px;">Perth Amboy</div>
+            <div style="font-size:.78rem;color:var(--muted);line-height:1.6;">The southwestern corner of Raritan Bay where the Raritan River meets the bay, making it a historic and productive striper spot that comes alive in spring as migrating fish push up into the river mouth. The rips and eddies around the points and shoals concentrate bass on the moving tide. Schoolies are consistent through summer and larger fish push through in spring and fall. Bottom fishing with crab and clam produces in the deeper holes. The area sees good numbers of fish in both the spring northward and fall southward migrations.</div>
+          </div>
+          <div style="background:var(--surf);border:1px solid var(--border);border-radius:10px;padding:14px 16px;">
+            <div style="font-size:.84rem;font-weight:700;color:var(--text);margin-bottom:5px;">Keyport</div>
+            <div style="font-size:.78rem;color:var(--muted);line-height:1.6;">The Keyport area sits at the center of Raritan Bay which gives good access to migrating fish moving through in both directions. Stripers and bluefish work the bay in spring and fall and the flats off Keyport produce weakfish in summer on light tackle at dusk. The harbor and marina structure hold fish on the tide and the open bay out front is worth working on the bigger tidal swings in the spring and fall migration windows.</div>
+          </div>
+          <div style="background:var(--surf);border:1px solid var(--border);border-radius:10px;padding:14px 16px;">
+            <div style="font-size:.84rem;font-weight:700;color:var(--text);margin-bottom:5px;">Keansburg</div>
+            <div style="font-size:.78rem;color:var(--muted);line-height:1.6;">The northern shore of Raritan Bay near Keansburg offers accessible shoreline fishing and boat ramp access to the open bay. Stripers move through this part of the bay in spring heading toward the rivers and in fall heading south. Bluefish are reliable here in summer and the deeper water just off the flats holds fish later into the fall season. A good option when you want open bay access without fighting the crowds at the more well known spots along the shore.</div>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-bottom:32px;">
+        <div style="font-size:.72rem;font-weight:700;color:var(--accent2);letter-spacing:.08em;text-transform:uppercase;margin-bottom:12px;">Monmouth County</div>
+        <div style="display:grid;gap:10px;">
+          <div style="background:var(--surf);border:1px solid var(--border);border-radius:10px;padding:14px 16px;">
+            <div style="font-size:.84rem;font-weight:700;color:var(--text);margin-bottom:5px;">Manasquan Inlet</div>
+            <div style="font-size:.78rem;color:var(--muted);line-height:1.6;">One of the most productive inlets on the Jersey Shore and a major striper landmark. The rip that forms at the mouth of the inlet is legendary and the jetties on both sides provide excellent access for surf and rock fishing. Spring and fall striper runs both push fish through this inlet in big numbers and the inlet mouth is also a top bluefish spot through summer. Eels, bucktails, and large swimmers are the go to presentations. The inlet also connects to the Manasquan River which holds stripers on the spring run and is worth working with live eels at night.</div>
+          </div>
+          <div style="background:var(--surf);border:1px solid var(--border);border-radius:10px;padding:14px 16px;">
+            <div style="font-size:.84rem;font-weight:700;color:var(--text);margin-bottom:5px;">Shark River Inlet</div>
+            <div style="font-size:.78rem;color:var(--muted);line-height:1.6;">A smaller but productive inlet connecting Shark River to the ocean. The current rips through on the outgoing tide and concentrates bass and blues in the channel mouth. Schoolie stripers are consistent from spring through fall and the back bay behind the inlet has good weakfish and flounder action. Light tackle fishing with small jigs and soft plastics is productive throughout the season. This inlet is more approachable than Manasquan and gets less pressure on weekday tides.</div>
+          </div>
+          <div style="background:var(--surf);border:1px solid var(--border);border-radius:10px;padding:14px 16px;">
+            <div style="font-size:.84rem;font-weight:700;color:var(--text);margin-bottom:5px;">Sandy Hook</div>
+            <div style="font-size:.78rem;color:var(--muted);line-height:1.6;">The northernmost point of the Jersey Shore and one of the legendary striper spots on the entire East Coast. The rip at the tip of Sandy Hook is world class striper fishing during the spring and fall migrations and big fish are common here in late April and May as the spring run peaks. The ocean side of the hook has miles of accessible beach for surf fishing and the bay side has productive back bay areas for smaller fish and weakfish. The tip of the hook and the lighthouse area are the prime zones and they fish best on the outgoing tide when the rip is at full strength.</div>
           </div>
         </div>
       </div>
@@ -1169,11 +1244,11 @@
         <div style="display:grid;gap:10px;">
           <div style="background:var(--surf);border:1px solid var(--border);border-radius:10px;padding:14px 16px;">
             <div style="font-size:.84rem;font-weight:700;color:var(--text);margin-bottom:5px;">Striped Bass</div>
-            <div style="font-size:.78rem;color:var(--muted);line-height:1.6;">Present in Cape May County from March through December with peak fishing in April through May and October through November. Best action on the first and last two hours of moving tide at dawn and dusk. Solunar windows add an additional bite trigger during major and minor feeding periods.</div>
+            <div style="font-size:.78rem;color:var(--muted);line-height:1.6;">Present on the Jersey Shore from March through December with peak fishing in April through May and October through November. The spring run hits Raritan Bay and the northern beaches early, then fills in along the whole coast through May. Best action on the first and last two hours of moving tide at dawn and dusk. Solunar windows add an additional bite trigger during major and minor feeding periods.</div>
           </div>
           <div style="background:var(--surf);border:1px solid var(--border);border-radius:10px;padding:14px 16px;">
             <div style="font-size:.84rem;font-weight:700;color:var(--text);margin-bottom:5px;">Flounder (Summer Flounder / Fluke)</div>
-            <div style="font-size:.78rem;color:var(--muted);line-height:1.6;">Season runs April through July in Cape May County. Early season fluke target warm back bay flats before ocean temps come up. Doormat flounder move through the inlets in May and June on light incoming tide over sand bottom structure.</div>
+            <div style="font-size:.78rem;color:var(--muted);line-height:1.6;">Season runs April through July on the Jersey Shore. Early season fluke target warm back bay flats before ocean temps come up. Doormat flounder move through the inlets in May and June on light incoming tide over sand bottom structure.</div>
           </div>
           <div style="background:var(--surf);border:1px solid var(--border);border-radius:10px;padding:14px 16px;">
             <div style="font-size:.84rem;font-weight:700;color:var(--text);margin-bottom:5px;">Weakfish</div>
@@ -1181,11 +1256,11 @@
           </div>
           <div style="background:var(--surf);border:1px solid var(--border);border-radius:10px;padding:14px 16px;">
             <div style="font-size:.84rem;font-weight:700;color:var(--text);margin-bottom:5px;">Sheepshead</div>
-            <div style="font-size:.78rem;color:var(--muted);line-height:1.6;">Show up in Cape May County late May through September around structure, pilings, jetty rocks, and bridge footings. They target crabs and barnacles and are notoriously hard to hook. Fiddler crabs and fresh shedder crab are the top baits. Bottomsweeper jigs tipped with crab also produce. The bite picks up as water temps climb through June and they can be found in both the inlets and the back bay around any hard structure.</div>
+            <div style="font-size:.78rem;color:var(--muted);line-height:1.6;">Show up in South Jersey late May through September around structure, pilings, jetty rocks, and bridge footings. They target crabs and barnacles and are notoriously hard to hook. Fiddler crabs and fresh shedder crab are the top baits. Bottomsweeper jigs tipped with crab also produce. The bite picks up as water temps climb through June and they can be found in both the inlets and the back bay around any hard structure.</div>
           </div>
           <div style="background:var(--surf);border:1px solid var(--border);border-radius:10px;padding:14px 16px;">
             <div style="font-size:.84rem;font-weight:700;color:var(--text);margin-bottom:5px;">Kingfish (Northern Kingfish)</div>
-            <div style="font-size:.78rem;color:var(--muted);line-height:1.6;">A surf and inlet bottom fish that arrives in Cape May County when water temps push above 60 degrees, typically late May into September. Found in the wash of the surf, around inlet mouths, and on sandy bottom in the back bay. Bloodworms are the classic bait and they are one of the best eating fish on the Jersey Shore. Often caught alongside spot and small weakfish on the same bottom rigs.</div>
+            <div style="font-size:.78rem;color:var(--muted);line-height:1.6;">A surf and inlet bottom fish that arrives on the Jersey Shore when water temps push above 60 degrees, typically late May into September. Found in the wash of the surf, around inlet mouths, and on sandy bottom in the back bay. Bloodworms are the classic bait and they are one of the best eating fish on the Jersey Shore. Often caught alongside spot and small weakfish on the same bottom rigs.</div>
           </div>
         </div>
       </div>
@@ -1225,27 +1300,41 @@ let _selectedSpots = JSON.parse(localStorage.getItem('selectedSpots')||'null') |
 
 function _saveSpots(){ localStorage.setItem('selectedSpots', JSON.stringify(_selectedSpots)); }
 
+const REGION_LABELS={
+  cape_may:'Cape May County', atlantic:'Atlantic County', ocean:'Ocean County / LBI',
+  raritan:'Raritan Bay', monmouth:'Monmouth County'
+};
+const REGION_ORDER=['cape_may','atlantic','ocean','raritan','monmouth'];
+
 function initSpotSelector(){
-  const oceanGrid=document.getElementById('spotCheckOcean');
-  const bayGrid=document.getElementById('spotCheckBay');
-  oceanGrid.innerHTML=''; bayGrid.innerHTML='';
-  for(const s of SPOT_META){
-    const el=document.createElement('div');
-    el.className='spot-check'+(_selectedSpots.includes(s.name)?' active':'');
-    el.textContent=s.name;
-    el.dataset.spot=s.name;
-    el.addEventListener('click',()=>{
-      if(_selectedSpots.includes(s.name)){
-        _selectedSpots=_selectedSpots.filter(x=>x!==s.name);
-        el.classList.remove('active');
-      }else{
-        _selectedSpots.push(s.name);
-        el.classList.add('active');
-      }
-      _saveSpots(); _onSpotsChanged();
-    });
-    if(s.zone==='back_bay') bayGrid.appendChild(el);
-    else oceanGrid.appendChild(el);
+  const wrap=document.getElementById('spotCheckGroups');
+  wrap.innerHTML='';
+  for(const rk of REGION_ORDER){
+    const spots=SPOT_META.filter(s=>(s.region||'cape_may')===rk);
+    if(!spots.length) continue;
+    const label=document.createElement('div');
+    label.className='spot-zone-label';
+    label.textContent=REGION_LABELS[rk]||rk;
+    const grid=document.createElement('div');
+    grid.className='spot-check-grid';
+    for(const s of spots){
+      const el=document.createElement('div');
+      el.className='spot-check'+(_selectedSpots.includes(s.name)?' active':'');
+      el.textContent=s.name;
+      el.dataset.spot=s.name;
+      el.addEventListener('click',()=>{
+        if(_selectedSpots.includes(s.name)){
+          _selectedSpots=_selectedSpots.filter(x=>x!==s.name);
+          el.classList.remove('active');
+        }else{
+          _selectedSpots.push(s.name);
+          el.classList.add('active');
+        }
+        _saveSpots(); _onSpotsChanged();
+      });
+      grid.appendChild(el);
+    }
+    wrap.appendChild(label); wrap.appendChild(grid);
   }
   _updateSpotCount();
 }
@@ -1267,12 +1356,11 @@ function _filterSpotSearch(q){
     const active=_selectedSpots.includes(el.dataset.spot);
     el.classList.toggle('search-hidden',!match&&!active);
   });
-  const oceanGrid=document.getElementById('spotCheckOcean');
-  const bayGrid=document.getElementById('spotCheckBay');
-  const oceanAllHidden=oceanGrid&&[...oceanGrid.querySelectorAll('.spot-check')].every(el=>el.classList.contains('search-hidden'));
-  const bayAllHidden=bayGrid&&[...bayGrid.querySelectorAll('.spot-check')].every(el=>el.classList.contains('search-hidden'));
-  document.getElementById('spotLabelOcean').classList.toggle('search-hidden',!!oceanAllHidden);
-  document.getElementById('spotLabelBay').classList.toggle('search-hidden',!!bayAllHidden);
+  // Hide a region label when every spot in its grid is hidden
+  document.querySelectorAll('#spotCheckGroups .spot-check-grid').forEach(grid=>{
+    const allHidden=[...grid.querySelectorAll('.spot-check')].every(el=>el.classList.contains('search-hidden'));
+    grid.previousElementSibling.classList.toggle('search-hidden',allHidden);
+  });
 }
 
 function selectAllSpots(){

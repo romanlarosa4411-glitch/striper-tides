@@ -32,7 +32,7 @@ _UPLOAD_THUMB.mkdir(parents=True, exist_ok=True)
 _cache: dict = {}
 
 def _key(prefix: str, **kw) -> str:
-    today = date.today().isoformat()
+    today = st.local_today().isoformat()
     parts = "&".join(f"{k}={v}" for k, v in sorted(kw.items()))
     return f"{prefix}:{today}:{parts}"
 
@@ -91,7 +91,7 @@ def spot_page(slug):
     if tide_days is None:
         tide_days = []
         try:
-            today = date.today()
+            today = st.local_today()
             preds = st.fetch_tides(cfg["station_id"], today, today + timedelta(days=6))
             by_day: dict[str, list] = {}
             for p in preds:
@@ -209,9 +209,9 @@ def api_forecast(date_str):
             wind_deg   = noon_wind["wind_deg"] if noon_wind else None
             # If no water temp for this date (future), use today's reading
             water_temp = conditions.get("water_temp_f")
-            if water_temp is None and d > date.today():
+            if water_temp is None and d > st.local_today():
                 try:
-                    today_cond = st.fetch_marine_conditions(date.today())
+                    today_cond = st.fetch_marine_conditions(st.local_today())
                     water_temp = today_cond.get("water_temp_f")
                     if water_temp is not None:
                         conditions["water_temp_f"] = water_temp
@@ -610,7 +610,7 @@ def robots():
 
 @app.route('/sitemap.xml')
 def sitemap():
-    today = date.today().isoformat()
+    today = st.local_today().isoformat()
     urls = [
         ("https://stripertides.com/", "daily", "1.0"),
         ("https://stripertides.com/spots", "weekly", "0.8"),

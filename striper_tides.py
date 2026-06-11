@@ -286,6 +286,11 @@ REGION_CONFIG: dict[str, dict] = {
 TIMEZONE = "America/New_York"
 LOCAL_TZ = ZoneInfo(TIMEZONE)
 
+def local_today() -> date:
+    """Today in NJ local time. Render servers run UTC, so date.today() rolls to
+    tomorrow at 8 PM EDT — always use this instead."""
+    return datetime.now(LOCAL_TZ).date()
+
 LOCATION = LocationInfo(
     name="Cape May, NJ",
     region="USA",
@@ -811,7 +816,7 @@ def fetch_water_temp_trend(lookback_days: int = 3, station_id: str = None) -> di
     station_id: NOAA CO-OPS station to query. Defaults to CAPE_MAY_STATION if None.
     """
     try:
-        end_d   = date.today()
+        end_d   = local_today()
         start_d = end_d - timedelta(days=lookback_days)
         resp = requests.get(
             NOAA_URL,
@@ -1187,7 +1192,7 @@ def get_events(days: int = 90) -> dict:
           "days":      number of days fetched,
         }
     """
-    today    = date.today()
+    today    = local_today()
     end_date = today + timedelta(days=days)
 
     # ── Fetch hilo predictions for all spots (parallel) ───────────────────────
@@ -2051,7 +2056,7 @@ def main() -> None:
     )
     args = parser.parse_args()
 
-    today    = date.today()
+    today    = local_today()
     end_date = today + timedelta(days=args.days)
     print(f"Fetching tide predictions  {today}  →  {end_date}")
 

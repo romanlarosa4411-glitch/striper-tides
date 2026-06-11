@@ -1323,7 +1323,12 @@ function _rebuildTopDays(){
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 const toHour = s => { const [h,m]=s.split(':').map(Number); return h+m/60; };
-const todayStr = () => new Date().toISOString().slice(0,10);
+// All dates are NJ-local: toISOString() is UTC and rolls to tomorrow at 8 PM EDT
+const NJ_TZ = 'America/New_York';
+const njDay = d => new Intl.DateTimeFormat('en-CA',{timeZone:NJ_TZ}).format(d);
+const todayStr = () => njDay(new Date());
+const njNowTime = () => new Intl.DateTimeFormat('en-GB',{timeZone:NJ_TZ,hourCycle:'h23',hour:'2-digit',minute:'2-digit'}).format(new Date());
+const dsOf = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
 const esc = s => String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 const fmtDate = ds => { const [y,m,d]=ds.split('-').map(Number); const dow=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][new Date(y,m-1,d).getDay()]; return `${dow}, ${MONTHS[m-1]} ${d}`; };
 const windArrow = deg => { const dirs=['↓','↙','←','↖','↑','↗','→','↘']; return dirs[Math.round(((deg+180)%360)/45)%8]; };
@@ -1374,7 +1379,7 @@ async function fetchEvents(days){
     const rangeStart=new Date(); rangeStart.setHours(0,0,0,0);
     for(let i=0;i<days;i++){
       const d=new Date(rangeStart); d.setDate(d.getDate()+i);
-      loadedDates.add(d.toISOString().slice(0,10));
+      loadedDates.add(dsOf(d));
     }
     // Init spot selector UI
     initSpotSelector();
@@ -1429,9 +1434,9 @@ function renderCal(){
   const grid=document.getElementById('calGrid'); grid.innerHTML='';
   for(let i=0;i<total;i++){
     let num, ds, other;
-    if(i<first){num=prevEnd-first+i+1;ds=new Date(y,m-1,num).toISOString().slice(0,10);other=true;}
+    if(i<first){num=prevEnd-first+i+1;ds=dsOf(new Date(y,m-1,num));other=true;}
     else if(i<first+daysIn){num=i-first+1;ds=`${y}-${String(m+1).padStart(2,'0')}-${String(num).padStart(2,'0')}`;other=false;}
-    else{num=i-first-daysIn+1;ds=new Date(y,m+1,num).toISOString().slice(0,10);other=true;}
+    else{num=i-first-daysIn+1;ds=dsOf(new Date(y,m+1,num));other=true;}
     const evs=byDate[ds]||[], hasJ=journalDates.has(ds), click=evs.length||hasJ||(!other&&loadedDates.has(ds));
     const div=document.createElement('div');
     div.className='day'+(other?' other':'')+(click?' clickable':'')+(ds===today?' today':'')+(ds===selectedDate?' sel':'');
@@ -1688,7 +1693,7 @@ async function loadForecast(ds, solar, evs){
     }
 
     // ── Tide chart ────────────────────────────────────────────────────────
-    const nowHour = ds===todayStr() ? new Date().getHours()+new Date().getMinutes()/60 : null;
+    const nowHour = ds===todayStr() ? toHour(njNowTime()) : null;
     const solunar = data.solunar||[];
 
     const bandsPlugin = {
@@ -2178,13 +2183,12 @@ function _waveColor(ft) {
 
 function _buildDayPills(allData) {
   // Only show days from today forward (skip history days)
-  const now = new Date();
-  const todayKey = now.toISOString().slice(0,10);
+  const todayKey = todayStr();
   const days = [];
   const seen = new Set();
   for(const p of allData) {
     const dt = new Date(Date.now() + p.offset * 3600000);
-    const key = dt.toISOString().slice(0,10);
+    const key = njDay(dt);
     if(key < todayKey) continue;
     if(!seen.has(key)) {
       seen.add(key);
@@ -2636,9 +2640,8 @@ document.getElementById('surfModelSel')?.addEventListener('change', () => {
 async function initClarity(){
   if(clarityLoaded) return;
   // Default date/time to now
-  const _now=new Date();
-  document.getElementById('crDate').value=_now.toISOString().slice(0,10);
-  document.getElementById('crTime').value=_now.toTimeString().slice(0,5);
+  document.getElementById('crDate').value=todayStr();
+  document.getElementById('crTime').value=njNowTime();
   document.getElementById('clarityLoad').classList.remove('hidden');
   document.getElementById('clarityContent').classList.add('hidden');
   try{

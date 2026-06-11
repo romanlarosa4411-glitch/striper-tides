@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>NJ Fishing Spots — Tide Times &amp; Forecasts for 25 Locations | Striper Tides</title>
+  <meta name="description" content="Fishing forecasts and tide times for 25 spots on the New Jersey Shore, from Sandy Hook to Cape May. Inlets, surf beaches, and back bay channels for stripers, flounder, and weakfish."/>
+  <meta name="robots" content="index, follow"/>
+  <link rel="canonical" href="https://stripertides.com/spots"/>
+  <meta property="og:title" content="NJ Fishing Spots — Tide Times &amp; Forecasts | Striper Tides"/>
+  <meta property="og:description" content="Fishing forecasts and tide times for 25 spots on the New Jersey Shore, from Sandy Hook to Cape May."/>
+  <meta property="og:image" content="https://stripertides.com/static/og.jpg"/>
+  <meta property="og:url" content="https://stripertides.com/spots"/>
+  <meta property="og:type" content="website"/>
+  <link rel="icon" type="image/png" href="/static/favicon.png"/>
+  <link rel="apple-touch-icon" href="/static/apple-touch-icon.png"/>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+    :root{
+      --bg:#060f1c;--surf:#0b1929;--surf2:#0f2238;
+      --border:#1a3254;--border2:#214070;
+      --text:#deeeff;--muted:#527898;--accent:#3b82f6;--accent2:#60a5fa;
+    }
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{background:var(--bg);color:var(--text);font-family:'Inter',-apple-system,sans-serif;min-height:100vh}
+    .wrap{max-width:700px;margin:0 auto;padding:20px 16px 60px}
+    .site-nav{display:flex;align-items:center;gap:12px;margin-bottom:28px}
+    .site-nav img{width:48px;height:48px;border-radius:50%}
+    .site-nav a{font-weight:800;font-size:1.05rem;color:var(--text);text-decoration:none}
+    h1{font-size:1.45rem;font-weight:800;line-height:1.25;margin-bottom:8px}
+    .intro{font-size:.86rem;color:var(--muted);line-height:1.7;margin-bottom:28px}
+    .region{margin-bottom:28px}
+    .region h2{font-size:.78rem;font-weight:700;color:var(--accent2);letter-spacing:.08em;text-transform:uppercase;margin-bottom:10px}
+    .grid{display:grid;gap:8px}
+    .grid a{display:flex;justify-content:space-between;align-items:center;background:var(--surf);border:1px solid var(--border);border-radius:10px;padding:12px 16px;font-size:.86rem;font-weight:600;color:var(--text);text-decoration:none}
+    .grid a:hover{border-color:var(--border2)}
+    .grid .zone{font-size:.66rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--muted)}
+    .foot{font-size:.74rem;color:var(--muted);text-align:center;margin-top:36px}
+    .foot a{color:var(--muted)}
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <div class="site-nav">
+    <img src="/static/logo.jpg" alt="Striper Tides logo">
+    <a href="/">Striper Tides</a>
+  </div>
+
+  <h1>New Jersey Fishing Spots</h1>
+  <p class="intro">Tide times and fishing forecasts for 25 spots on the Jersey Shore, from Sandy Hook to Cape May Point. Every spot below has its own page with a 7 day tide table and a local fishing writeup, plus a live daily fishing score on the <a href="/" style="color:var(--accent2)">forecast calendar</a>.</p>
+
+  {% for group in groups %}
+  <div class="region">
+    <h2>{{ group.label }}</h2>
+    <div class="grid">
+      {% for s in group.spots %}
+      <a href="/spots/{{ s.slug }}">{{ s.title }} <span class="zone">{{ "Back Bay" if s.zone == "back_bay" else "Ocean / Inlet" }}</span></a>
+      {% endfor %}
+    </div>
+  </div>
+  {% endfor %}
+
+  <div class="foot"><a href="/">Striper Tides</a> · free fishing forecasts for the New Jersey Shore</div>
+</div>
+</body>
+</html>

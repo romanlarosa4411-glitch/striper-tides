@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>{{ spot.title }} Fishing Forecast &amp; Tide Times | Striper Tides</title>
+  <meta name="description" content="{{ meta_description }}"/>
+  <meta name="robots" content="index, follow"/>
+  <link rel="canonical" href="https://stripertides.com/spots/{{ spot.slug }}"/>
+  <meta property="og:title" content="{{ spot.title }} Fishing Forecast &amp; Tide Times | Striper Tides"/>
+  <meta property="og:description" content="{{ meta_description }}"/>
+  <meta property="og:image" content="https://stripertides.com/static/og.jpg"/>
+  <meta property="og:url" content="https://stripertides.com/spots/{{ spot.slug }}"/>
+  <meta property="og:type" content="website"/>
+  <meta name="twitter:card" content="summary_large_image"/>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "WebPage",
+        "name": "{{ spot.title }} Fishing Forecast & Tide Times",
+        "url": "https://stripertides.com/spots/{{ spot.slug }}",
+        "description": {{ meta_description|tojson }},
+        "isPartOf": {"@type": "WebSite", "name": "Striper Tides", "url": "https://stripertides.com"}
+      },
+      {
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          {"@type": "ListItem", "position": 1, "name": "Striper Tides", "item": "https://stripertides.com"},
+          {"@type": "ListItem", "position": 2, "name": "Fishing Spots", "item": "https://stripertides.com/spots"},
+          {"@type": "ListItem", "position": 3, "name": {{ spot.title|tojson }}, "item": "https://stripertides.com/spots/{{ spot.slug }}"}
+        ]
+      }
+    ]
+  }
+  </script>
+  <link rel="icon" type="image/png" href="/static/favicon.png"/>
+  <link rel="apple-touch-icon" href="/static/apple-touch-icon.png"/>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+    :root{
+      --bg:#060f1c;--surf:#0b1929;--surf2:#0f2238;--surf3:#163050;
+      --border:#1a3254;--border2:#214070;
+      --rg:#f59e0b;--good:#14b8a6;
+      --text:#deeeff;--muted:#527898;--accent:#3b82f6;--accent2:#60a5fa;
+    }
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{background:var(--bg);color:var(--text);font-family:'Inter',-apple-system,sans-serif;min-height:100vh}
+    a{color:var(--accent2)}
+    .wrap{max-width:700px;margin:0 auto;padding:20px 16px 60px}
+    .site-nav{display:flex;align-items:center;gap:12px;margin-bottom:28px}
+    .site-nav img{width:48px;height:48px;border-radius:50%}
+    .site-nav a{font-weight:800;font-size:1.05rem;color:var(--text);text-decoration:none}
+    .crumbs{font-size:.74rem;color:var(--muted);margin-bottom:14px}
+    .crumbs a{color:var(--muted);text-decoration:none}
+    .crumbs a:hover{color:var(--accent2)}
+    h1{font-size:1.45rem;font-weight:800;line-height:1.25;margin-bottom:6px}
+    .sub{font-size:.84rem;color:var(--muted);margin-bottom:4px}
+    .tags{display:flex;gap:8px;margin:12px 0 24px;flex-wrap:wrap}
+    .tag{font-size:.68rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--accent2);background:var(--surf2);border:1px solid var(--border);border-radius:999px;padding:4px 12px}
+    .card{background:var(--surf);border:1px solid var(--border);border-radius:13px;padding:16px 18px;margin-bottom:18px}
+    .card h2{font-size:.78rem;font-weight:700;color:var(--accent2);letter-spacing:.08em;text-transform:uppercase;margin-bottom:12px}
+    .blurb{font-size:.88rem;color:var(--text);line-height:1.75}
+    table{width:100%;border-collapse:collapse;font-size:.82rem}
+    th{text-align:left;color:var(--muted);font-size:.68rem;text-transform:uppercase;letter-spacing:.06em;padding:6px 8px;border-bottom:1px solid var(--border)}
+    td{padding:7px 8px;border-bottom:1px solid var(--border);vertical-align:top}
+    tr:last-child td{border-bottom:none}
+    .day-cell{font-weight:700;white-space:nowrap}
+    .tide-h{color:var(--good);font-weight:700}
+    .tide-l{color:var(--muted);font-weight:700}
+    .cta{display:block;text-align:center;background:var(--accent);color:#fff;font-weight:700;font-size:.9rem;text-decoration:none;border-radius:10px;padding:13px;margin:24px 0}
+    .cta:hover{background:var(--accent2)}
+    .nearby{display:grid;gap:8px}
+    .nearby a{display:block;background:var(--surf2);border:1px solid var(--border);border-radius:9px;padding:10px 14px;font-size:.82rem;font-weight:600;color:var(--text);text-decoration:none}
+    .nearby a:hover{border-color:var(--border2)}
+    .foot{font-size:.74rem;color:var(--muted);text-align:center;margin-top:36px;line-height:1.8}
+    .foot a{color:var(--muted)}
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <div class="site-nav">
+    <img src="/static/logo.jpg" alt="Striper Tides logo">
+    <a href="/">Striper Tides</a>
+  </div>
+
+  <div class="crumbs"><a href="/">Home</a> &rsaquo; <a href="/spots">Fishing Spots</a> &rsaquo; {{ spot.title }}</div>
+
+  <h1>{{ spot.title }} Fishing Forecast &amp; Tide Times</h1>
+  <div class="sub">{{ location_long }}</div>
+  <div class="tags">
+    <span class="tag">{{ region_label }}</span>
+    <span class="tag">{{ "Back Bay" if zone == "back_bay" else "Ocean / Inlet" }}</span>
+    <span class="tag">Best on {{ "high" if tide_type == "H" else "low" }} tide</span>
+  </div>
+
+  {% if tide_days %}
+  <div class="card">
+    <h2>Tide Times — Next 7 Days</h2>
+    <table>
+      <thead><tr><th>Day</th><th>Tides</th></tr></thead>
+      <tbody>
+        {% for day in tide_days %}
+        <tr>
+          <td class="day-cell">{{ day.label }}</td>
+          <td>
+            {% for t in day.tides %}<span class="tide-{{ 'h' if t.type == 'H' else 'l' }}">{{ 'High' if t.type == 'H' else 'Low' }}</span> {{ t.time }} ({{ t.height }} ft){% if not loop.last %} &nbsp;·&nbsp; {% endif %}{% endfor %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% endif %}
+
+  <div class="card">
+    <h2>Fishing {{ spot.title }}</h2>
+    <div class="blurb">{{ spot.blurb }}</div>
+  </div>
+
+  <a class="cta" href="/">View the live forecast calendar for {{ spot.title }} &rarr;</a>
+
+  {% if nearby %}
+  <div class="card">
+    <h2>More Spots in {{ region_label }}</h2>
+    <div class="nearby">
+      {% for n in nearby %}
+      <a href="/spots/{{ n.slug }}">{{ n.title }} &rsaquo;</a>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+  <div class="foot">
+    Tide predictions from NOAA CO-OPS station {{ station_id }} ({{ station_name }}).<br>
+    <a href="/">Striper Tides</a> · free fishing forecasts for the New Jersey Shore · <a href="/spots">all 25 spots</a>
+  </div>
+</div>
+</body>
+</html>

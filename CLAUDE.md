@@ -26,12 +26,14 @@ Hosted on Render.com, auto-deploys from `main` branch on GitHub (`romanlarosa441
 
 ## Architecture
 
-**Single-page Flask app** with three Python modules and one monolithic HTML template:
+**Flask app** with four Python modules, one monolithic SPA template, and server-rendered SEO pages:
 
 - **`striper_tides.py`** — Core engine (~1960 lines). All data fetching (NOAA tides, NWS weather, NDBC buoys, Open-Meteo marine models), astronomical calculations (solar via Astral, lunar via ephem), scoring algorithms, forecast logic, and species-specific fishing conditions.
-- **`app.py`** — Flask routes and API layer. Thin wrapper that calls into `striper_tides.py`, manages an in-memory daily cache (`_cache` dict keyed by date), and serves JSON endpoints. Handles journal/clarity/comments CRUD against SQLite. Also serves `/robots.txt` and `/sitemap.xml`.
+- **`app.py`** — Flask routes and API layer. Thin wrapper that calls into `striper_tides.py`, manages an in-memory daily cache (`_cache` dict keyed by date), and serves JSON endpoints. Handles journal/clarity/comments CRUD against SQLite. Also serves `/robots.txt`, `/sitemap.xml`, and the per-spot SEO pages.
+- **`spots_content.py`** — Single source of truth for the 25 spot writeups (slug, display title, blurb) plus `REGION_LABELS`/`REGION_ORDER`. Used by the spot pages, the About tab, and the sitemap. Edit spot copy here, nowhere else.
 - **`db.py`** — SQLite setup. Three tables: `journal_entries` (fishing logs with auto-filled NOAA conditions), `clarity_reports` (crowd-sourced water clarity), and `comments` (Bite Talk community thread). WAL mode, Row factory.
-- **`templates/index.html`** — Full SPA with embedded CSS + vanilla JS (~2890 lines). Five tabs: Tide Calendar (with weekly report), Water Clarity, Local Reports (journal + Bite Talk), About. Chart.js for visualizations.
+- **`templates/index.html`** — Full SPA with embedded CSS + vanilla JS (~2780 lines). Five tabs: Tide Calendar (with weekly report), Water Clarity, Local Reports (journal + Bite Talk), About. Chart.js for visualizations. About tab spot cards render from `about_groups` (Jinja loop over `spots_content.py` data).
+- **`templates/spot.html`** + **`templates/spots_index.html`** — Server-rendered SEO pages: `/spots` hub and `/spots/<slug>` for each of the 25 spots (7-day NOAA tide table, writeup, same-region links). All in the sitemap. Built so each spot can rank for "[spot] tides" / "[spot] fishing" queries.
 
 ## Key External APIs
 
@@ -63,7 +65,7 @@ Hosted on Render.com, auto-deploys from `main` branch on GitHub (`romanlarosa441
 - **Bite Talk**: Lightweight community thread on the Reports tab. `GET/POST /api/comments`. Name comes from `anglerName` in localStorage (shared with journal). 280-char limit.
 - **Swell tab**: Currently archived/hidden. Code remains in template but tab button is commented out.
 - **Weekly report**: Manually updated HTML block in `templates/index.html` around line 730, inside the Tide Calendar pane (`pane-calendar`). Update the "Week of X" date, the title, and the body paragraph each week. No em dashes or hyphens in paragraph copy.
-- **About tab**: Static `pane-about` div at the bottom of `templates/index.html` (~line 1098). Contains full writeups for all 25 selectable spots across NJ, species and seasons info, and how the forecast works. Update manually when spots or species info changes.
+- **About tab**: `pane-about` div at the bottom of `templates/index.html` (~line 1098). Spot cards render via Jinja from `spots_content.py` — edit writeups there, not in the template. Species/seasons and how-it-works sections are still static HTML in the template.
 
 ## Mobile Responsive
 

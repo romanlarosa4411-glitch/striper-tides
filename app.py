@@ -7,7 +7,7 @@ Run: python3 app.py  →  http://localhost:5001
 import io
 import json
 import uuid
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
@@ -16,6 +16,7 @@ from PIL import Image, ImageOps
 
 import striper_tides as st
 from db import SPOTS, get_conn, init_db
+from spots_content import REGION_LABELS, REGION_ORDER, SLUG_TO_NAME, SPOT_PAGES
 
 app    = Flask(__name__)
 LOCAL_TZ = ZoneInfo(st.TIMEZONE)
@@ -39,18 +40,101 @@ def _key(prefix: str, **kw) -> str:
 
 # ── Pages ─────────────────────────────────────────────────────────────────────
 
+def _spot_entry(name: str) -> dict:
+    """Merge SPOT_CONFIG and SPOT_PAGES data for one spot."""
+    cfg  = st.SPOT_CONFIG.get(name, {})
+    page = SPOT_PAGES.get(name, {})
+    return {
+        "name":   name,
+        "slug":   page.get("slug", ""),
+        "title":  page.get("title", name),
+        "blurb":  page.get("blurb", ""),
+        "zone":   cfg.get("zone", "ocean"),
+        "region": cfg.get("region", "cape_may"),
+    }
+
+
+def _region_groups() -> list[dict]:
+    """Spots grouped by region in display order, for /spots and the About tab."""
+    groups = []
+    for rk in REGION_ORDER:
+        spots = [_spot_entry(n) for n in SPOTS
+                 if st.SPOT_CONFIG.get(n, {}).get("region", "cape_may") == rk]
+        if spots:
+            groups.append({"key": rk, "label": REGION_LABELS[rk], "spots": spots})
+    return groups
+
+
 @app.route("/")
 def index():
-    # Build spot metadata for the template (name, zone, region)
-    spot_meta = []
-    for name in SPOTS:
-        cfg = st.SPOT_CONFIG.get(name, {})
-        spot_meta.append({
-            "name":   name,
-            "zone":   cfg.get("zone", "ocean"),
-            "region": cfg.get("region", "cape_may"),
-        })
-    return render_template("index.html", spots=SPOTS, spot_meta=spot_meta)
+    spot_meta = [_spot_entry(name) for name in SPOTS]
+    return render_template("index.html", spots=SPOTS, spot_meta=spot_meta,
+                           about_groups=_region_groups())
+
+
+@app.route("/spots")
+def spots_index():
+    return render_template("spots_index.html", groups=_region_groups())
+
+
+@app.route("/spots/<slug>")
+def spot_page(slug):
+    name = SLUG_TO_NAME.get(slug)
+    if name is None:
+        return render_template("spots_index.html", groups=_region_groups()), 404
+    cfg  = st.SPOT_CONFIG[name]
+    spot = _spot_entry(name)
+
+    # 7-day tide table, cached for the day
+    ck = _key("spotpage", slug=slug)
+    tide_days = _cache.get(ck)
+    if tide_days is None:
+        tide_days = []
+        try:
+            today = date.today()
+            preds = st.fetch_tides(cfg["station_id"], today, today + timedelta(days=6))
+            by_day: dict[str, list] = {}
+            for p in preds:
+                dt = datetime.strptime(p["t"], "%Y-%m-%d %H:%M")
+                by_day.setdefault(dt.date().isoformat(), []).append({
+                    "type":   p["type"],
+                    "time":   dt.strftime("%-I:%M %p"),
+                    "height": f"{float(p['v']):.1f}",
+                })
+            for day_str in sorted(by_day):
+                d = date.fromisoformat(day_str)
+                tide_days.append({
+                    "label": d.strftime("%a %b %-d"),
+                    "tides": by_day[day_str],
+                })
+            _cache[ck] = tide_days
+        except Exception:
+            tide_days = []
+
+    # First ~155 chars of the blurb as the meta description
+    blurb = spot["blurb"]
+    meta_description = blurb if len(blurb) <= 155 else blurb[:152].rsplit(" ", 1)[0] + "…"
+    meta_description = f"{spot['title']} tide times and fishing forecast. " + meta_description
+    meta_description = meta_description if len(meta_description) <= 160 else meta_description[:157].rsplit(" ", 1)[0] + "…"
+
+    region = cfg.get("region", "cape_may")
+    nearby = [_spot_entry(n) for n in SPOTS
+              if n != name
+              and st.SPOT_CONFIG.get(n, {}).get("region", "cape_may") == region]
+
+    return render_template(
+        "spot.html",
+        spot=spot,
+        meta_description=meta_description,
+        location_long=cfg.get("location_long", ""),
+        region_label=REGION_LABELS.get(cfg.get("region", "cape_may"), ""),
+        zone=cfg.get("zone", "ocean"),
+        tide_type=cfg.get("tide_type", "H"),
+        station_id=cfg.get("station_id", ""),
+        station_name=cfg.get("station_name", ""),
+        tide_days=tide_days,
+        nearby=nearby[:6],
+    )
 
 
 # ── Tide calendar API ──────────────────────────────────────────────────────────
@@ -526,16 +610,25 @@ def robots():
 
 @app.route('/sitemap.xml')
 def sitemap():
-    from datetime import date
     today = date.today().isoformat()
+    urls = [
+        ("https://stripertides.com/", "daily", "1.0"),
+        ("https://stripertides.com/spots", "weekly", "0.8"),
+    ]
+    urls += [(f"https://stripertides.com/spots/{info['slug']}", "daily", "0.7")
+             for info in SPOT_PAGES.values()]
+    entries = "\n".join(
+        f"""  <url>
+    <loc>{loc}</loc>
+    <lastmod>{today}</lastmod>
+    <changefreq>{freq}</changefreq>
+    <priority>{pri}</priority>
+  </url>"""
+        for loc, freq, pri in urls
+    )
     xml = f'''<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url>
-    <loc>https://stripertides.com/</loc>
-    <lastmod>{today}</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>1.0</priority>
-  </url>
+{entries}
 </urlset>'''
     return app.response_class(xml, mimetype='application/xml')
 
